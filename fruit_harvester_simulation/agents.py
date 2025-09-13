@@ -2,11 +2,10 @@
 Basic agents for the Mesa learning environment.
 """
 
-import random
-from mesa import Agent
+from mesa.discrete_space import CellAgent
 
 
-class RandomWalkAgent(Agent):
+class RandomWalkAgent(CellAgent):
     """
     An agent that moves randomly around the grid.
     - Yellow colored circle in visualization
@@ -15,36 +14,32 @@ class RandomWalkAgent(Agent):
     - Ignores fruits (this is just for learning Mesa)
     """
 
-    def __init__(self, unique_id, model):
-        super().__init__(unique_id, model)
+    def __init__(self, model, cell):
+        super().__init__(model)
+        self.cell = cell
 
     def step(self):
         """Move randomly to a neighboring cell if possible."""
-        # Get all possible moves (Moore neighborhood)
-        possible_steps = self.model.grid.get_neighborhood(
-            self.pos,
-            moore=True,  # Include diagonals
-            include_center=False  # Don't stay in place
-        )
+        # Get all neighboring cells
+        neighbors = list(self.cell.neighborhood)
 
-        # Filter out cells with obstacles or other agents
-        valid_steps = []
-        for cell in possible_steps:
-            cell_contents = self.model.grid.get_cell_list_contents([cell])
+        # Filter out cells with obstacles or other RandomWalkAgents
+        valid_cells = []
+        for neighbor_cell in neighbors:
             # Check if cell has obstacles or other RandomWalkAgents
             has_obstacle_or_agent = any(
-                isinstance(agent, (Obstacle, RandomWalkAgent)) for agent in cell_contents
+                isinstance(agent, (Obstacle, RandomWalkAgent)) for agent in neighbor_cell.agents
             )
             if not has_obstacle_or_agent:
-                valid_steps.append(cell)
+                valid_cells.append(neighbor_cell)
 
         # Move to a random valid cell if any exist
-        if valid_steps:
-            new_position = self.model.random.choice(valid_steps)
-            self.model.grid.move_agent(self, new_position)
+        if valid_cells:
+            new_cell = self.random.choice(valid_cells)
+            self.cell = new_cell
 
 
-class Fruit(Agent):
+class Fruit(CellAgent):
     """
     A fruit object on the grid.
     - Red colored circle in visualization
@@ -52,15 +47,16 @@ class Fruit(Agent):
     - Agents ignore these for now
     """
 
-    def __init__(self, unique_id, model):
-        super().__init__(unique_id, model)
+    def __init__(self, model, cell):
+        super().__init__(model)
+        self.cell = cell
 
     def step(self):
         """Fruits don't do anything - they're static."""
         pass
 
 
-class Obstacle(Agent):
+class Obstacle(CellAgent):
     """
     An obstacle on the grid.
     - Black colored square in visualization
@@ -68,8 +64,9 @@ class Obstacle(Agent):
     - Blocks agent movement
     """
 
-    def __init__(self, unique_id, model):
-        super().__init__(unique_id, model)
+    def __init__(self, model, cell):
+        super().__init__(model)
+        self.cell = cell
 
     def step(self):
         """Obstacles don't do anything - they're static."""
