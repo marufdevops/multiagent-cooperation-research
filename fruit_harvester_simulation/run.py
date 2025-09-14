@@ -3,13 +3,12 @@
 Run the basic Mesa grid learning environment.
 
 Usage:
-    python run.py          # Launch web visualization
-    python run.py --batch  # Run batch simulation without visualization
+    python run.py --batch   # Run batch simulation without visualization
+    solara run server.py    # Launch web visualization (recommended)
 """
 
 import argparse
 from .model import BasicGridModel
-from .server import launch_server
 
 
 def run_batch_simulation(steps=100):
@@ -41,10 +40,11 @@ def main():
     if args.batch:
         run_batch_simulation(args.steps)
     else:
-        print("Launching web visualization server...")
-        print("Open http://localhost:8521 in your browser")
-        server = launch_server()
-        server.launch()
+        print("For web visualization, use:")
+        print("  solara run fruit_harvester_simulation/server.py")
+        print("")
+        print("This will launch the interactive web interface at http://localhost:8765")
+        print("Use --batch flag to run simulation without visualization")
 
 
 if __name__ == "__main__":
