@@ -12,7 +12,7 @@ class HarvesterAgent(Agent):
     def __init__(self, model):
         """
         Initialize harvester agent.
-        
+
         Args:
             model: The model instance (Mesa 3.0 convention)
         """
@@ -21,10 +21,18 @@ class HarvesterAgent(Agent):
         self.messages_sent = 0
         self.messages_received = 0
         self.current_target = None
+        self.travel_distance = 0
+        self.last_pos = None
         
     def step(self):
         """Execute one step: move, harvest, communicate."""
+        self.last_pos = self.pos
         self.move()
+
+        # Track travel distance
+        if self.last_pos and self.pos != self.last_pos:
+            self.travel_distance += 1
+
         self.harvest()
         self.communicate()
         
