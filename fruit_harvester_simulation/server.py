@@ -1,12 +1,16 @@
 """
-Mesa visualization server for the basic grid learning environment using SolaraViz.
+Mesa visualization server for the basic grid environment using SolaraViz.
 """
+
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from mesa.visualization import SolaraViz, SpaceRenderer
 from mesa.visualization.components import AgentPortrayalStyle
 
-from .model import BasicGridModel
-from .agents import RandomWalkAgent, Fruit, Obstacle
+from fruit_harvester_simulation.model import BasicGridModel
+from fruit_harvester_simulation.agents import RandomWalkAgent, Fruit, Obstacle
 
 
 def agent_portrayal(agent):
@@ -40,53 +44,7 @@ def agent_portrayal(agent):
 
 
 # Model parameters for the web interface
-model_params = {
-    "seed": {
-        "type": "InputText",
-        "value": 42,
-        "label": "Random Seed",
-    },
-    "width": {
-        "type": "SliderInt",
-        "value": 20,
-        "label": "Grid Width:",
-        "min": 10,
-        "max": 30,
-        "step": 1,
-    },
-    "height": {
-        "type": "SliderInt",
-        "value": 20,
-        "label": "Grid Height:",
-        "min": 10,
-        "max": 30,
-        "step": 1,
-    },
-    "num_agents": {
-        "type": "SliderInt",
-        "value": 10,
-        "label": "Number of Agents:",
-        "min": 1,
-        "max": 20,
-        "step": 1,
-    },
-    "num_fruits": {
-        "type": "SliderInt",
-        "value": 40,
-        "label": "Number of Fruits:",
-        "min": 10,
-        "max": 100,
-        "step": 5,
-    },
-    "num_obstacles": {
-        "type": "SliderInt",
-        "value": 12,
-        "label": "Number of Obstacles:",
-        "min": 0,
-        "max": 50,
-        "step": 1,
-    },
-}
+model_params = {}
 
 
 # Create the model instance
@@ -97,13 +55,14 @@ renderer = SpaceRenderer(model, backend="altair")
 renderer.draw_structure(grid_color="lightgray", grid_opacity=0.5)
 renderer.draw_agents(agent_portrayal=agent_portrayal)
 
-# Create the SolaraViz page
+# Create the SolaraViz page with minimal controls
 page = SolaraViz(
     model,
     renderer,
-    components=[],  # No additional components for now
+    components=[],
     model_params=model_params,
-    name="Basic Mesa Grid Learning Environment",
+    name="Basic Mesa Grid Environment",
+    play_interval=1000,  # Set default play interval
 )
 
 # This is needed for Solara to find the page

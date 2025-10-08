@@ -11,7 +11,7 @@ class RandomWalkAgent(CellAgent):
     - Yellow colored circle in visualization
     - Uses Moore neighborhood (8-directional movement)
     - Cannot move into cells with obstacles or other agents
-    - Ignores fruits (this is just for learning Mesa)
+    - Ignores fruits at this moment
     """
 
     def __init__(self, model, cell):
