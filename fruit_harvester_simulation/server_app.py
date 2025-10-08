@@ -14,33 +14,9 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from mesa.visualization import SolaraViz, make_space_component, make_plot_component, Slider
+from mesa.visualization import SolaraViz, make_space_component, make_plot_component
 from fruit_harvester_simulation.model import OrchardModel
 import solara
-# Workaround for Mesa SolaraViz param-check bug (see projectmesa/mesa#2722)
-# Ensure _check_model_params validates against our model __init__ with user params,
-# even during early render when SolaraViz mistakenly passes type.__init__ or wrong params.
-import mesa.visualization.solara_viz as _sv
-__orig_check = getattr(_sv, "_check_model_params", None)
-if __orig_check is not None:
-    def __patched_check(fn, provided_params):
-        # Always use our model's __init__ and our user params for checking
-        try:
-            _ = fn  # keep for signature compatibility
-        except Exception:
-            pass
-        try:
-            # Use the model_params defined in this module and split like SolaraViz does
-            user_params, _fixed = _sv.split_model_params(model_params)
-        except Exception:
-            user_params = model_params
-        try:
-            return __orig_check(OrchardModel.__init__, user_params)
-        except Exception:
-            # Last resort: do not block UI; pretend validation passed
-            return None
-    _sv._check_model_params = __patched_check
-
 
 
 def agent_portrayal(agent):
@@ -53,15 +29,15 @@ def agent_portrayal(agent):
     return portrayal
 
 
-# Model parameters for the UI (Mesa 3.x Slider objects)
+# Model parameters for the UI (dict style supported by Mesa 3.x)
 model_params = {
-    "width": Slider("Grid Width", 25, 15, 40, 1, int),
-    "height": Slider("Grid Height", 25, 15, 40, 1, int),
-    "num_agents": Slider("Number of Agents", 15, 5, 30, 1, int),
-    "communication_range": Slider("Communication Range", 3.0, 1.0, 8.0, 0.5, float),
-    "cooperative_share": Slider("Cooperative Share", 0.8, 0.0, 1.0, 0.1, float),
-    "initial_fruit_density": Slider("Initial Fruit Density", 0.3, 0.1, 0.6, 0.05, float),
-    "regeneration_prob": Slider("Fruit Regeneration Probability", 0.1, 0.01, 0.3, 0.01, float),
+    "width": {"type": "SliderInt", "value": 25, "label": "Grid Width", "min": 15, "max": 40, "step": 1},
+    "height": {"type": "SliderInt", "value": 25, "label": "Grid Height", "min": 15, "max": 40, "step": 1},
+    "num_agents": {"type": "SliderInt", "value": 15, "label": "Number of Agents", "min": 5, "max": 30, "step": 1},
+    "communication_range": {"type": "SliderFloat", "value": 3.0, "label": "Communication Range", "min": 1.0, "max": 8.0, "step": 0.5},
+    "cooperative_share": {"type": "SliderFloat", "value": 0.8, "label": "Cooperative Share", "min": 0.0, "max": 1.0, "step": 0.1},
+    "initial_fruit_density": {"type": "SliderFloat", "value": 0.3, "label": "Initial Fruit Density", "min": 0.1, "max": 0.6, "step": 0.05},
+    "regeneration_prob": {"type": "SliderFloat", "value": 0.1, "label": "Fruit Regeneration Probability", "min": 0.01, "max": 0.3, "step": 0.01},
 }
 
 

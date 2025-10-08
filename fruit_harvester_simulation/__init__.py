@@ -1,15 +1,17 @@
 """
-Basic Mesa Grid Environment for Learning
+Multi-Agent Fruit Harvesting Simulation
 
-A minimal Mesa simulation to understand the framework's capabilities.
+Mesa 3.0 compatible implementation for studying communication range effects
+on cooperation in multi-agent fruit harvesting environments.
+
 Features:
-- 20x20 bounded grid
-- Random fruits (red circles)
-- Random obstacles (black squares)
-- Agents with random movement (yellow circles)
+- HarvesterAgent with cooperative/competitive strategies
+- Range-bounded communication system
+- OrchardModel with fruit dynamics
+- Data collection for research analysis
 """
 
-from .model import BasicGridModel
-from .agents import RandomWalkAgent, Fruit, Obstacle
+from .model import OrchardModel
+from .agents import HarvesterAgent
 
-__all__ = ["BasicGridModel", "RandomWalkAgent", "Fruit", "Obstacle"]
+__all__ = ["OrchardModel", "HarvesterAgent"]
