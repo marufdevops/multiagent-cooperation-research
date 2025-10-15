@@ -1,0 +1,14 @@
+% Abstract
+
+Multi-agent systems for resource gathering tasks, such as fruit harvesting, require effective coordination to maximize collective performance. Communication among agents enables information sharing about resource locations, but introduces overhead costs in terms of bandwidth, energy, and computational processing. This dissertation investigates the optimal communication range for maximizing collective yield in grid-based multi-agent fruit harvesting simulations.
+
+Using the Mesa 3.0 agent-based modeling framework, we implement a parameterizable simulation environment where autonomous harvester agents navigate a spatial grid, locate fruit resources, and share information with teammates within a configurable communication range (0--8 cells, Chebyshev distance). We conduct a comprehensive factorial experiment examining the interaction effects of communication range, team size (10, 20, 30 agents), resource dynamics (Static one-off harvest vs. Replenishing with regeneration probabilities 0.01, 0.05, 0.10), and initial fruit density (0.10, 0.20, 0.30).
+
+Our experimental design comprises approximately 12,150 simulation runs with 30 replications per configuration to ensure statistical robustness. We evaluate performance using multiple metrics including final yield, yield-per-message efficiency, network connectivity (largest component ratio), fairness (Gini coefficient), and time-to-depletion. Statistical analysis employs multi-way ANOVA with post-hoc Tukey HSD tests and mixed-effects models to identify significant main effects and interactions.
+
+Preliminary results from pilot studies indicate a non-monotonic relationship between communication range and collective yield, with performance degrading at both extremes (isolated agents vs. communication saturation). We hypothesize that optimal communication range will be higher in Replenishing conditions compared to Static, as sustained coordination becomes more valuable when resources regenerate. Additionally, we expect larger team sizes to benefit from increased communication range due to greater potential for coordination gains.
+
+This research contributes to the fields of multi-agent systems, swarm robotics, and agricultural automation by providing empirically grounded recommendations for communication range selection based on environmental conditions and team composition. The findings have practical implications for designing cooperative robot teams in precision agriculture, warehouse logistics, and search-and-rescue operations.
+
+\textbf{Keywords:} Multi-agent systems, communication protocols, fruit harvesting, agent-based modeling, swarm robotics, cooperative behavior, Mesa framework
+

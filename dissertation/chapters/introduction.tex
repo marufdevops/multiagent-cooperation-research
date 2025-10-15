@@ -1,0 +1,68 @@
+% Introduction
+
+\section{Background and Motivation}
+
+The coordination of multiple autonomous agents for resource gathering tasks represents a fundamental challenge in distributed artificial intelligence and robotics. In agricultural settings, the deployment of cooperative robot teams for fruit harvesting offers the potential to address labor shortages, improve efficiency, and reduce operational costs \citep{agriculture-robotics}. However, effective coordination requires agents to communicate information about resource locations, task allocation, and environmental conditions. The design of communication protocols—particularly the selection of appropriate communication ranges—critically impacts both the performance and efficiency of multi-agent systems.
+
+Communication in multi-agent systems involves inherent trade-offs. Insufficient communication range leads to network fragmentation, where agents operate in isolation without access to valuable information from teammates. Conversely, excessive communication range introduces overhead costs including bandwidth consumption, energy expenditure, and computational processing of redundant messages \citep{swarm-communication}. Moreover, the optimal communication range is not fixed but depends on contextual factors such as team size, resource distribution, and environmental dynamics.
+
+Despite extensive research on multi-agent foraging and swarm robotics, systematic investigation of communication range optimization across varying environmental conditions remains limited. Most existing studies either fix communication range a priori or focus on qualitative comparisons between extreme cases (no communication vs. full connectivity). Furthermore, the interaction between communication range and resource dynamics—specifically the distinction between static (non-regenerating) and replenishing (regenerating) resources—has received insufficient attention in the literature.
+
+\section{Research Questions}
+
+This dissertation addresses the following research questions:
+
+\begin{enumerate}
+    \item \textbf{RQ1:} What communication range maximizes collective yield in a grid-based multi-agent fruit harvesting environment?
+    
+    \item \textbf{RQ2:} How do resource dynamics (Static one-off harvest vs. Replenishing with regeneration probability) shift the optimal communication range and impact collective yield and efficiency? Specifically, to what extent does regeneration probability change the range that maximizes yield and yield-per-message?
+\end{enumerate}
+
+\section{Research Objectives}
+
+The primary objectives of this research are:
+
+\begin{enumerate}
+    \item To design and implement a parameterizable agent-based simulation of multi-agent fruit harvesting using the Mesa 3.0 framework, incorporating realistic agent behaviors, spatial dynamics, and communication protocols.
+    
+    \item To conduct a comprehensive factorial experiment systematically exploring communication ranges (0--8 cells) across multiple team sizes (10, 20, 30 agents), resource dynamics (Static vs. Replenishing), regeneration probabilities (0.0, 0.01, 0.05, 0.10), and fruit densities (0.10, 0.20, 0.30).
+    
+    \item To evaluate multi-agent system performance using a comprehensive suite of metrics including yield, efficiency (yield-per-message), network connectivity, fairness, and temporal dynamics.
+    
+    \item To identify statistically significant main effects and interaction effects through rigorous statistical analysis (ANOVA, mixed-effects models, post-hoc tests) with appropriate effect size reporting.
+    
+    \item To provide empirically grounded recommendations for communication range selection based on environmental conditions and team composition, with practical implications for agricultural robotics and related domains.
+\end{enumerate}
+
+\section{Significance and Contributions}
+
+This research makes several contributions to the fields of multi-agent systems and agricultural robotics:
+
+\begin{itemize}
+    \item \textbf{Systematic parameter exploration:} Unlike prior work that examines limited communication configurations, this study conducts a comprehensive sweep of communication ranges to identify true optima rather than local maxima.
+    
+    \item \textbf{Resource dynamics comparison:} By treating resource dynamics (Static vs. Replenishing) as a first-class independent variable with controlled regeneration probabilities, we provide direct comparative analysis of how environmental characteristics influence optimal communication strategies.
+    
+    \item \textbf{Multi-dimensional evaluation:} The use of comprehensive metrics (performance, efficiency, connectivity, fairness) enables nuanced assessment of communication trade-offs beyond simple yield maximization.
+    
+    \item \textbf{Statistical rigor:} Large-scale replication (30 seeds per configuration) and advanced statistical methods (mixed-effects models, effect size reporting) ensure defensible conclusions with quantified uncertainty.
+    
+    \item \textbf{Practical applicability:} Findings directly inform the design of communication protocols for cooperative robot teams in precision agriculture, warehouse automation, and search-and-rescue operations.
+\end{itemize}
+
+\section{Dissertation Structure}
+
+The remainder of this dissertation is organized as follows:
+
+\begin{itemize}
+    \item \textbf{Chapter 2 (Literature Review):} Surveys existing research on multi-agent foraging, communication protocols, swarm robotics, agricultural automation, and agent-based modeling frameworks.
+    
+    \item \textbf{Chapter 3 (Methodology):} Describes the simulation model architecture, agent behaviors, experimental design, parameter space, metrics, and statistical analysis pipeline.
+    
+    \item \textbf{Chapter 4 (Results):} Presents experimental findings including descriptive statistics, visualizations, ANOVA results, post-hoc comparisons, and effect sizes.
+    
+    \item \textbf{Chapter 5 (Discussion):} Interprets results in the context of research questions, compares findings with prior literature, discusses limitations, and explores implications for theory and practice.
+    
+    \item \textbf{Chapter 6 (Conclusion):} Summarizes key findings, restates contributions, and proposes directions for future research.
+\end{itemize}
+

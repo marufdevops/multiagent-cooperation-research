@@ -1,0 +1,267 @@
+% Methodology
+
+\section{Overview}
+
+This chapter describes the simulation model architecture, agent behaviors, experimental design, metrics, and statistical analysis methods employed in this research. We implement a grid-based multi-agent fruit harvesting simulation using the Mesa 3.0 framework, conduct a comprehensive factorial experiment across multiple parameter dimensions, and analyze results using rigorous statistical techniques.
+
+\section{Simulation Model Architecture}
+
+\subsection{Environment}
+
+The simulation environment consists of a two-dimensional square grid with the following characteristics:
+
+\begin{itemize}
+    \item \textbf{Grid size:} Parameterizable dimensions (default 50×50 cells, scalable from 10×10 to 200×200)
+    \item \textbf{Topology:} Non-toroidal (agents cannot wrap around edges)
+    \item \textbf{Cell occupancy:} Multiple agents and one fruit resource per cell (MultiGrid)
+    \item \textbf{Obstacles:} None in baseline configuration
+\end{itemize}
+
+\subsection{Fruit Resources}
+
+Fruit resources occupy grid cells and exhibit two dynamics modes:
+
+\subsubsection{Static Dynamics}
+
+In Static mode, fruit resources are placed at initialization and do not regenerate after harvest. This represents one-time harvest scenarios such as grain fields. Key parameters:
+
+\begin{itemize}
+    \item \textbf{Initial fruit density:} Fraction of cells containing fruit at $t=0$ (values: 0.10, 0.20, 0.30)
+    \item \textbf{Regeneration:} None ($p_{regen} = 0.0$)
+\end{itemize}
+
+\subsubsection{Replenishing Dynamics}
+
+In Replenishing mode, harvested fruit can regenerate with a specified probability per time step. This represents continuous ripening scenarios such as strawberry fields. Key parameters:
+
+\begin{itemize}
+    \item \textbf{Initial fruit density:} Same as Static mode
+    \item \textbf{Regeneration probability:} $p_{regen} \in \{0.01, 0.05, 0.10\}$ per step for each empty fruit cell
+\end{itemize}
+
+\subsection{Harvester Agents}
+
+Harvester agents are autonomous entities that navigate the grid, harvest fruit, and communicate with teammates. Agent behaviors follow Mesa 3.0 conventions (no mandatory \texttt{unique\_id}, activation via \texttt{model.agents.shuffle\_do('step')}).
+
+\subsubsection{Movement}
+
+Agents move one cell per time step using Moore neighborhood (8-directional movement). Movement strategy:
+
+\begin{enumerate}
+    \item If agent has a target position (received via communication), move toward target using greedy strategy (reduce Manhattan distance).
+    \item Otherwise, perform random walk to adjacent cells.
+\end{enumerate}
+
+\subsubsection{Harvesting}
+
+At each time step, agents check their current cell for available fruit. If fruit is present and available, the agent harvests it (fruit becomes unavailable, agent's harvest count increments).
+
+\subsubsection{Communication}
+
+Agents communicate with teammates within a specified communication range using Chebyshev distance (maximum of absolute coordinate differences). Communication protocol:
+
+\begin{enumerate}
+    \item Agent identifies all teammates within communication range $r_{comm}$ (values: 0--8 cells).
+    \item Agent searches for nearest available fruit within perception range.
+    \item If fruit is found, agent broadcasts fruit location to all neighbors without current targets.
+    \item Receiving agents update their target position and navigate toward the communicated fruit location.
+\end{enumerate}
+
+Message tracking: Each agent maintains counters for messages sent and received per step, enabling communication overhead analysis.
+
+\section{Experimental Design}
+
+\subsection{Independent Variables}
+
+The experiment employs a full factorial design with the following independent variables:
+
+\begin{table}[h]
+\centering
+\caption{Independent Variables and Levels}
+\begin{tabular}{lll}
+\toprule
+\textbf{Variable} & \textbf{Levels} & \textbf{Description} \\
+\midrule
+Communication range & 0, 1, 2, 3, 4, 5, 6, 7, 8 & Cells (Chebyshev distance) \\
+Team size & 10, 20, 30 & Number of harvester agents \\
+Resource dynamics & Static, Replenishing & Regeneration mode \\
+Regeneration prob. & 0.00, 0.01, 0.05, 0.10 & Per step, per empty cell \\
+Fruit density & 0.10, 0.20, 0.30 & Fraction of cells with fruit \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Note:} Regeneration probability applies only to Replenishing dynamics. For Static dynamics, $p_{regen} = 0.0$ regardless of specified value.
+
+\subsection{Design Structure}
+
+\begin{itemize}
+    \item \textbf{Static condition:} $9 \text{ (range)} \times 3 \text{ (agents)} \times 3 \text{ (density)} \times 30 \text{ (seeds)} = 2,430$ runs
+    \item \textbf{Replenishing condition:} $9 \times 3 \times 3 \times 4 \text{ (regen)} \times 30 = 9,720$ runs
+    \item \textbf{Total:} 12,150 runs
+\end{itemize}
+
+\subsection{Pilot Study}
+
+A pilot study with 5 seeds per configuration is conducted first to:
+\begin{enumerate}
+    \item Validate metrics collection and data pipeline
+    \item Estimate effect sizes for power analysis
+    \item Assess computational runtime and identify bottlenecks
+    \item Refine parameter ranges if necessary
+\end{enumerate}
+
+\subsection{Simulation Parameters}
+
+\begin{table}[h]
+\centering
+\caption{Fixed Simulation Parameters}
+\begin{tabular}{ll}
+\toprule
+\textbf{Parameter} & \textbf{Value} \\
+\midrule
+Grid width & 50 cells \\
+Grid height & 50 cells \\
+Time steps & 500 \\
+Agent perception range & Unlimited (can see all fruit) \\
+Movement speed & 1 cell per step \\
+Harvest capacity & 1 fruit per step \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Metrics and Data Collection}
+
+\subsection{Per-Step Metrics}
+
+The following metrics are collected at each time step using Mesa's \texttt{DataCollector}:
+
+\begin{itemize}
+    \item \textbf{total\_yield:} Cumulative fruit harvested by all agents
+    \item \textbf{messages\_this\_step:} Messages sent this step
+    \item \textbf{cumulative\_messages:} Total messages sent since $t=0$
+    \item \textbf{remaining\_fruit:} Available fruit count
+    \item \textbf{harvested\_cells\_this\_step:} Cells harvested this step
+    \item \textbf{largest\_component\_ratio:} $|V_{max}| / N$ where $V_{max}$ is the largest connected component in the communication graph
+    \item \textbf{avg\_hops:} Mean shortest-path length for message delivery
+    \item \textbf{mean\_agent\_load:} Mean harvest count per agent
+    \item \textbf{gini\_yield:} Gini coefficient of harvest distribution
+    \item \textbf{avg\_travel\_distance:} Mean movement steps per agent
+\end{itemize}
+
+\subsection{Per-Run Summary Metrics}
+
+Aggregated metrics computed after each run:
+
+\begin{itemize}
+    \item \textbf{final\_yield:} Total yield at final time step
+    \item \textbf{steady\_state\_yield:} Mean yield over last 25\% of steps
+    \item \textbf{time\_to\_depletion:} Step when remaining fruit reaches 0 (Static only)
+    \item \textbf{mean\_messages\_per\_step:} Average messages per step
+    \item \textbf{yield\_per\_message:} $\text{final\_yield} / \max(\text{cumulative\_messages}, 1)$
+    \item \textbf{peak\_component\_ratio:} Maximum connectivity achieved
+\end{itemize}
+
+\subsection{Metric Formulas}
+
+\subsubsection{Largest Component Ratio}
+
+Communication graph $G = (V, E)$ where $V$ is the set of agents and $(i, j) \in E$ if $d_{Chebyshev}(pos_i, pos_j) \leq r_{comm}$. Largest component ratio:
+
+\begin{equation}
+\text{LCR} = \frac{|V_{max}|}{|V|}
+\end{equation}
+
+where $V_{max}$ is the largest connected component found via depth-first search.
+
+\subsubsection{Gini Coefficient}
+
+For harvest counts $h_1 \leq h_2 \leq \cdots \leq h_n$:
+
+\begin{equation}
+G = \frac{2 \sum_{i=1}^{n} i \cdot h_i}{n \sum_{i=1}^{n} h_i} - \frac{n+1}{n}
+\end{equation}
+
+Values range from 0 (perfect equality) to 1 (maximum inequality).
+
+\section{Statistical Analysis}
+
+\subsection{Primary Outcome}
+
+The primary outcome variable is \textbf{final\_yield}. Secondary outcomes include \textbf{yield\_per\_message}, \textbf{largest\_component\_ratio}, and \textbf{steady\_state\_yield}.
+
+\subsection{Analysis Pipeline}
+
+\subsubsection{Descriptive Statistics}
+
+\begin{itemize}
+    \item Mean, standard deviation, median, and interquartile range for each configuration
+    \item Visualization: line plots (yield vs. range), heatmaps (yield over range × agents), time-series (yield over time)
+\end{itemize}
+
+\subsubsection{Inferential Statistics}
+
+\textbf{ANOVA:} Multi-way analysis of variance to test main effects and interactions:
+
+\begin{itemize}
+    \item \textbf{Static:} $\text{final\_yield} \sim \text{comm\_range} \times \text{num\_agents} \times \text{fruit\_density}$
+    \item \textbf{Replenishing:} Add $\text{regen\_prob}$ as factor
+\end{itemize}
+
+\textbf{Mixed-Effects Model:} Linear mixed model with random intercept for seed:
+
+\begin{equation}
+Y_{ijklm} = \mu + \alpha_i + \beta_j + \gamma_k + \delta_l + (\alpha\beta)_{ij} + \cdots + u_m + \epsilon_{ijklm}
+\end{equation}
+
+where $u_m \sim N(0, \sigma_u^2)$ is the random effect for seed $m$.
+
+\textbf{Post-Hoc Tests:} Tukey HSD for pairwise comparisons of significant factors.
+
+\textbf{Significance Level:} $\alpha = 0.05$ with 95\% confidence intervals.
+
+\textbf{Effect Sizes:} Partial $\eta^2$ for ANOVA, Cohen's $d$ for pairwise comparisons.
+
+\subsubsection{Assumption Checking}
+
+\begin{itemize}
+    \item \textbf{Normality:} Shapiro-Wilk test on residuals; Q-Q plots
+    \item \textbf{Homoscedasticity:} Levene's test; residual plots
+    \item \textbf{Independence:} Verified by experimental design (separate seeds)
+\end{itemize}
+
+If assumptions are violated, apply transformations (log, square root) or use non-parametric alternatives (Kruskal-Wallis, Dunn's test with Holm correction).
+
+\section{Implementation Details}
+
+\subsection{Software and Tools}
+
+\begin{itemize}
+    \item \textbf{Simulation:} Mesa 3.0 (Python)
+    \item \textbf{Data analysis:} pandas, NumPy, SciPy, statsmodels
+    \item \textbf{Visualization:} Matplotlib, Seaborn, Solara
+    \item \textbf{Statistical testing:} SciPy, statsmodels
+    \item \textbf{Version control:} Git, GitHub
+\end{itemize}
+
+\subsection{Computational Resources}
+
+\begin{itemize}
+    \item \textbf{Hardware:} Apple M-series laptop
+    \item \textbf{Parallelization:} Multi-core execution for independent runs
+    \item \textbf{Estimated runtime:} 1.7--6.7 hours for 10,000 runs (0.5--2.0 seconds per run)
+\end{itemize}
+
+\subsection{Reproducibility}
+
+\begin{itemize}
+    \item Fixed random seeds for all runs
+    \item Configuration files (JSON) stored with results
+    \item Metadata logging (timestamp, parameters, software versions)
+    \item Source code archived in version control repository
+\end{itemize}
+
+\section{Ethical Considerations}
+
+This research involves computational simulations only, with no human subjects or animal testing. All software used is open-source or freely available for academic use. Results and code will be made publicly available to support reproducibility and future research.
+
