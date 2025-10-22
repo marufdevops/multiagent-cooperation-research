@@ -121,12 +121,19 @@ model_params = {
 }
 
 
+# Create initial model instance
+model = HarvestModel()
+
+# Create space renderer
+from mesa.visualization import SpaceRenderer
+renderer = SpaceRenderer(model, backend="matplotlib")
+renderer.draw_agents(agent_portrayal)
+
 # Create visualization page
-# Note: In Mesa 3.3.0, SolaraViz expects agent_portrayal directly, not wrapped in make_space_component
 page = SolaraViz(
-    HarvestModel,
+    model,
+    renderer,
     model_params=model_params,
-    agent_portrayal=agent_portrayal,
     name="Fruit Harvesting Simulation",
 )
 
