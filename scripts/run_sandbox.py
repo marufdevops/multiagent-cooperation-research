@@ -5,6 +5,8 @@ Week 1-2 deliverable: reproducible runs with yield-over-time and messages/step p
 import sys
 sys.path.insert(0, 'src')
 
+import matplotlib
+matplotlib.use('Agg')  # Use non-interactive backend
 import matplotlib.pyplot as plt
 import pandas as pd
 from models.harvest_model import HarvestModel

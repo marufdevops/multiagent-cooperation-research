@@ -6,6 +6,8 @@ Validates metrics collection and parameter sweep infrastructure.
 import sys
 sys.path.insert(0, 'src')
 
+import matplotlib
+matplotlib.use('Agg')  # Use non-interactive backend
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
