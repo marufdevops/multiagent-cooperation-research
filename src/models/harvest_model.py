@@ -35,7 +35,6 @@ class HarvestModel(Model):
 
     def __init__(
         self,
-        *,
         width=20,
         height=20,
         num_agents=5,
