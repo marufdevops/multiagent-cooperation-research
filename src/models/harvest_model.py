@@ -18,7 +18,7 @@ from agents.fruit import Fruit
 class HarvestModel(Model):
     """
     Minimal sandbox model for fruit harvesting with communication.
-    
+
     Parameters:
         width: Grid width
         height: Grid height
@@ -29,9 +29,13 @@ class HarvestModel(Model):
         regen_prob: Regeneration probability per step (for Replenishing)
         seed: Random seed for reproducibility
     """
-    
+
+    # Class variable for Solara visualization
+    steps = 0
+
     def __init__(
         self,
+        *,
         width=20,
         height=20,
         num_agents=5,
@@ -67,6 +71,7 @@ class HarvestModel(Model):
         # Tracking variables for metrics
         self.cumulative_messages = 0
         self.total_harvested_cells = 0
+        self.steps = 0  # Track current step for visualization
 
         # Data collection with comprehensive metrics
         self.datacollector = DataCollector(
@@ -127,7 +132,10 @@ class HarvestModel(Model):
         
         # Agents act (Mesa 3.0 convention: shuffle_do)
         self.agents.shuffle_do('step')
-        
+
+        # Increment step counter
+        self.steps += 1
+
         # Collect data
         self.datacollector.collect(self)
     

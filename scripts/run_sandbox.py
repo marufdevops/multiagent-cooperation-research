@@ -51,10 +51,10 @@ def run_sandbox(
     
     # Get data
     model_data = model.datacollector.get_model_vars_dataframe()
-    
-    print(f"Final yield: {model_data['Total Yield'].iloc[-1]}")
-    print(f"Total messages: {model_data['Messages This Step'].sum()}")
-    print(f"Remaining fruit: {model_data['Remaining Fruit'].iloc[-1]}")
+
+    print(f"Final yield: {model_data['total_yield'].iloc[-1]}")
+    print(f"Total messages: {model_data['messages_this_step'].sum()}")
+    print(f"Remaining fruit: {model_data['remaining_fruit'].iloc[-1]}")
     print()
     
     return model, model_data
@@ -63,21 +63,21 @@ def run_sandbox(
 def plot_results(model_data, output_prefix='sandbox'):
     """Generate required plots: yield-over-time and messages/step."""
     fig, axes = plt.subplots(1, 2, figsize=(12, 4))
-    
+
     # Plot 1: Yield over time
-    axes[0].plot(model_data.index, model_data['Total Yield'], linewidth=2)
+    axes[0].plot(model_data.index, model_data['total_yield'], linewidth=2)
     axes[0].set_xlabel('Step')
     axes[0].set_ylabel('Total Yield')
     axes[0].set_title('Yield Over Time')
     axes[0].grid(True, alpha=0.3)
-    
+
     # Plot 2: Messages per step
-    axes[1].plot(model_data.index, model_data['Messages This Step'], linewidth=2, color='orange')
+    axes[1].plot(model_data.index, model_data['messages_this_step'], linewidth=2, color='orange')
     axes[1].set_xlabel('Step')
     axes[1].set_ylabel('Messages This Step')
     axes[1].set_title('Communication Activity')
     axes[1].grid(True, alpha=0.3)
-    
+
     plt.tight_layout()
     plt.savefig(f'{output_prefix}_results.png', dpi=150)
     print(f"Saved plot: {output_prefix}_results.png")

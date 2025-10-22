@@ -2,8 +2,13 @@
 Solara visualization components for harvest model.
 Uses Mesa 3.0 SolaraViz with make_space_component and make_plot_component.
 """
-import solara
-from mesa.visualization import SolaraViz, make_plot_component, make_space_component
+import sys
+import os
+
+# Add src directory to path for imports
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+
+from mesa.visualization import SolaraViz
 from models.harvest_model import HarvestModel
 from agents.harvester_agent import HarvesterAgent
 from agents.fruit import Fruit
@@ -108,19 +113,20 @@ model_params = {
         "max": 0.2,
         "step": 0.01,
     },
+    "seed": {
+        "type": "InputText",
+        "value": None,
+        "label": "Random Seed (optional)",
+    },
 }
 
 
 # Create visualization page
+# Note: In Mesa 3.3.0, SolaraViz expects agent_portrayal directly, not wrapped in make_space_component
 page = SolaraViz(
     HarvestModel,
-    [
-        make_space_component(agent_portrayal),
-        make_plot_component("Total Yield"),
-        make_plot_component("Messages This Step"),
-        make_plot_component("Remaining Fruit"),
-    ],
     model_params=model_params,
+    agent_portrayal=agent_portrayal,
     name="Fruit Harvesting Simulation",
 )
 
