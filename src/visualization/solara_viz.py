@@ -19,6 +19,7 @@ def agent_portrayal(agent):
     Define agent portrayal as dictionary with color/size/marker keys.
     Mesa 3.0 convention for Solara visualization.
     """
+    return {};
     if isinstance(agent, HarvesterAgent):
         # Agents: blue circles, size based on harvest count
         return {
