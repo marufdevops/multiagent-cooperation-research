@@ -1,14 +1,16 @@
 % Abstract
 
-Multi-agent systems for resource gathering tasks, such as fruit harvesting, require coordination to improve collective performance. Communication among agents enables information sharing about resource locations, but introduces costs in terms of bandwidth and processing. This dissertation explores how communication range affects collective yield in a grid-based multi-agent fruit harvesting simulation.
+Coordinating multiple robots for fruit harvesting isn't straightforward. While communication lets them share information about resource locations, it comes with costs—bandwidth gets consumed, processing power gets tied up handling messages. The question is: how far should robots be able to communicate? This dissertation explores that question through simulation.
 
-Using the Mesa 3.0 agent-based modeling framework, we implement a basic simulation environment where autonomous harvester agents navigate a spatial grid, locate fruit resources, and share information with teammates within a configurable communication range. The simulation includes agent behaviors for movement, harvesting, and communication, along with two resource dynamics modes: Static (non-regenerating) and Replenishing (regenerating resources).
+Using Mesa 3.0, I've implemented a grid-based environment where harvester agents roam around looking for fruit. When they find some, they broadcast the location to teammates within their communication range. The interesting bit is comparing two scenarios: static environments where fruit doesn't regenerate once picked, versus replenishing environments where new fruit keeps appearing. Agent behaviors are deliberately simple—move, harvest when you encounter fruit, and share what you find with nearby teammates.
 
-This early-stage work (Weeks 1-2) presents the foundational implementation and a preliminary literature review. The simulation successfully demonstrates basic multi-agent coordination with communication, collecting metrics on total yield, messages sent, and remaining fruit. Interactive visualization allows real-time observation of agent behaviors and communication patterns.
+This is early-stage work, roughly the first couple weeks of the project. The simulation runs, tracks metrics like total yield and message counts, and there's a web interface for watching everything unfold in real-time. You can actually see which agents are communicating with whom, which turns out to be quite informative.
 
-Future work will involve systematic experimentation across different communication ranges, team sizes, and environmental conditions to identify optimal communication strategies. Statistical analysis will be conducted to determine significant effects and provide evidence-based recommendations.
+Two questions drive this research. First: does communication range actually matter for collective harvest performance? Second: does the answer change depending on whether resources regenerate or not? Maybe the optimal range for a one-time harvest differs from continuous production scenarios.
 
-This research aims to contribute to multi-agent systems and agricultural robotics by investigating communication range selection for cooperative robot teams. The findings may have practical applications in precision agriculture and related domains.
+Future work involves systematic experimentation—varying communication ranges, team sizes, resource distributions—followed by statistical analysis to identify what actually works. For now, the foundation is in place.
+
+The practical motivation is agricultural robotics, though the insights might generalize to other multi-robot coordination problems. We'll see where it goes.
 
 \textbf{Keywords:} Multi-agent systems, communication protocols, fruit harvesting, agent-based modeling, Mesa framework
 

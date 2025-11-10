@@ -2,57 +2,57 @@
 
 \section{Background and Motivation}
 
-The coordination of multiple autonomous agents for resource gathering tasks is an important problem in robotics and artificial intelligence. In agricultural settings, cooperative robot teams for fruit harvesting could help address labor shortages and improve efficiency. However, effective coordination requires agents to communicate information about resource locations. The design of communication protocols—particularly the selection of appropriate communication ranges—impacts the performance of multi-agent systems.
+Getting multiple robots to work together on harvesting tasks is trickier than it sounds. Agriculture is facing real labor shortages, and there's growing interest in using robot teams to pick fruit more efficiently. But here's the thing—these robots need to talk to each other. If they don't share information about where the fruit is, they'll waste time searching areas that teammates have already covered.
 
-Communication in multi-agent systems involves trade-offs. Too little communication leads to isolated agents without access to information from teammates. Too much communication introduces overhead costs including bandwidth consumption and message processing. The optimal communication range likely depends on factors such as team size, resource distribution, and environmental dynamics.
+The question is: how much communication is the right amount? If robots can only talk to others very close by, they might miss out on useful information from teammates further away. But if they're constantly broadcasting to everyone within a huge radius, they'll spend all their time processing messages instead of actually harvesting. There's probably a sweet spot somewhere in between, and it likely shifts depending on how many robots you have, how the fruit is distributed, and whether new fruit keeps appearing or not.
 
-This dissertation explores communication range effects in multi-agent fruit harvesting through simulation-based investigation. We focus on understanding how communication range affects collective yield in different environmental conditions.
+That's what I'm trying to figure out here. This dissertation uses simulation to explore how communication range affects how much fruit a team of robots can harvest. It's early days—just the first couple weeks of work—but the foundation is there to start asking these questions properly.
 
 \section{Research Questions}
 
-This dissertation investigates the following research questions:
+I'm trying to answer two main questions:
 
 \begin{enumerate}
-    \item \textbf{RQ1:} How does communication range affect collective yield in a grid-based multi-agent fruit harvesting environment?
+    \item \textbf{RQ1:} Does the distance over which robots can communicate actually matter for how much fruit they harvest? And if so, how?
 
-    \item \textbf{RQ2:} How do resource dynamics (Static vs. Replenishing) influence the relationship between communication range and collective performance?
+    \item \textbf{RQ2:} Does it make a difference whether the fruit grows back or not? Maybe the best communication range changes depending on whether you're dealing with a one-time harvest versus an environment where resources keep regenerating.
 \end{enumerate}
 
 \section{Research Objectives}
 
-The objectives of this research are:
+What I'm actually trying to do here:
 
 \begin{enumerate}
-    \item To implement a basic agent-based simulation of multi-agent fruit harvesting using the Mesa 3.0 framework, incorporating agent behaviors for movement, harvesting, and communication.
+    \item Build a working simulation where agents move around, pick fruit, and talk to each other. I'm using Mesa 3.0 because it handles a lot of the tedious setup stuff.
 
-    \item To develop an interactive visualization system that allows real-time observation of agent behaviors and communication patterns.
+    \item Create a visualization so you can actually watch what's happening. It's way easier to understand agent behavior when you can see them moving around and communicating in real-time.
 
-    \item To conduct a literature review examining existing research on multi-agent coordination, communication protocols, and agricultural robotics.
+    \item Review what other researchers have already figured out about robot coordination and communication. No point reinventing the wheel.
 
-    \item To establish a foundation for future experimental work exploring communication range effects across different environmental conditions.
+    \item Get the groundwork in place so I can run proper experiments later—testing different communication ranges, team sizes, that sort of thing.
 \end{enumerate}
 
 \section{Scope and Contributions}
 
-This early-stage work (Weeks 1-2) establishes the foundation for investigating communication range effects in multi-agent fruit harvesting:
+This is pretty early-stage work—just the first couple weeks. But here's what I've managed to get done:
 
 \begin{itemize}
-    \item \textbf{Working simulation:} A functional Mesa 3.0 implementation with agent behaviors, communication protocols, and two resource dynamics modes.
+    \item \textbf{Working simulation:} The basic system is up and running. Agents move around, harvest fruit, send messages to nearby teammates. You can switch between static fruit (doesn't grow back) and replenishing fruit (keeps appearing).
 
-    \item \textbf{Interactive visualization:} A web-based interface for observing agent behaviors and adjusting simulation parameters in real-time.
+    \item \textbf{Interactive visualization:} There's a web interface where you can watch everything happen. You can tweak parameters and see how it changes agent behavior, which is honestly pretty satisfying.
 
-    \item \textbf{Literature foundation:} A review of relevant research on multi-agent coordination and communication protocols.
+    \item \textbf{Literature foundation:} I've read through the relevant research on how robots coordinate and communicate. Turns out people have been thinking about this stuff for a while.
 
-    \item \textbf{Future research direction:} A clear path toward systematic experimentation and statistical analysis of communication range effects.
+    \item \textbf{Future research direction:} The simulation is set up so I can run proper experiments later—varying communication ranges, team sizes, resource distributions, all that. The hard part (getting the foundation right) is mostly done.
 \end{itemize}
 
 \section{Dissertation Structure}
 
-This dissertation is organized as follows:
+The rest of this document is organized pretty simply:
 
 \begin{itemize}
-    \item \textbf{Chapter 2 (Literature Review):} Reviews existing research on multi-agent coordination, communication protocols, and agricultural robotics relevant to this investigation.
+    \item \textbf{Chapter 2 (Literature Review):} What other researchers have already figured out about robot coordination and communication. I focus on the stuff that's actually relevant to fruit harvesting scenarios.
 \end{itemize}
 
-Future chapters will describe the methodology, present experimental results, discuss findings, and conclude with recommendations for future work.
+Eventually there'll be more chapters covering the methodology in detail, experimental results, discussion of what it all means, and conclusions. But that's future work—right now it's just the foundation.
 
