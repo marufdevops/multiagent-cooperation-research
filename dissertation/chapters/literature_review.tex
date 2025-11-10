@@ -2,189 +2,109 @@
 
 \section{Introduction}
 
-This chapter reviews the theoretical foundations and empirical research relevant to multi-agent fruit harvesting with communication-based coordination. We examine four primary domains: (1) multi-agent foraging and resource gathering, (2) communication protocols in distributed systems, (3) swarm robotics and emergent cooperation, and (4) agricultural robotics applications. We conclude by identifying research gaps that motivate the current study.
+This chapter reviews existing research relevant to multi-agent fruit harvesting with communication. We examine three main areas: (1) multi-agent coordination and foraging, (2) communication in multi-agent systems, and (3) agricultural robotics. We conclude by identifying how this work contributes to the field.
 
-\section{Multi-Agent Foraging and Resource Gathering}
+\section{Multi-Agent Coordination and Foraging}
 
-\subsection{Foundational Concepts}
+Multi-agent foraging is a classic problem where multiple autonomous agents must find and collect resources distributed in an environment. The main challenge is balancing exploration (searching for new resources) with exploitation (collecting known resources) while coordinating with other agents.
 
-Multi-agent foraging represents a canonical problem in distributed artificial intelligence where autonomous agents must locate, communicate about, and collect spatially distributed resources \citep{foraging-fundamentals}. The challenge lies in balancing exploration (searching for new resources) with exploitation (harvesting known resources) while coordinating with teammates to maximize collective yield.
+Research on ant colonies has shown that simple rules can produce effective collective behavior. For example, ants leave pheromone trails that other ants follow, creating efficient paths to food sources without any central controller \citep{ant-foraging}. This demonstrates that coordination can emerge from local interactions.
 
-Early work on multi-agent foraging focused on reactive behaviors inspired by social insects, particularly ant colonies \citep{ant-foraging}. These studies demonstrated that simple local rules—such as pheromone trail following—can produce sophisticated collective behaviors without centralized control. However, such stigmergic approaches face limitations in dynamic environments where information decay and ambiguity reduce effectiveness.
+However, in many robotic applications, direct communication (sending messages) is more practical than indirect methods like pheromones. Communication allows agents to share information about resource locations, reducing wasted effort from multiple agents searching the same areas.
 
-\subsection{Spatial Dynamics and Agent Density}
-
-Research on spatial foraging has identified several key factors influencing collective performance:
+Key factors that affect multi-agent foraging performance include:
 
 \begin{itemize}
-    \item \textbf{Resource distribution:} Clustered resources favor local search strategies, while dispersed resources benefit from broader exploration \citep{resource-distribution}.
-    
-    \item \textbf{Agent density:} High agent density increases competition for resources but also enhances information sharing opportunities \citep{density-effects}.
-    
-    \item \textbf{Environmental topology:} Obstacles, boundaries, and terrain features constrain movement and communication patterns \citep{topology-effects}.
+    \item \textbf{Resource distribution:} How resources are spread across the environment
+    \item \textbf{Team size:} The number of agents working together
+    \item \textbf{Communication range:} How far agents can send and receive messages
 \end{itemize}
 
-\subsection{Exploration-Exploitation Trade-offs}
+When agents can communicate, they can share discovered resource locations, allowing teammates to go directly to those locations instead of searching randomly. This improves efficiency but also introduces communication costs.
 
-The exploration-exploitation dilemma in multi-agent foraging has been extensively studied using reinforcement learning frameworks \citep{rl-foraging}. Optimal policies typically exhibit dynamic switching between exploration and exploitation phases based on environmental feedback. Communication enables agents to reduce redundant exploration by sharing discovered resource locations, effectively shifting the balance toward exploitation.
+\section{Communication in Multi-Agent Systems}
 
-\section{Communication Protocols in Multi-Agent Systems}
+\subsection{Communication Range Trade-offs}
 
-\subsection{Communication Modalities}
+Research has shown that communication range has a significant impact on multi-agent system performance. Too little communication means agents work in isolation without benefiting from shared information. Too much communication creates overhead from processing many messages.
 
-The literature identifies three primary communication paradigms for multi-agent coordination:
-
-\subsubsection{Direct Communication (Explicit Messaging)}
-
-Direct communication involves explicit information exchange between agents through message passing. Two common patterns are:
+Studies have found a non-monotonic relationship between communication range and performance \citep{range-effects}:
 
 \begin{itemize}
-    \item \textbf{Broadcast:} Agents share information with all neighbors within communication range. This approach maximizes information dissemination but introduces bandwidth overhead \citep{broadcast-protocols}.
-    
-    \item \textbf{Peer-to-peer:} Agents send targeted messages to specific recipients based on need or proximity. This reduces overhead but requires more sophisticated coordination logic \citep{p2p-coordination}.
+    \item \textbf{Too small:} Agents cannot reach each other, so they work independently
+    \item \textbf{Optimal:} Agents can share useful information without excessive overhead
+    \item \textbf{Too large:} Agents receive too many messages, wasting bandwidth and processing time
 \end{itemize}
 
-\subsubsection{Indirect Communication (Stigmergy)}
+This suggests there is an optimal communication range that balances information sharing benefits against communication costs.
 
-Stigmergic communication involves agents modifying the environment to leave information for others \citep{stigmergy-theory}. Examples include pheromone trails in ant-inspired systems and marker-based navigation. Advantages include persistence and simplicity, while disadvantages include information decay and interpretation ambiguity.
+\subsection{Communication Methods}
 
-Recent work on emergent communication demonstrates that pheromone-based protocols can boost efficiency when agents learn to use them effectively through reinforcement learning \citep{emergent-communication}.
-
-\subsubsection{Implicit Communication}
-
-Implicit communication refers to agents inferring teammate intentions from observations without explicit messages \citep{implicit-coordination}. Multi-agent reinforcement learning research has shown that agents can develop sophisticated implicit communication protocols through training \citep{marl-communication}.
-
-\subsection{Communication Range Effects}
-
-A critical insight from prior research is the non-monotonic relationship between communication range and system performance \citep{range-effects}:
+Multi-agent systems can use different communication approaches:
 
 \begin{itemize}
-    \item \textbf{Connectivity threshold:} Below a minimum range, agent networks fragment, preventing information flow and reducing coordination effectiveness.
-    
-    \item \textbf{Optimal range:} An intermediate range balances information sharing benefits against communication overhead costs.
-    
-    \item \textbf{Saturation point:} Beyond the optimal range, additional communication provides diminishing returns while increasing bandwidth consumption and processing load.
+    \item \textbf{Broadcast:} Agents send messages to all neighbors within range. This is simple but can create many messages.
+
+    \item \textbf{Direct messaging:} Agents send messages to specific teammates. This reduces overhead but requires knowing who to contact.
+
+    \item \textbf{Environmental markers:} Agents leave information in the environment (like pheromone trails). This works without direct communication but information can decay over time.
 \end{itemize}
 
-Studies on socially situated agents emphasize that agents must remain within "sense-communication range" to avoid isolation and maintain collective coherence \citep{social-action}.
+For robotic systems, broadcast communication within a limited range is often practical because it is simple to implement and does not require maintaining a list of specific teammates to contact.
 
-\subsection{Communication Costs and Efficiency}
+\section{Agricultural Robotics}
 
-Real-world communication systems face multiple cost factors:
+Agricultural robotics research has explored using multiple robots for harvesting tasks. The main challenges include:
 
 \begin{itemize}
-    \item \textbf{Energy consumption:} Wireless transmission requires power, constraining battery-operated robots \citep{energy-aware-communication}.
-    
-    \item \textbf{Bandwidth limitations:} Shared communication channels have finite capacity, leading to congestion at high message rates \citep{bandwidth-constraints}.
-    
-    \item \textbf{Computational overhead:} Processing incoming messages consumes CPU cycles, reducing resources available for other tasks \citep{processing-overhead}.
+    \item \textbf{Finding resources:} Robots must locate ripe fruit in the environment
+    \item \textbf{Avoiding collisions:} Multiple robots must coordinate to avoid interfering with each other
+    \item \textbf{Efficient coverage:} Robots should distribute themselves to cover the area effectively
 \end{itemize}
 
-These costs motivate the development of efficiency metrics such as yield-per-message, which quantifies the value obtained per unit of communication overhead.
+Communication can help address these challenges. When robots share information about fruit locations, they can reduce redundant searching. When they communicate their positions, they can avoid collisions and distribute themselves more evenly.
 
-\section{Swarm Robotics and Emergent Cooperation}
+However, most existing agricultural robot systems use centralized control or assume all robots can communicate with each other. This limits scalability and robustness. Investigating limited communication ranges is important for understanding how these systems can work in realistic conditions where communication may be constrained by distance or obstacles.
 
-\subsection{Swarm Intelligence Principles}
+\section{Resource Dynamics}
 
-Swarm robotics applies principles from social insect colonies to design decentralized robot teams \citep{swarm-robotics-survey}. Key characteristics include:
+Agricultural environments can have different resource dynamics:
 
 \begin{itemize}
-    \item \textbf{Decentralization:} No central controller; coordination emerges from local interactions.
-    \item \textbf{Scalability:} System performance degrades gracefully as team size changes.
-    \item \textbf{Robustness:} Failure of individual agents does not compromise collective function.
-    \item \textbf{Flexibility:} Adaptive responses to environmental changes without reprogramming.
+    \item \textbf{Static resources:} Resources do not regenerate during harvesting (e.g., grain fields). Once harvested, they are gone.
+
+    \item \textbf{Replenishing resources:} New resources become available over time (e.g., strawberry fields where fruit continues to ripen).
 \end{itemize}
 
-\subsection{Collective Decision-Making}
+These different dynamics may affect optimal communication strategies. In static environments, agents need to coordinate to avoid harvesting the same locations. In replenishing environments, sustained coordination may be more valuable because resources continue to appear, making long-term efficiency more important.
 
-Research on collective decision-making in swarms has identified mechanisms for achieving consensus without centralized control \citep{collective-decisions}. Relevant findings include:
+Understanding how communication range affects performance in both types of environments is important for designing effective multi-agent systems.
+
+\section{Agent-Based Modeling with Mesa}
+
+Mesa is a Python framework for building agent-based simulations. It provides tools for creating spatial grids, scheduling agent actions, collecting data, and visualizing results. Mesa 3.0 includes features that make it easier to build multi-agent simulations:
 
 \begin{itemize}
-    \item \textbf{Quorum sensing:} Agents commit to decisions when local evidence exceeds a threshold, enabling rapid convergence \citep{quorum-sensing}.
-    
-    \item \textbf{Positive feedback:} Successful strategies are reinforced through communication, amplifying effective behaviors \citep{positive-feedback}.
-    
-    \item \textbf{Negative feedback:} Resource depletion or congestion naturally limits exploitation, promoting exploration \citep{negative-feedback}.
+    \item Simple agent activation with \texttt{model.agents.shuffle\_do('step')}
+    \item Flexible agent initialization without requiring unique IDs
+    \item Interactive web-based visualization with Solara
+    \item Data collection tools for tracking metrics over time
 \end{itemize}
 
-\subsection{Fairness and Load Balancing}
+Mesa is well-suited for exploring multi-agent coordination because it handles the technical details of simulation management, allowing researchers to focus on agent behaviors and coordination mechanisms.
 
-Fairness in multi-agent systems refers to equitable distribution of workload and rewards among team members \citep{fairness-mas}. Unequal resource access can lead to:
+\section{Summary and Research Direction}
+
+The literature shows that:
 
 \begin{itemize}
-    \item \textbf{Exploitation by dominant agents:} Some agents monopolize resources while others remain idle.
-    \item \textbf{Spatial clustering:} Agents concentrate in resource-rich areas, leaving other regions unexplored.
-    \item \textbf{Reduced overall efficiency:} Imbalanced workload distribution wastes collective capacity.
+    \item Communication enables multi-agent coordination by allowing information sharing
+    \item Communication range affects performance in a non-monotonic way (too little or too much is problematic)
+    \item Resource dynamics (static vs. replenishing) may influence optimal communication strategies
+    \item Agent-based modeling frameworks like Mesa provide tools for investigating these questions
 \end{itemize}
 
-Communication can improve fairness by enabling agents to coordinate spatial distribution and avoid redundant effort.
+However, systematic investigation of communication range effects across different environmental conditions remains limited. Most studies either fix communication range in advance or only compare extreme cases (no communication vs. full connectivity).
 
-\section{Agricultural Robotics Applications}
-
-\subsection{Fruit Harvesting Automation}
-
-Agricultural robotics research has increasingly focused on automated fruit harvesting to address labor shortages and improve productivity \citep{agriculture-automation}. Key challenges include:
-
-\begin{itemize}
-    \item \textbf{Perception:} Detecting ripe fruit amid foliage and varying lighting conditions.
-    \item \textbf{Manipulation:} Grasping delicate fruit without damage.
-    \item \textbf{Navigation:} Moving through orchards with obstacles and uneven terrain.
-    \item \textbf{Coordination:} Allocating tasks among multiple robots to maximize throughput.
-\end{itemize}
-
-\subsection{Multi-Robot Coordination in Agriculture}
-
-Recent work on multi-robot agricultural systems demonstrates the benefits of coordination \citep{multi-robot-agriculture}:
-
-\begin{itemize}
-    \item \textbf{Task allocation:} Distributing harvesting tasks based on robot capabilities and locations reduces idle time.
-    \item \textbf{Path planning:} Coordinated movement prevents collisions and minimizes travel distance.
-    \item \textbf{Information sharing:} Communicating fruit locations enables efficient resource exploitation.
-\end{itemize}
-
-However, most existing systems rely on centralized coordination or assume full connectivity, limiting scalability and robustness.
-
-\subsection{Resource Dynamics in Agricultural Settings}
-
-Agricultural environments exhibit diverse resource dynamics:
-
-\begin{itemize}
-    \item \textbf{Static resources:} One-time harvest scenarios (e.g., grain fields) where resources do not regenerate during the harvesting period.
-    
-    \item \textbf{Replenishing resources:} Continuous ripening scenarios (e.g., strawberry fields) where new fruit becomes available over time.
-\end{itemize}
-
-The distinction between static and replenishing dynamics has significant implications for optimal coordination strategies, yet comparative analysis remains limited in the literature.
-
-\section{Agent-Based Modeling Frameworks}
-
-\subsection{Mesa Framework}
-
-Mesa is a Python-based framework for agent-based modeling that provides tools for spatial grids, scheduling, data collection, and visualization \citep{mesa-framework}. Mesa 3.0 introduces several improvements:
-
-\begin{itemize}
-    \item \textbf{Simplified agent activation:} The \texttt{model.agents.shuffle\_do('step')} method streamlines agent scheduling.
-    \item \textbf{Flexible agent initialization:} Agents no longer require mandatory \texttt{unique\_id} parameters.
-    \item \textbf{Enhanced visualization:} Solara-based components (\texttt{make\_space\_component}, \texttt{make\_plot\_component}) enable interactive web-based visualization.
-\end{itemize}
-
-Mesa's \texttt{DataCollector} and \texttt{BatchRunner} facilitate systematic parameter sweeps and statistical analysis, making it well-suited for rigorous experimental research.
-
-\section{Research Gaps and Dissertation Focus}
-
-Despite extensive research on multi-agent foraging and communication, several gaps remain:
-
-\begin{enumerate}
-    \item \textbf{Systematic range optimization:} Most studies fix communication range a priori rather than systematically exploring the parameter space to identify true optima.
-    
-    \item \textbf{Resource dynamics comparison:} Limited work directly compares static vs. replenishing environments within the same experimental framework with controlled regeneration probabilities.
-    
-    \item \textbf{Interaction effects:} Insufficient investigation of how optimal communication range changes with team size, resource density, and environmental dynamics.
-    
-    \item \textbf{Efficiency metrics:} Need for explicit yield-per-message metrics to evaluate communication cost-benefit trade-offs.
-    
-    \item \textbf{Statistical rigor:} Many studies report results from limited replications without effect size reporting or mixed-effects modeling to account for random variation.
-\end{enumerate}
-
-This dissertation addresses these gaps through a comprehensive factorial experiment with systematic communication range exploration, direct comparison of resource dynamics, multi-dimensional evaluation metrics, and rigorous statistical analysis.
+This dissertation contributes by implementing a simulation environment to explore communication range effects in multi-agent fruit harvesting. The work establishes a foundation for future systematic experimentation across different communication ranges, team sizes, and resource dynamics.
 

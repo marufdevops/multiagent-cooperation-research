@@ -1,6 +1,5 @@
 """
-Fruit Harvesting Model - Basic version (Weeks 1-2).
-Mesa 3.0 conventions: model.agents.shuffle_do('step'), no unique_id in constructors.
+Fruit Harvesting Model
 Includes basic metrics: yield, messages, and remaining fruit.
 """
 import random
@@ -18,7 +17,6 @@ from agents.fruit import Fruit
 class HarvestModel(Model):
     """
     Minimal sandbox model for fruit harvesting with communication.
-
     Parameters:
         width: Grid width
         height: Grid height
