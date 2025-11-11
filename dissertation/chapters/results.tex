@@ -12,7 +12,12 @@ Before statistical testing, I explored the data to understand distributions and 
 
 Figure \ref{fig:yield_distribution} shows the distribution of total yields across all 600 runs. The data shows considerable variation (yields range from approximately 150 to 650 fruit), which makes sense given the different configurations tested.
 
-% TODO: Add histogram of all yields
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/yield_distribution.png}
+\caption{Distribution of total yields across all 600 experimental runs. The bimodal distribution reflects the two resource density levels tested (0.15 and 0.25).}
+\label{fig:yield_distribution}
+\end{figure}
 
 The distribution is roughly bimodal, reflecting the two resource density levels (0.15 and 0.25). Higher density environments naturally produce higher yields.
 
@@ -20,7 +25,12 @@ The distribution is roughly bimodal, reflecting the two resource density levels 
 
 Figure \ref{fig:yield_by_range} presents box plots of total yield grouped by communication range. This is the key visualization for answering RQ1.
 
-% TODO: Add box plot: yield vs. communication range
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.85\textwidth]{figures/yield_by_range.png}
+\caption{Box plots showing harvest yield by communication range. Each box represents 120 runs (2 team sizes × 2 densities × 30 replications). The median yield increases from range 0 to range 6, then slightly decreases at range 8.}
+\label{fig:yield_by_range}
+\end{figure}
 
 \textbf{Key observations}:
 \begin{itemize}
@@ -36,7 +46,12 @@ This suggests communication does matter, but there may be diminishing returns or
 
 Figure \ref{fig:yield_vs_messages} shows the relationship between total yield and total messages sent. Each point represents one simulation run, colored by communication range.
 
-% TODO: Add scatter plot: yield vs. messages, colored by range
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.85\textwidth]{figures/yield_vs_messages.png}
+\caption{Scatter plot showing the relationship between harvest yield and communication cost (total messages sent). Each point represents one simulation run, colored by communication range. The plot reveals a non-linear relationship with diminishing returns at high message counts.}
+\label{fig:yield_vs_messages}
+\end{figure}
 
 \textbf{Key observations}:
 \begin{itemize}
@@ -50,7 +65,12 @@ Figure \ref{fig:yield_vs_messages} shows the relationship between total yield an
 
 Efficiency (yield per message) captures the cost-benefit trade-off. Figure \ref{fig:efficiency_by_range} shows efficiency by communication range.
 
-% TODO: Add bar chart: efficiency by range
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/efficiency_by_range.png}
+\caption{Communication efficiency (yield per message) by communication range. Range 2 shows the highest efficiency, indicating that local communication provides the best return on investment. Efficiency decreases at longer ranges due to message overhead.}
+\label{fig:efficiency_by_range}
+\end{figure}
 
 \textbf{Key observations}:
 \begin{itemize}
@@ -64,7 +84,12 @@ Efficiency (yield per message) captures the cost-benefit trade-off. Figure \ref{
 
 Figure \ref{fig:yield_by_range_teamsize} shows how team size affects the relationship between communication range and yield.
 
-% TODO: Add grouped bar chart or faceted plot
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.85\textwidth]{figures/interaction_teamsize.png}
+\caption{Interaction plot showing mean harvest yield by communication range for different team sizes (10 vs. 20 agents). Larger teams consistently harvest more fruit, and the benefit of communication is more pronounced with larger teams.}
+\label{fig:yield_by_range_teamsize}
+\end{figure}
 
 \textbf{Key observations}:
 \begin{itemize}
@@ -77,7 +102,12 @@ Figure \ref{fig:yield_by_range_teamsize} shows how team size affects the relatio
 
 Figure \ref{fig:yield_by_range_density} shows how resource density affects the relationship between communication range and yield.
 
-% TODO: Add grouped bar chart or faceted plot
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.85\textwidth]{figures/interaction_density.png}
+\caption{Interaction plot showing mean harvest yield by communication range for different resource densities (0.15 vs. 0.25). Higher density environments produce higher yields across all ranges. Communication benefits are more pronounced in sparse environments where information sharing is more valuable.}
+\label{fig:yield_by_range_density}
+\end{figure}
 
 \textbf{Key observations}:
 \begin{itemize}
