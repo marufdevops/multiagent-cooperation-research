@@ -53,8 +53,9 @@ def run_sandbox(
     model_data = model.datacollector.get_model_vars_dataframe()
 
     print(f"Final yield: {model_data['total_yield'].iloc[-1]}")
-    print(f"Total messages: {model_data['messages_this_step'].sum()}")
+    print(f"Total messages: {model_data['cumulative_messages'].iloc[-1]}")
     print(f"Remaining fruit: {model_data['remaining_fruit'].iloc[-1]}")
+    print(f"Coverage (cells visited): {model_data['coverage'].iloc[-1]}")
     print()
     
     return model, model_data

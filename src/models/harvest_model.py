@@ -76,6 +76,7 @@ class HarvestModel(Model):
                 'messages_this_step': self._get_messages_this_step,
                 'cumulative_messages': lambda m: m.cumulative_messages,
                 'remaining_fruit': self._get_remaining_fruit,
+                'coverage': self._get_coverage,
             }
         )
 
@@ -114,9 +115,12 @@ class HarvestModel(Model):
         for agent in self.agents:
             if isinstance(agent, HarvesterAgent):
                 agent.messages_sent = 0
-        
+
         # Agents act (Mesa 3.0 convention: shuffle_do)
         self.agents.shuffle_do('step')
+
+        # Update cumulative message count
+        self.cumulative_messages += self._get_messages_this_step()
 
         # Increment step counter
         self.steps += 1
@@ -141,4 +145,12 @@ class HarvestModel(Model):
     def _get_remaining_fruit(self):
         """Get count of available fruit."""
         return sum(1 for f in self.fruits if f.available)
+
+    def _get_coverage(self):
+        """Get total unique cells visited by all agents."""
+        all_visited = set()
+        for agent in self.agents:
+            if isinstance(agent, HarvesterAgent):
+                all_visited.update(agent.visited_cells)
+        return len(all_visited)
 
