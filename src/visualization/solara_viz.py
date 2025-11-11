@@ -44,15 +44,13 @@ def agent_portrayal(agent):
 
 
 def make_model(params):
-    """Create model instance from parameters."""
+    """Create model instance from parameters (Static dynamics only)."""
     return HarvestModel(
         width=params.get("width", 20),
         height=params.get("height", 20),
         num_agents=params.get("num_agents", 5),
         fruit_density=params.get("fruit_density", 0.2),
         comm_range=params.get("comm_range", 2),
-        dynamics=params.get("dynamics", "Static"),
-        regen_prob=params.get("regen_prob", 0.0),
         seed=params.get("seed", None),
     )
 
@@ -98,20 +96,6 @@ model_params = {
         "min": 0,
         "max": 8,
         "step": 1,
-    },
-    "dynamics": {
-        "type": "Select",
-        "value": "Static",
-        "values": ["Static", "Replenishing"],
-        "label": "Resource Dynamics",
-    },
-    "regen_prob": {
-        "type": "SliderFloat",
-        "value": 0.0,
-        "label": "Regeneration Probability",
-        "min": 0.0,
-        "max": 0.2,
-        "step": 0.01,
     },
     "seed": {
         "type": "InputText",

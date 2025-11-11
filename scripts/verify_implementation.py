@@ -27,7 +27,6 @@ def test_no_communication():
         num_agents=5,
         fruit_density=0.2,
         comm_range=0,  # NO COMMUNICATION
-        dynamics='Static',
         seed=42
     )
     
@@ -63,7 +62,6 @@ def test_with_communication():
         num_agents=5,
         fruit_density=0.2,
         comm_range=4,  # WITH COMMUNICATION
-        dynamics='Static',
         seed=42
     )
     
@@ -102,7 +100,6 @@ def test_yield_increases():
             num_agents=5,
             fruit_density=0.2,
             comm_range=comm_range,
-            dynamics='Static',
             seed=42
         )
         
@@ -146,7 +143,6 @@ def test_metrics_collection():
         num_agents=5,
         fruit_density=0.2,
         comm_range=2,
-        dynamics='Static',
         seed=42
     )
     
@@ -188,7 +184,6 @@ def test_agent_behavior():
         num_agents=3,
         fruit_density=0.2,
         comm_range=3,
-        dynamics='Static',
         seed=42
     )
     
@@ -234,7 +229,6 @@ def test_static_dynamics():
         num_agents=5,
         fruit_density=0.2,
         comm_range=2,
-        dynamics='Static',
         seed=42
     )
     

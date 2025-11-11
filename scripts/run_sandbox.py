@@ -1,6 +1,6 @@
 """
-Run sandbox model and generate basic plots.
-Week 1-2 deliverable: reproducible runs with yield-over-time and messages/step plots.
+Run sandbox model and generate basic plots for RQ1.
+Tests Static dynamics with different communication ranges.
 """
 import sys
 sys.path.insert(0, 'src')
@@ -8,7 +8,6 @@ sys.path.insert(0, 'src')
 import matplotlib
 matplotlib.use('Agg')  # Use non-interactive backend
 import matplotlib.pyplot as plt
-import pandas as pd
 from models.harvest_model import HarvestModel
 
 
@@ -18,37 +17,32 @@ def run_sandbox(
     num_agents=5,
     fruit_density=0.2,
     comm_range=2,
-    dynamics='Static',
-    regen_prob=0.0,
     steps=100,
     seed=42
 ):
-    """Run sandbox model and return results."""
+    """Run sandbox model with Static dynamics and return results."""
     print(f"Running sandbox model:")
     print(f"  Grid: {width}x{height}")
     print(f"  Agents: {num_agents}")
     print(f"  Fruit density: {fruit_density}")
     print(f"  Comm range: {comm_range}")
-    print(f"  Dynamics: {dynamics}")
-    print(f"  Regen prob: {regen_prob}")
+    print(f"  Dynamics: Static (no regeneration)")
     print(f"  Steps: {steps}")
     print(f"  Seed: {seed}")
     print()
-    
-    # Create and run model
+
+    # Create and run model (Static dynamics only)
     model = HarvestModel(
         width=width,
         height=height,
         num_agents=num_agents,
         fruit_density=fruit_density,
         comm_range=comm_range,
-        dynamics=dynamics,
-        regen_prob=regen_prob,
         seed=seed
     )
-    
+
     model.run_model(steps=steps)
-    
+
     # Get data
     model_data = model.datacollector.get_model_vars_dataframe()
 
@@ -57,7 +51,7 @@ def run_sandbox(
     print(f"Remaining fruit: {model_data['remaining_fruit'].iloc[-1]}")
     print(f"Coverage (cells visited): {model_data['coverage'].iloc[-1]}")
     print()
-    
+
     return model, model_data
 
 
@@ -88,45 +82,52 @@ def plot_results(model_data, output_prefix='sandbox'):
 if __name__ == '__main__':
     # Run with default parameters
     print("=" * 60)
-    print("SANDBOX MODEL - WEEK 1-2 DELIVERABLE")
+    print("SANDBOX MODEL - RQ1: COMMUNICATION RANGE EFFECTS")
     print("=" * 60)
     print()
-    
-    # Test 1: Static dynamics, no communication
-    print("Test 1: Static, no communication")
+
+    # Test 1: No communication (baseline)
+    print("Test 1: No communication (Range=0)")
     print("-" * 60)
     model1, data1 = run_sandbox(
         comm_range=0,
-        dynamics='Static',
         steps=100,
         seed=42
     )
-    plot_results(data1, 'sandbox_static_nocomm')
-    
-    # Test 2: Static dynamics, with communication
-    print("Test 2: Static, with communication (range=3)")
+    plot_results(data1, 'sandbox_range0')
+
+    # Test 2: Short range communication
+    print("Test 2: Short range communication (Range=2)")
     print("-" * 60)
     model2, data2 = run_sandbox(
-        comm_range=3,
-        dynamics='Static',
+        comm_range=2,
         steps=100,
         seed=42
     )
-    plot_results(data2, 'sandbox_static_comm')
-    
-    # Test 3: Replenishing dynamics
-    print("Test 3: Replenishing, with communication")
+    plot_results(data2, 'sandbox_range2')
+
+    # Test 3: Medium range communication
+    print("Test 3: Medium range communication (Range=4)")
     print("-" * 60)
     model3, data3 = run_sandbox(
-        comm_range=3,
-        dynamics='Replenishing',
-        regen_prob=0.05,
+        comm_range=4,
         steps=100,
         seed=42
     )
-    plot_results(data3, 'sandbox_replenishing')
-    
+    plot_results(data3, 'sandbox_range4')
+
+    # Test 4: Long range communication
+    print("Test 4: Long range communication (Range=8)")
+    print("-" * 60)
+    model4, data4 = run_sandbox(
+        comm_range=8,
+        steps=100,
+        seed=42
+    )
+    plot_results(data4, 'sandbox_range8')
+
     print("=" * 60)
     print("Sandbox tests complete!")
+    print("All tests use Static dynamics (no regeneration)")
     print("=" * 60)
 

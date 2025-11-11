@@ -14,23 +14,22 @@ import matplotlib.patches as patches
 import numpy as np
 
 def run_scenario(comm_range, steps=50, seed=42):
-    """Run a single scenario and return model + metrics."""
+    """Run a single scenario with Static dynamics and return model + metrics."""
     model = HarvestModel(
         width=20,
         height=20,
         num_agents=5,
         fruit_density=0.2,
         comm_range=comm_range,
-        dynamics='Static',
         seed=seed
     )
-    
+
     for _ in range(steps):
         model.step()
-    
+
     # Get metrics
     data = model.datacollector.get_model_vars_dataframe()
-    
+
     return model, data
 
 

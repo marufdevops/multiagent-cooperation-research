@@ -1,9 +1,10 @@
 """
-Fruit Harvesting Model
-Includes basic metrics: yield, messages, and remaining fruit.
+Fruit Harvesting Model for RQ1: Communication Range Effects
+
+Implements Static resource dynamics (no regeneration).
+Tracks metrics: yield, messages, remaining fruit, coverage.
 """
 import random
-import numpy as np
 from mesa import Model
 from mesa.space import MultiGrid
 from mesa.datacollection import DataCollector
@@ -16,15 +17,17 @@ from agents.fruit import Fruit
 
 class HarvestModel(Model):
     """
-    Minimal sandbox model for fruit harvesting with communication.
+    Fruit harvesting model with communication for RQ1.
+
+    This model implements Static resource dynamics only (no regeneration).
+    Agents move, harvest fruit, and communicate within a configurable range.
+
     Parameters:
         width: Grid width
         height: Grid height
         num_agents: Number of harvester agents
         fruit_density: Fraction of cells with fruit (0.0-1.0)
         comm_range: Communication range in cells (Chebyshev distance)
-        dynamics: 'Static' or 'Replenishing'
-        regen_prob: Regeneration probability per step (for Replenishing)
         seed: Random seed for reproducibility
     """
 
@@ -38,20 +41,16 @@ class HarvestModel(Model):
         num_agents=5,
         fruit_density=0.2,
         comm_range=2,
-        dynamics='Static',
-        regen_prob=0.0,
         seed=None
     ):
         super().__init__(seed=seed)
-        
+
         # Parameters
         self.width = width
         self.height = height
         self.num_agents = num_agents
         self.fruit_density = fruit_density
         self.comm_range = comm_range
-        self.dynamics = dynamics
-        self.regen_prob = regen_prob if dynamics == 'Replenishing' else 0.0
         
         # Grid (non-toroidal)
         self.grid = MultiGrid(width, height, torus=False)
@@ -84,17 +83,16 @@ class HarvestModel(Model):
         self.datacollector.collect(self)
         
     def _place_fruits(self):
-        """Place fruits on grid according to density."""
+        """Place fruits on grid according to density (Static dynamics only)."""
         num_fruits = int(self.width * self.height * self.fruit_density)
-        
+
         # Get all possible positions
         all_positions = [(x, y) for x in range(self.width) for y in range(self.height)]
         fruit_positions = random.sample(all_positions, num_fruits)
-        
-        regenerates = (self.dynamics == 'Replenishing')
-        
+
+        # Create static fruits (no regeneration)
         for pos in fruit_positions:
-            fruit = Fruit(self, regenerates=regenerates, regen_prob=self.regen_prob)
+            fruit = Fruit(self)
             self.grid.place_agent(fruit, pos)
             self.fruits.append(fruit)
     
