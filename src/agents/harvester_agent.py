@@ -23,15 +23,18 @@ class HarvesterAgent(Agent):
         self.current_target = None
         self.travel_distance = 0
         self.last_pos = None
+        self.visited_cells = set()  # Track unique cells visited
         
     def step(self):
         """Execute one step: move, harvest, communicate."""
         self.last_pos = self.pos
         self.move()
 
-        # Track travel distance
+        # Track travel distance and visited cells
         if self.last_pos and self.pos != self.last_pos:
             self.travel_distance += 1
+        if self.pos:
+            self.visited_cells.add(self.pos)
 
         self.harvest()
         self.communicate()

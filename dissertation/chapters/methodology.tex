@@ -1,0 +1,333 @@
+% Methodology
+
+\section{Problem Formulation}
+
+The core problem I'm tackling is: how do we choose the right communication range for a team of harvesting robots? Too small and they work in isolation; too large and they waste resources on communication overhead. This section formalizes the problem.
+
+\subsection{Problem Definition}
+
+Given a team of $N$ autonomous harvesting agents operating in a spatial environment with distributed fruit resources, the goal is to maximize collective harvest yield. Agents can communicate within a configurable range $r$ (measured in grid cells using Chebyshev distance). The problem is to identify the communication range that optimizes the trade-off between information sharing benefits and communication costs.
+
+\textbf{State Space}: Each agent maintains local state including position $(x, y)$, known fruit locations, and messages received from neighbors.
+
+\textbf{Action Space}: At each time step, agents can move (8 directions), harvest fruit if present, and broadcast messages to neighbors within range $r$.
+
+\textbf{Objective Function}: Maximize total yield $Y = \sum_{t=1}^{T} \sum_{i=1}^{N} h_i(t)$ where $h_i(t)$ is fruit harvested by agent $i$ at time $t$.
+
+\textbf{Constraints}:
+\begin{itemize}
+    \item Agents have limited sensing range (can only see fruit in adjacent cells)
+    \item Communication range $r$ is fixed for each experimental run
+    \item Fruit cannot be harvested by multiple agents simultaneously
+    \item Agents cannot occupy the same cell
+\end{itemize}
+
+\subsection{Research Approach}
+
+Rather than attempting to find a globally optimal communication strategy (which would require solving a complex multi-agent optimization problem), I take an empirical approach: systematically test discrete communication ranges and analyze performance using statistical methods. This is feasible within the 30-day timeline and provides interpretable, evidence-based conclusions.
+
+\section{Alternative Solution Approaches}
+
+Before settling on my chosen methodology, I considered several alternative approaches. This section discusses each option, explaining why certain methods were selected or rejected.
+
+\subsection{Approach 1: Reinforcement Learning}
+
+\subsubsection{Description}
+Agents could learn optimal communication policies through reinforcement learning, specifically Q-learning. Each agent would learn a policy $\pi(s, a)$ mapping states to actions, including when and what to communicate.
+
+\subsubsection{Advantages}
+\begin{itemize}
+    \item Adaptive: agents discover strategies through experience
+    \item Can handle dynamic environments where optimal strategies shift
+    \item Potentially discovers non-obvious communication patterns
+    \item Aligns with ML module content on Q-learning and Monte Carlo methods
+\end{itemize}
+
+\subsubsection{Disadvantages}
+\begin{itemize}
+    \item Sample inefficiency: requires thousands of training episodes
+    \item Convergence not guaranteed within reasonable time
+    \item Difficult to interpret learned policies
+    \item Hyperparameter tuning (learning rate, exploration rate) adds complexity
+    \item Multi-agent RL introduces non-stationarity (agents learning simultaneously)
+\end{itemize}
+
+\subsubsection{Why Not Chosen}
+The 30-day timeline is insufficient for proper RL implementation, training, and validation. RL would require extensive experimentation to tune hyperparameters and verify convergence. Additionally, the goal is to understand communication range effects, not to discover novel agent behaviors—RL would conflate these two aspects.
+
+\subsection{Approach 2: Evolutionary Algorithms / Swarm Optimization}
+
+\subsubsection{Description}
+Use evolutionary algorithms (EA) or particle swarm optimization (PSO) to evolve communication range parameters. A population of candidate solutions (communication ranges) would be evaluated through simulation, with fitter solutions (higher yield) selected for reproduction.
+
+\subsubsection{Advantages}
+\begin{itemize}
+    \item Population-based search explores multiple solutions simultaneously
+    \item No gradient information required
+    \item Can optimize multiple parameters (range, message frequency, etc.)
+    \item Aligns with Computational Intelligence module content
+\end{itemize}
+
+\subsubsection{Disadvantages}
+\begin{itemize}
+    \item Computationally expensive: each fitness evaluation requires full simulation run
+    \item Requires many generations to converge (hundreds of evaluations)
+    \item Stochastic: results vary across runs
+    \item Doesn't provide insight into \textit{why} certain ranges work better
+\end{itemize}
+
+\subsubsection{Why Not Chosen}
+While EA/PSO could find optimal parameters, they don't explain the underlying mechanisms. The goal is to understand how communication range affects performance, not just to find the best value. Additionally, the computational cost (hundreds of simulation runs) is prohibitive for thorough analysis.
+
+\subsection{Approach 3: Game-Theoretic Analysis}
+
+\subsubsection{Description}
+Model agent interactions as a cooperative game and analyze using game theory. Find Nash equilibrium or Pareto-optimal communication strategies.
+
+\subsubsection{Advantages}
+\begin{itemize}
+    \item Theoretical guarantees on solution quality
+    \item Elegant mathematical framework
+    \item Aligns with Multi-Agent Systems module content on game theory
+    \item Can prove properties about optimal strategies
+\end{itemize}
+
+\subsubsection{Disadvantages}
+\begin{itemize}
+    \item Assumes perfectly rational agents with complete information
+    \item Difficult to model spatial dynamics and resource distribution
+    \item Analytical solutions intractable for complex environments
+    \item Doesn't account for stochastic elements (random movement, resource placement)
+\end{itemize}
+
+\subsubsection{Why Not Chosen}
+The spatial foraging problem with limited sensing and stochastic elements doesn't fit cleanly into game-theoretic frameworks. Agents don't have complete information about the environment or each other's states, violating key assumptions. While game theory provides valuable insights (discussed in literature review), it's not practical for this specific problem.
+
+\subsection{Approach 4: Systematic Parameter Sweep with Statistical Analysis}
+
+\subsubsection{Description}
+Test a discrete set of communication ranges $r \in \{0, 2, 4, 6, 8\}$ through systematic experimentation. For each range, run multiple replications with different random seeds and analyze results using statistical methods (Kruskal-Wallis test, post-hoc comparisons, effect sizes).
+
+\subsubsection{Advantages}
+\begin{itemize}
+    \item Interpretable: clear relationship between range and performance
+    \item Feasible within 30-day timeline
+    \item Rigorous statistical validation provides defensible conclusions
+    \item Aligns with experimental design principles from ML and Data Mining modules
+    \item Allows systematic exploration of interaction effects (team size, resource density)
+    \item Results directly answer research question
+\end{itemize}
+
+\subsubsection{Disadvantages}
+\begin{itemize}
+    \item Limited to predefined parameter values (doesn't search continuous space)
+    \item Doesn't discover novel strategies beyond tested ranges
+    \item Requires many simulation runs for statistical power (30 replications per configuration)
+    \item Assumes independence between runs (valid for simulation with different seeds)
+\end{itemize}
+
+\subsubsection{Why Chosen}
+This approach best balances feasibility, rigor, and interpretability. It directly addresses the research question ("Does communication range matter?") with statistically validated evidence. The methodology aligns with best practices from the ML module (experimental design, hyperparameter evaluation, performance estimation) and Data Mining module (EDA, statistical testing, model evaluation). Most importantly, it's achievable within 30 days while demonstrating understanding of experimental methodology.
+
+\section{Simulation Environment Design}
+
+\subsection{Framework Selection: Mesa 3.0}
+
+I'm using Mesa 3.0, a Python framework for agent-based modeling. Mesa handles simulation infrastructure (grid management, agent scheduling, data collection) so I can focus on agent behaviors and coordination mechanisms.
+
+\textbf{Key features}:
+\begin{itemize}
+    \item \texttt{MultiGrid}: Spatial environment with multiple agents per cell
+    \item \texttt{model.agents.shuffle\_do('step')}: Randomized agent activation each step
+    \item \texttt{DataCollector}: Automated metric collection over time
+    \item \texttt{SolaraViz}: Interactive web-based visualization
+\end{itemize}
+
+\subsection{Environment Specification}
+
+\textbf{Grid}: 50×50 cells, non-toroidal (agents cannot wrap around edges)
+
+\textbf{Fruit placement}: Random initial placement with density $\rho \in \{0.15, 0.25\}$ (proportion of cells with fruit)
+
+\textbf{Resource dynamics}: Two modes implemented (RQ2 theoretical discussion only):
+\begin{itemize}
+    \item \textbf{Static}: Fruit doesn't regenerate once harvested
+    \item \textbf{Replenishing}: Fruit regenerates with probability $p_{regen} = 0.01$ per step
+\end{itemize}
+
+For RQ1 experiments, I use Static mode only to isolate communication range effects.
+
+\subsection{Agent Architecture}
+
+Agents follow a simplified BDI (Belief-Desire-Intention) architecture inspired by the Multi-Agent Systems module:
+
+\textbf{Beliefs}: Known fruit locations (from sensing and received messages)
+
+\textbf{Desires}: Harvest fruit to maximize collective yield
+
+\textbf{Intentions}: Move toward nearest known fruit, or explore if none known
+
+\textbf{Agent behavior algorithm}:
+\begin{enumerate}
+    \item \textbf{Sense}: Detect fruit in adjacent cells (Moore neighborhood)
+    \item \textbf{Receive messages}: Update beliefs with fruit locations from neighbors within range $r$
+    \item \textbf{Decide}: Choose action based on beliefs
+    \begin{itemize}
+        \item If fruit in current cell: harvest
+        \item Else if known fruit locations: move toward nearest
+        \item Else: random walk (exploration)
+    \end{itemize}
+    \item \textbf{Act}: Execute chosen action
+    \item \textbf{Communicate}: Broadcast known fruit locations to neighbors within range $r$
+\end{enumerate}
+
+\subsection{Communication Protocol}
+
+\textbf{Range}: Chebyshev distance $d_{Chebyshev}(a, b) = \max(|x_a - x_b|, |y_a - y_b|)$
+
+\textbf{Message content}: List of known fruit locations (coordinates)
+
+\textbf{Broadcasting}: Each agent sends messages to all agents within range $r$ each step
+
+\textbf{Message processing}: Receiving agents merge new locations into their belief set
+
+\textbf{Cost model}: Count total messages sent (bandwidth proxy)
+
+\section{Experimental Design}
+
+\subsection{Independent Variables}
+
+\textbf{Communication range} $r \in \{0, 2, 4, 6, 8\}$ cells (5 levels)
+\begin{itemize}
+    \item $r=0$: No communication (baseline)
+    \item $r=2$: Local communication (immediate neighbors)
+    \item $r=4$: Medium range
+    \item $r=6$: Long range
+    \item $r=8$: Very long range (covers significant portion of 50×50 grid)
+\end{itemize}
+
+\textbf{Team size} $N \in \{10, 20\}$ agents (2 levels)
+
+\textbf{Resource density} $\rho \in \{0.15, 0.25\}$ (2 levels)
+
+\textbf{Total configurations}: $5 \times 2 \times 2 = 20$ unique configurations
+
+\subsection{Dependent Variables (Performance Metrics)}
+
+\textbf{Primary metric}:
+\begin{itemize}
+    \item \textbf{Total yield}: Cumulative fruit harvested by all agents over episode
+\end{itemize}
+
+\textbf{Secondary metrics}:
+\begin{itemize}
+    \item \textbf{Messages sent}: Total communication cost
+    \item \textbf{Efficiency ratio}: $E = Y / M$ where $Y$ is yield and $M$ is messages (yield per message)
+    \item \textbf{Coverage}: Number of unique cells visited (exploration measure)
+    \item \textbf{Remaining fruit}: Fruit left unharvested at episode end
+\end{itemize}
+
+\subsection{Experimental Protocol}
+
+\textbf{Replications}: 30 runs per configuration (following ML module best practices for statistical power)
+
+\textbf{Random seeds}: Fixed sequence (0-29) for reproducibility
+
+\textbf{Episode length}: 500 time steps (sufficient for agents to explore and harvest)
+
+\textbf{Data collection}: Per-step metrics recorded via Mesa \texttt{DataCollector}
+
+\textbf{Total runs}: $20 \text{ configurations} \times 30 \text{ replications} = 600$ simulation runs
+
+\subsection{Baseline Comparison}
+
+Range $r=0$ (no communication) serves as baseline. All other ranges are compared against this to quantify communication benefits.
+
+\section{Statistical Analysis Plan}
+
+\subsection{Exploratory Data Analysis}
+
+Before statistical testing, I'll conduct EDA following Data Mining module principles:
+
+\begin{itemize}
+    \item \textbf{Distribution plots}: Histograms and box plots of yield by communication range
+    \item \textbf{Scatter plots}: Yield vs. messages to visualize efficiency trade-off
+    \item \textbf{Summary statistics}: Mean, median, standard deviation, quartiles for each configuration
+    \item \textbf{Outlier detection}: Identify anomalous runs
+\end{itemize}
+
+\subsection{Statistical Hypothesis Testing}
+
+\textbf{Null hypothesis} ($H_0$): Communication range has no effect on median yield
+
+\textbf{Alternative hypothesis} ($H_1$): At least one communication range produces different median yield
+
+\textbf{Test}: Kruskal-Wallis H-test (non-parametric alternative to ANOVA)
+\begin{itemize}
+    \item \textbf{Why}: Don't assume normal distribution of yields
+    \item \textbf{Significance level}: $\alpha = 0.05$
+    \item \textbf{Implementation}: \texttt{scipy.stats.kruskal()} in Python
+\end{itemize}
+
+\textbf{Post-hoc analysis}: If Kruskal-Wallis rejects $H_0$, perform pairwise comparisons using Dunn's test with Bonferroni correction to control family-wise error rate.
+
+\subsection{Effect Size Calculation}
+
+Statistical significance doesn't imply practical significance. I'll calculate Cohen's d for pairwise comparisons:
+
+$$d = \frac{\bar{x}_1 - \bar{x}_2}{s_{pooled}}$$
+
+where $s_{pooled} = \sqrt{\frac{(n_1-1)s_1^2 + (n_2-1)s_2^2}{n_1 + n_2 - 2}}$
+
+\textbf{Interpretation}:
+\begin{itemize}
+    \item $|d| < 0.2$: Small effect
+    \item $0.2 \leq |d| < 0.8$: Medium effect
+    \item $|d| \geq 0.8$: Large effect
+\end{itemize}
+
+\subsection{Performance Evaluation Framework}
+
+Following ML module principles on model evaluation:
+
+\textbf{Central tendency}: Report mean $\pm$ standard deviation for each configuration
+
+\textbf{Confidence intervals}: 95\% CI for mean yield: $\bar{x} \pm 1.96 \times \frac{s}{\sqrt{n}}$
+
+\textbf{Comparative analysis}: Percentage improvement over baseline (range 0)
+
+\subsection{Validation and Reproducibility}
+
+\textbf{Fixed random seeds}: Ensures reproducibility of results
+
+\textbf{Sanity checks}:
+\begin{itemize}
+    \item Range 0 should produce 0 messages
+    \item Higher ranges should produce more messages
+    \item Total fruit harvested cannot exceed initial fruit count (Static mode)
+\end{itemize}
+
+\textbf{Sensitivity analysis}: Test with different episode lengths (400, 500, 600 steps) to verify conclusions are robust
+
+\section{Theoretical Discussion: Resource Dynamics (RQ2)}
+
+While RQ1 focuses on communication range effects in Static environments, RQ2 asks whether resource dynamics (Static vs. Replenishing) change the optimal communication range. Due to time constraints, I don't run full experiments for RQ2, but discuss it theoretically here.
+
+\subsection{Hypothesis}
+
+\textbf{Static environments}: Communication benefits diminish over time as fruit depletes. Optimal range may be lower since there's less information to share as the episode progresses.
+
+\textbf{Replenishing environments}: Sustained communication remains valuable because new fruit keeps appearing. Optimal range may be higher to maintain awareness of regenerating resources across the environment.
+
+\subsection{Theoretical Framework}
+
+The value of communication depends on information freshness and relevance. In Static mode, once an area is cleared, communicating about it provides no benefit. In Replenishing mode, previously cleared areas may have new fruit, making sustained communication more valuable.
+
+This suggests an interaction effect: optimal communication range may depend on resource dynamics. Future work should test this hypothesis systematically.
+
+\section{Summary}
+
+This chapter presented the methodology for investigating RQ1: "Does communication range affect harvest yield?" I discussed four alternative approaches (RL, EA/PSO, game theory, parameter sweep) and justified choosing systematic parameter sweep with statistical analysis. The experimental design tests 5 communication ranges across 20 configurations with 30 replications each (600 total runs). Statistical analysis uses Kruskal-Wallis testing with post-hoc comparisons and effect sizes. RQ2 (resource dynamics) is discussed theoretically as future work.
+
+The next chapter describes the implementation details of the simulation system.
+

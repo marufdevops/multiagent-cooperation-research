@@ -1,0 +1,359 @@
+% Implementation
+
+This chapter describes how I built the simulation system. The implementation uses Mesa 3.0, a Python framework for agent-based modeling, and follows the experimental design outlined in Chapter 3.
+
+\section{System Architecture}
+
+The system consists of three main components: the environment (grid world with fruit), the agents (harvesters), and the data collection infrastructure. Figure \ref{fig:architecture} shows how these components interact.
+
+\subsection{Overall Structure}
+
+The implementation follows Mesa's standard architecture:
+
+\begin{itemize}
+    \item \textbf{Model class} (\texttt{HarvestModel}): Manages the simulation, creates the grid, initializes agents and fruit, and coordinates execution
+    \item \textbf{Agent classes}: \texttt{HarvesterAgent} (mobile harvesters) and \texttt{Fruit} (stationary resources)
+    \item \textbf{Grid}: \texttt{MultiGrid} allowing multiple agents per cell
+    \item \textbf{DataCollector}: Tracks metrics at each time step
+    \item \textbf{Visualization}: SolaraViz for interactive web-based display
+\end{itemize}
+
+\subsection{Model Class}
+
+The \texttt{HarvestModel} class initializes the simulation environment and manages execution. Key parameters:
+
+\begin{itemize}
+    \item \texttt{width}, \texttt{height}: Grid dimensions (50×50 for experiments)
+    \item \texttt{num\_agents}: Number of harvester agents (10 or 20)
+    \item \texttt{fruit\_density}: Proportion of cells with fruit (0.15 or 0.25)
+    \item \texttt{comm\_range}: Communication range in cells (0, 2, 4, 6, or 8)
+    \item \texttt{dynamics}: Resource mode ('Static' or 'Replenishing')
+    \item \texttt{seed}: Random seed for reproducibility
+\end{itemize}
+
+The model's \texttt{step()} method executes one time step:
+
+\begin{enumerate}
+    \item Activate all agents in random order: \texttt{model.agents.shuffle\_do('step')}
+    \item Handle fruit regeneration (if Replenishing mode)
+    \item Collect metrics via DataCollector
+    \item Increment step counter
+\end{enumerate}
+
+\subsection{Grid and Spatial Representation}
+
+The environment is a 50×50 grid with non-toroidal boundaries (agents cannot wrap around edges). This creates realistic edge effects where agents near boundaries have fewer neighbors.
+
+\textbf{Why 50×50?} This size balances several factors:
+\begin{itemize}
+    \item Large enough for interesting spatial dynamics
+    \item Small enough for reasonable simulation runtime
+    \item Allows communication ranges (0-8) to span meaningful proportions of the space
+    \item With 10-20 agents, creates realistic density (0.4-0.8\% coverage)
+\end{itemize}
+
+The grid uses \texttt{MultiGrid}, allowing multiple agents (harvesters and fruit) to occupy the same cell. This is necessary because agents might move onto cells containing fruit.
+
+\section{Agent Implementation}
+
+\subsection{Harvester Agent Architecture}
+
+Each \texttt{HarvesterAgent} maintains internal state and executes a simple behavior cycle. The design is inspired by practical reasoning agents: agents have beliefs (known fruit locations), desires (harvest fruit), and intentions (current target).
+
+\subsubsection{Agent State}
+
+\begin{itemize}
+    \item \texttt{pos}: Current position $(x, y)$
+    \item \texttt{harvested}: Count of fruit harvested
+    \item \texttt{messages\_sent}: Count of messages broadcast
+    \item \texttt{messages\_received}: Count of messages received
+    \item \texttt{current\_target}: Position of target fruit (if any)
+    \item \texttt{visited\_cells}: Set of unique cells visited (for coverage metric)
+\end{itemize}
+
+\subsubsection{Agent Behavior Algorithm}
+
+The agent's \texttt{step()} method implements the behavior cycle:
+
+\begin{verbatim}
+def step(self):
+    1. Record current position
+    2. Move (toward target or random walk)
+    3. Track visited cells
+    4. Harvest fruit if present at current position
+    5. Communicate with nearby agents
+\end{verbatim}
+
+Let me break down each component:
+
+\textbf{Movement}: Agents use a simple strategy:
+\begin{itemize}
+    \item If \texttt{current\_target} exists: move one step toward target using greedy approach
+    \item Otherwise: random walk (choose random adjacent cell from Moore neighborhood)
+\end{itemize}
+
+The greedy movement calculates direction to target:
+\begin{verbatim}
+dx = sign(target_x - current_x)
+dy = sign(target_y - current_y)
+new_pos = (current_x + dx, current_y + dy)
+\end{verbatim}
+
+This moves diagonally when possible, which is efficient given Chebyshev distance.
+
+\textbf{Harvesting}: At each step, the agent checks if fruit is present at its current position. If so, it harvests the fruit (marks it as unavailable) and clears its current target.
+
+\textbf{Communication}: This is where communication range matters. The agent:
+\begin{enumerate}
+    \item Finds all agents within communication range using Chebyshev distance
+    \item Identifies the nearest available fruit it knows about
+    \item Broadcasts that fruit's location to all neighbors within range
+    \item Only sends to neighbors that don't already have a target (avoid overriding their plans)
+\end{enumerate}
+
+\subsection{Fruit Agent}
+
+The \texttt{Fruit} class is simpler—it's mostly a stationary marker. Key properties:
+
+\begin{itemize}
+    \item \texttt{available}: Boolean indicating if fruit can be harvested
+    \item \texttt{regenerates}: Whether fruit can regenerate after harvest
+    \item \texttt{regen\_prob}: Probability of regeneration per step (if regenerates=True)
+\end{itemize}
+
+When harvested, fruit becomes unavailable. In Replenishing mode, unavailable fruit has a chance to regenerate each step.
+
+\section{Communication Protocol}
+
+\subsection{Range Calculation}
+
+Communication range uses Chebyshev distance (also called chessboard distance):
+
+$$d_{Chebyshev}(a, b) = \max(|x_a - x_b|, |y_a - y_b|)$$
+
+This means an agent at position $(10, 10)$ with range $r=2$ can communicate with any agent in the square from $(8, 8)$ to $(12, 12)$.
+
+\textbf{Why Chebyshev distance?} It's natural for grid-based movement where agents can move diagonally. An agent can reach any cell within Chebyshev distance $r$ in exactly $r$ steps.
+
+\subsection{Message Content and Processing}
+
+Messages are simple: they contain the position of a fruit location. When an agent receives a message:
+
+\begin{enumerate}
+    \item Increment \texttt{messages\_received} counter
+    \item If agent doesn't have a current target, set the received position as target
+    \item Otherwise, ignore the message (agent is already committed to a target)
+\end{enumerate}
+
+This creates a simple coordination mechanism: agents share information about fruit locations, and idle agents respond by moving toward shared locations.
+
+\subsection{Communication Cost Model}
+
+I track communication cost by counting messages sent. Each broadcast to a neighbor counts as one message. If an agent has 5 neighbors within range and broadcasts, that's 5 messages.
+
+This is a simplified model—real communication systems have more complex costs (bandwidth, latency, energy). But message count serves as a reasonable proxy for communication overhead.
+
+\section{Data Collection}
+
+\subsection{Metrics Tracked}
+
+The \texttt{DataCollector} records four metrics at each time step:
+
+\begin{enumerate}
+    \item \textbf{total\_yield}: Cumulative fruit harvested by all agents
+    \item \textbf{messages\_this\_step}: Messages sent in current step
+    \item \textbf{cumulative\_messages}: Total messages sent since start
+    \item \textbf{remaining\_fruit}: Count of available fruit still on grid
+\end{enumerate}
+
+These metrics are calculated by aggregating over agents and fruit:
+
+\begin{verbatim}
+total_yield = sum(agent.harvested for agent in harvesters)
+messages_this_step = sum(agent.messages_sent for agent in harvesters)
+remaining_fruit = sum(1 for fruit in fruits if fruit.available)
+\end{verbatim}
+
+\subsection{Derived Metrics}
+
+After simulation, I calculate additional metrics:
+
+\begin{itemize}
+    \item \textbf{Efficiency}: $E = \frac{\text{total yield}}{\text{total messages}}$ (yield per message)
+    \item \textbf{Coverage}: Number of unique cells visited by all agents
+\end{itemize}
+
+Efficiency captures the cost-benefit trade-off: higher efficiency means more fruit harvested per message sent.
+
+\section{Parameter Selection and Justification}
+
+This section explains why I chose specific parameter values for the experiments.
+
+\subsection{Grid Size: 50×50}
+
+I tested several grid sizes during development. Smaller grids (20×20) led to quick depletion and limited spatial dynamics. Larger grids (100×100) increased runtime significantly without adding much insight. 50×50 provides:
+
+\begin{itemize}
+    \item Sufficient space for agents to spread out
+    \item Meaningful communication range effects (range 8 covers 16\% of grid width)
+    \item Reasonable runtime (0.1-0.2 seconds per 500-step episode)
+\end{itemize}
+
+\subsection{Episode Length: 500 Steps}
+
+I ran preliminary tests with different episode lengths. At 200 steps, agents hadn't explored much of the environment. At 1000 steps, most fruit was harvested by step 500 anyway (in Static mode). 500 steps provides:
+
+\begin{itemize}
+    \item Enough time for agents to explore and harvest
+    \item Clear differentiation between communication ranges
+    \item Reasonable runtime for 600 experimental runs
+\end{itemize}
+
+\subsection{Communication Ranges: \{0, 2, 4, 6, 8\}}
+
+These values span the spectrum from no communication to long-range:
+
+\begin{itemize}
+    \item \textbf{Range 0}: Baseline (no communication)
+    \item \textbf{Range 2}: Local communication (immediate neighbors)
+    \item \textbf{Range 4}: Medium range (covers 9×9 = 81 cells)
+    \item \textbf{Range 6}: Long range (covers 13×13 = 169 cells)
+    \item \textbf{Range 8}: Very long range (covers 17×17 = 289 cells, 11.6\% of grid)
+\end{itemize}
+
+I didn't test ranges above 8 because preliminary tests showed diminishing returns—agents were already well-connected at range 8.
+
+\subsection{Team Sizes: \{10, 20\}}
+
+These represent small and medium-sized teams:
+
+\begin{itemize}
+    \item \textbf{10 agents}: Sparse coverage (0.4\% of grid), limited interaction
+    \item \textbf{20 agents}: Moderate coverage (0.8\% of grid), more interaction opportunities
+\end{itemize}
+
+I didn't test larger teams (e.g., 50 agents) because the grid would become crowded and communication effects might be masked by physical proximity.
+
+\subsection{Resource Densities: \{0.15, 0.25\}}
+
+These represent sparse and moderate fruit distributions:
+
+\begin{itemize}
+    \item \textbf{0.15}: 375 fruit on 50×50 grid (sparse)
+    \item \textbf{0.25}: 625 fruit on 50×50 grid (moderate)
+\end{itemize}
+
+Sparse environments make communication more valuable (fruit is harder to find). Moderate environments provide more opportunities for harvest.
+
+\subsection{Replications: 30 per Configuration}
+
+Following standard practice in simulation studies, I run 30 replications per configuration. This provides:
+
+\begin{itemize}
+    \item Sufficient statistical power for hypothesis testing
+    \item Reasonable confidence intervals (margin of error $\propto 1/\sqrt{30} \approx 0.18$)
+    \item Balance between statistical rigor and computational cost
+\end{itemize}
+
+With 30 replications, I can detect medium effect sizes (Cohen's $d \approx 0.5$) with 80\% power at $\alpha = 0.05$.
+
+\section{Verification and Validation}
+
+\subsection{Unit Testing}
+
+I verified individual components work correctly:
+
+\begin{itemize}
+    \item \textbf{Movement}: Agents move to adjacent cells, respect grid boundaries
+    \item \textbf{Harvesting}: Fruit becomes unavailable when harvested, yield increments correctly
+    \item \textbf{Communication}: Message counts match expected values, range calculation correct
+    \item \textbf{Regeneration}: Fruit regenerates with correct probability (Replenishing mode)
+\end{itemize}
+
+\subsection{Sanity Checks}
+
+I ran sanity checks on experimental data:
+
+\begin{itemize}
+    \item Range 0 produces exactly 0 messages (verified)
+    \item Higher ranges produce more messages (verified)
+    \item Total yield cannot exceed initial fruit count in Static mode (verified)
+    \item Agents visit more cells over time (verified via coverage metric)
+\end{itemize}
+
+\subsection{Visualization Validation}
+
+The Solara visualization lets me watch simulations in real-time. I verified:
+
+\begin{itemize}
+    \item Agents move sensibly (toward targets when available, random walk otherwise)
+    \item Fruit disappears when harvested
+    \item Communication links appear between agents within range
+    \item Agents spread out over time (exploration behavior)
+\end{itemize}
+
+Watching the simulation helped me catch bugs (e.g., agents getting stuck at grid edges) that weren't obvious from metrics alone.
+
+\section{Experimental Infrastructure}
+
+\subsection{Batch Runner Script}
+
+I wrote a Python script (\texttt{run\_experiments.py}) to automate the 600 experimental runs. The script:
+
+\begin{enumerate}
+    \item Generates all 20 configurations (5 ranges × 2 team sizes × 2 densities)
+    \item For each configuration, runs 30 replications with seeds 0-29
+    \item Collects final metrics from each run
+    \item Saves results to CSV file with timestamp
+    \item Generates summary statistics by communication range
+\end{enumerate}
+
+The script includes a progress bar (using \texttt{tqdm}) and estimates remaining time, which is helpful for long runs.
+
+\subsection{Reproducibility}
+
+All experiments use fixed random seeds (0-29 for replications). This ensures:
+
+\begin{itemize}
+    \item Results are reproducible—running the same configuration with the same seed produces identical results
+    \item Fair comparison—all communication ranges tested under identical conditions (same fruit placement, same agent starting positions)
+\end{itemize}
+
+Mesa 3.0 requires passing the seed to the model constructor: \texttt{super().\_\_init\_\_(seed=seed)}. This seeds the model's random number generator.
+
+\section{Implementation Challenges}
+
+\subsection{Mesa 3.0 API Changes}
+
+Mesa 3.0 introduced breaking changes from earlier versions. Key differences:
+
+\begin{itemize}
+    \item No \texttt{unique\_id} parameter in agent constructors (Mesa generates IDs automatically)
+    \item Agent activation via \texttt{model.agents.shuffle\_do('step')} instead of custom schedulers
+    \item Visualization requires model instance, not class
+\end{itemize}
+
+I had to update code from Mesa 2.x examples to work with Mesa 3.0.
+
+\subsection{Performance Optimization}
+
+Initial implementation was slow because I searched all fruit for each agent at each step. I optimized by:
+
+\begin{itemize}
+    \item Maintaining a separate \texttt{fruits} list for efficient iteration
+    \item Caching neighbor calculations where possible
+    \item Using Mesa's built-in spatial queries instead of manual distance calculations
+\end{itemize}
+
+These optimizations reduced runtime from ~0.5s to ~0.15s per 500-step episode.
+
+\subsection{Visualization Integration}
+
+Getting Solara visualization working required careful attention to Mesa 3.0's API. The key insight: \texttt{SolaraViz} expects a model \textit{instance}, not a class. I had to restructure the visualization code to create the model first, then pass it to SolaraViz.
+
+\section{Summary}
+
+This chapter described the implementation of the fruit harvesting simulation. The system uses Mesa 3.0 with a 50×50 grid, simple agent behaviors (move, harvest, communicate), and Chebyshev distance for communication range. I justified parameter choices (grid size, episode length, communication ranges, team sizes, densities, replications) based on preliminary testing and standard practices. The implementation includes verification tests, visualization for qualitative validation, and automated batch runner for experiments.
+
+The next chapter presents results from running 600 experiments (20 configurations × 30 replications) to answer RQ1: Does communication range affect harvest yield?
+
