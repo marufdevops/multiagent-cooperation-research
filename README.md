@@ -16,22 +16,36 @@ See `TODO.md` for remaining tasks and `PROGRESS.md` for detailed progress tracki
 
 ## Quick Start
 
+### Requirements
+
+- Python 3.11+ (required for Mesa 3.3.0)
+- If using system python3, make sure it's version 3.11 or higher
+
 ### Install Dependencies
 
 ```bash
 pip install mesa==3.3.0 pandas numpy matplotlib solara
 ```
 
+**Note**: If you have Anaconda installed, use:
+```bash
+/opt/anaconda3/bin/python -m pip install mesa==3.3.0 pandas numpy matplotlib solara
+```
+
 ### Run Basic Test
 
 ```bash
-python scripts/run_sandbox.py
+# If using Anaconda Python:
+/opt/anaconda3/bin/python scripts/run_sandbox.py
+
+# Or if your system python3 is 3.11+:
+python3 scripts/run_sandbox.py
 ```
 
 ### Run Visualization
 
 ```bash
-python scripts/run_visualization.py
+/opt/anaconda3/bin/python scripts/run_visualization.py
 ```
 
 Then open browser to http://localhost:8765
