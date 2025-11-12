@@ -19,7 +19,7 @@ class Fruit(Agent):
         Args:
             model: The model instance
         """
-        super().__init__(model)
+        super().__init__(model=model)
         self.is_fruit = True
         self.available = True
         self.times_harvested = 0
