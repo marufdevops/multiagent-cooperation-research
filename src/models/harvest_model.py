@@ -100,7 +100,7 @@ class HarvestModel(Model):
             fruit = Fruit(self)
             self.grid.place_agent(fruit, pos)
             self.fruits.append(fruit)
-    
+
     def _place_agents(self):
         """Place harvester agents on grid."""
         for _ in range(self.num_agents):

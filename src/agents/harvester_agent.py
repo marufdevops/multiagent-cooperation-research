@@ -19,7 +19,7 @@ class HarvesterAgent(Agent):
         Initialize harvester agent.
 
         Args:
-            model: The model instance (Mesa 3.0 convention)
+            model: The model instance
         """
         super().__init__(model)
         self.harvested = 0
