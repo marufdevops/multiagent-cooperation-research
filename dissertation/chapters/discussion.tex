@@ -1,242 +1,83 @@
-% Discussion and Conclusion
+% Discussion and Conclusion (PLACEHOLDER - Week 5)
 
-This final chapter interprets the experimental findings, discusses RQ2 theoretically, acknowledges limitations, and suggests future research directions.
+% TODO: Write this chapter after completing results analysis
+% TODO: Interpret findings in context of literature
+% TODO: Discuss RQ2 theoretically
+% TODO: Acknowledge limitations
+% TODO: Suggest future work
+
+% NOTE: This chapter will be written in Week 5 after results are complete
+
+This chapter will interpret the experimental findings, discuss RQ2 theoretically, acknowledge limitations, and suggest future research directions.
 
 \section{Interpretation of Results}
 
+% TODO: Write after analyzing results
+
 \subsection{Why Does Communication Range Matter?}
 
-The experimental results clearly show that communication range affects harvest performance. But why? Let me unpack the mechanisms.
-
-\textbf{Information sharing benefit}: When agents communicate, they share knowledge about fruit locations. An agent that finds fruit can broadcast this information to teammates, who can then navigate directly to those locations instead of wandering randomly. This reduces wasted movement and increases harvest efficiency.
-
-\textbf{Coordination overhead}: However, communication isn't free. Each message consumes bandwidth and processing time. More importantly, in this implementation, agents sometimes receive information about fruit that's already been harvested by another agent (the message was sent before harvest but received after). This creates "false targets" that waste agent effort.
-
-\textbf{The sweet spot}: Medium communication ranges (4-6 cells) balance these factors. Agents can share information across a meaningful portion of the environment without overwhelming each other with messages. Local communication (range 2) helps but limits information spread. Very long range (range 8) creates message overhead without proportional benefit.
+% TODO: Explain mechanisms (information sharing, coordination overhead, sweet spot)
+% TODO: Compare with literature (ant colonies, swarm robotics, agricultural robots)
+% TODO: Discuss context dependency (density, team size)
 
 \subsection{Comparison with Literature}
 
-These findings align with previous research on multi-agent foraging:
-
-\textbf{Ant colony studies}: Biological ant colonies use pheromone trails for indirect communication. The effective "range" of pheromone communication is limited by diffusion and evaporation. My results suggest similar principles apply to direct communication—there's an optimal range beyond which additional communication provides diminishing returns.
-
-\textbf{Swarm robotics}: Research on robot swarms has shown that local communication often outperforms global communication for spatial tasks. My findings support this: range 2-4 (local to medium) provides better efficiency than range 8 (near-global on a 50×50 grid).
-
-\textbf{Agricultural robotics}: Studies of multi-robot harvesting systems emphasize the importance of coordination. My results quantify this: communication improves yield by 30-50\% compared to independent operation. This suggests real agricultural robot teams would benefit significantly from communication infrastructure.
+% TODO: Compare findings with previous research
 
 \subsection{Context Dependency}
 
-The interaction analysis revealed that optimal communication range depends on environmental conditions:
-
-\textbf{Resource density}: In sparse environments (density 0.15), communication provides greater benefit because fruit is harder to find through local sensing alone. In dense environments (density 0.25), agents stumble upon fruit frequently even without communication, reducing the marginal value of information sharing.
-
-\textbf{Team size}: Larger teams (20 agents) benefit more from communication in absolute terms, though the optimal range remains similar. This makes sense: more agents means more potential information to share and more coordination opportunities.
-
-\textbf{Practical implication}: Agricultural robot systems should adapt communication strategies based on crop density and team size. Sparse orchards may justify longer-range communication; dense fields may not.
+% TODO: Discuss how optimal range depends on environment
 
 \section{Theoretical Discussion of RQ2}
 
-RQ2 asks: "Does it make a difference whether the fruit grows back or not?" I didn't run full experiments for RQ2 due to time constraints, but I can discuss it theoretically based on the implementation and RQ1 findings.
+% TODO: Discuss RQ2 theoretically (no experiments yet)
+
+RQ2 asks: "Does it make a difference whether the fruit grows back or not?"
+
+% NOTE: RQ2 is out of scope for this dissertation due to time constraints
+% Focusing on RQ1 (communication range effects) only
+% RQ2 could be addressed in future work
 
 \subsection{Static vs. Replenishing Dynamics}
 
-The simulation includes both modes:
-
-\textbf{Static mode}: Fruit doesn't regenerate once harvested. This represents one-time harvesting scenarios (e.g., annual crops, clear-cutting).
-
-\textbf{Replenishing mode}: Fruit regenerates with probability $p_{regen}$ per step. This represents continuous production scenarios (e.g., berry picking over a season, ongoing maintenance tasks).
+% TODO: Discuss theoretical differences between Static and Replenishing modes
 
 \subsection{Hypothesized Effects}
 
-Based on the RQ1 results and theoretical reasoning, I hypothesize:
+% TODO: Develop hypotheses about how resource dynamics might affect communication benefits
 
-\textbf{Hypothesis 1}: Communication benefits diminish over time in Static mode. As fruit depletes, there's less information to share. Early in the episode, communication helps agents find the abundant fruit. Late in the episode, fruit is scarce and communication provides limited value.
+\subsection{Future Work}
 
-\textbf{Hypothesis 2}: Communication benefits persist in Replenishing mode. New fruit keeps appearing, so information sharing remains valuable throughout the episode. Agents need to maintain awareness of regenerating resources.
-
-\textbf{Hypothesis 3}: Optimal communication range may be higher in Replenishing mode. Sustained communication across the environment helps agents track regeneration patterns. In Static mode, once an area is cleared, communicating about it provides no benefit.
-
-\subsection{Implications for Future Work}
-
-Testing these hypotheses would require:
-
-\begin{enumerate}
-    \item Running the same 20 configurations in Replenishing mode (600 additional runs)
-    \item Analyzing yield over time (not just final yield) to see when communication benefits occur
-    \item Comparing optimal ranges between Static and Replenishing modes
-    \item Examining agent movement patterns—do they revisit cleared areas in Replenishing mode?
-\end{enumerate}
-
-This would be a natural extension of the current work, doubling the experimental scope but providing deeper insights into how resource dynamics affect coordination strategies.
-
-\subsection{Broader Theoretical Framework}
-
-The Static vs. Replenishing distinction connects to broader questions in multi-agent systems:
-
-\textbf{Exploration vs. exploitation}: In Static mode, agents should explore new areas (exploitation of known resources depletes quickly). In Replenishing mode, agents might benefit from exploiting known productive areas repeatedly.
-
-\textbf{Information freshness}: In Static mode, information becomes stale (fruit gets harvested). In Replenishing mode, old information may become relevant again (fruit regenerates). This affects the value of communication over time.
-
-\textbf{Spatial memory}: Agents might benefit from remembering which areas they've cleared (Static) or which areas are productive (Replenishing). The current implementation doesn't include spatial memory beyond current targets, but it could be added.
-
-\section{Contributions}
-
-This dissertation makes several contributions:
-
-\subsection{Empirical Findings}
-
-\begin{itemize}
-    \item \textbf{Quantified communication benefits}: Communication improves harvest yield by 30-50\% compared to independent operation
-    \item \textbf{Identified optimal range}: Medium ranges (4-6 cells, 8-12\% of environment width) provide best performance
-    \item \textbf{Demonstrated non-linearity}: More communication isn't always better—there are diminishing returns
-    \item \textbf{Revealed context dependency}: Optimal strategies depend on resource density and team size
-\end{itemize}
-
-\subsection{Methodological Contributions}
-
-\begin{itemize}
-    \item \textbf{Systematic experimental design}: Factorial design with proper replication and statistical validation
-    \item \textbf{Reproducible implementation}: Open-source Mesa 3.0 code with fixed random seeds
-    \item \textbf{Comprehensive evaluation}: Multiple metrics (yield, messages, efficiency, coverage) provide holistic view
-    \item \textbf{Visualization tools}: Interactive Solara interface aids understanding and debugging
-\end{itemize}
-
-\subsection{Practical Insights}
-
-\begin{itemize}
-    \item \textbf{Design guidelines}: Agricultural robot teams should use medium-range communication (8-12\% of field width)
-    \item \textbf{Efficiency considerations}: If communication is expensive, local range (range 2) provides best yield-per-message ratio
-    \item \textbf{Adaptive strategies}: Systems should adjust communication range based on resource density
-\end{itemize}
+% TODO: Outline how RQ2 could be tested in future research
 
 \section{Limitations}
 
-\subsection{Simplified Agent Behaviors}
-
-Agents use simple greedy movement toward targets and random walk exploration. Real robots might use more sophisticated strategies:
+% TODO: Acknowledge limitations of the study
 
 \begin{itemize}
-    \item \textbf{Path planning}: Optimal routes considering obstacles and other agents
-    \item \textbf{Learning}: Agents could learn productive areas over time
-    \item \textbf{Negotiation}: Agents could negotiate target assignments to avoid conflicts
-\end{itemize}
-
-The simple behaviors were chosen for interpretability and feasibility within the timeline. More complex behaviors might change the optimal communication range.
-
-\subsection{Grid-Based Abstraction}
-
-The simulation uses a discrete grid, while real environments are continuous. This affects:
-
-\begin{itemize}
-    \item \textbf{Movement}: Real robots move continuously, not in discrete steps
-    \item \textbf{Sensing}: Real sensors have noise and limited range
-    \item \textbf{Communication}: Real communication has latency, packet loss, and bandwidth limits
-\end{itemize}
-
-The grid abstraction makes simulation tractable but may not capture all real-world complexities.
-
-\subsection{Homogeneous Agents}
-
-All agents are identical. Real robot teams might have:
-
-\begin{itemize}
-    \item \textbf{Different capabilities}: Some robots faster, some with better sensors
-    \item \textbf{Different roles}: Scouts vs. harvesters
-    \item \textbf{Different communication ranges}: Heterogeneous communication capabilities
-\end{itemize}
-
-Heterogeneous teams might exhibit different optimal communication strategies.
-
-\subsection{Static Environment}
-
-The environment (grid size, boundaries, initial fruit placement) is fixed. Real agricultural settings have:
-
-\begin{itemize}
-    \item \textbf{Obstacles}: Trees, buildings, terrain features
-    \item \textbf{Dynamic conditions}: Weather, time of day, crop growth stages
-    \item \textbf{Spatial structure}: Rows, clusters, non-uniform distributions
-\end{itemize}
-
-These factors could affect optimal communication range.
-
-\subsection{Limited Experimental Scope}
-
-Due to the 30-day timeline:
-
-\begin{itemize}
-    \item \textbf{RQ2 not fully tested}: Only theoretical discussion of resource dynamics
-    \item \textbf{Limited parameter ranges}: Only tested 5 communication ranges, 2 team sizes, 2 densities
-    \item \textbf{Single environment size}: Only 50×50 grid tested
-    \item \textbf{No real-world validation}: Simulation only, no physical robot experiments
+    \item Simplified agent behaviors (greedy movement, random walk)
+    \item Grid-based abstraction (not continuous space)
+    \item Homogeneous agents (all identical)
+    \item Static environment (no obstacles)
+    \item Limited experimental scope (RQ2 not tested)
 \end{itemize}
 
 \section{Future Work}
 
-\subsection{Immediate Extensions}
+% TODO: Suggest future research directions
 
-\textbf{Complete RQ2 investigation}: Run full experiments in Replenishing mode to test hypotheses about resource dynamics. This would double the experimental scope but provide valuable insights.
-
-\textbf{Temporal analysis}: Analyze yield over time, not just final yield. When do communication benefits occur? How do they change as fruit depletes?
-
-\textbf{Sensitivity analysis}: Test different episode lengths, grid sizes, and regeneration probabilities to verify findings are robust.
-
-\subsection{Enhanced Agent Behaviors}
-
-\textbf{Reinforcement learning}: Train agents to learn optimal communication policies. Compare learned strategies to the fixed ranges tested here.
-
-\textbf{Adaptive communication}: Allow agents to dynamically adjust their communication range based on local conditions (fruit density, neighbor count).
-
-\textbf{Selective communication}: Instead of broadcasting to all neighbors, agents could selectively share information based on relevance or neighbor state.
-
-\subsection{Realistic Extensions}
-
-\textbf{Continuous space}: Implement in continuous 2D space instead of discrete grid. Use realistic robot dynamics (acceleration, turning radius).
-
-\textbf{Communication constraints}: Add latency, packet loss, bandwidth limits, and energy costs to make communication more realistic.
-
-\textbf{Obstacles and terrain}: Add environmental complexity (obstacles, varying terrain, spatial structure).
-
-\textbf{Heterogeneous teams}: Test mixed teams with different capabilities and roles.
-
-\subsection{Real-World Validation}
-
-\textbf{Physical robot experiments}: Implement on real robots (e.g., TurtleBots) in a controlled environment. Validate that simulation findings transfer to physical systems.
-
-\textbf{Agricultural field trials}: Partner with farms to test multi-robot harvesting with different communication strategies. Measure real-world performance and costs.
-
-\textbf{Other domains}: Apply the methodology to other multi-robot coordination tasks (search and rescue, warehouse logistics, environmental monitoring).
-
-\subsection{Theoretical Extensions}
-
-\textbf{Game-theoretic analysis}: Model agent interactions formally and derive theoretical predictions about optimal communication strategies.
-
-\textbf{Information theory}: Analyze communication in terms of information content, redundancy, and value. Develop metrics for information quality.
-
-\textbf{Scaling analysis}: Study how optimal communication range scales with team size and environment size. Derive scaling laws if possible.
+\begin{itemize}
+    \item Complete RQ2 investigation (Replenishing mode experiments)
+    \item Enhance agent behaviors (learning, adaptation)
+    \item Add realism (continuous space, communication constraints)
+    \item Real-world validation (physical robot experiments)
+\end{itemize}
 
 \section{Conclusion}
 
-This dissertation investigated how communication range affects multi-agent fruit harvesting performance. Through systematic experimentation with 600 simulation runs, I found that communication significantly improves harvest yield (30-50\% over independent operation) and that medium-range communication (4-6 cells, 8-12\% of environment width) provides optimal performance.
+% TODO: Write conclusion after completing results
 
-The key insight is that communication benefits are non-linear: some communication is much better than none, but more isn't always better. There's a sweet spot where agents share enough information to coordinate effectively without overwhelming each other with messages. This optimal range depends on environmental conditions—communication is more valuable in sparse environments and with larger teams.
+This dissertation will investigate how communication range affects multi-agent fruit harvesting performance. The work will provide insights into optimal communication strategies for multi-agent coordination tasks.
 
-While the work has limitations (simplified behaviors, grid abstraction, limited scope), it provides a solid foundation for understanding communication in multi-agent foraging. The methodology—systematic parameter sweep with statistical validation—demonstrates how to rigorously evaluate multi-agent systems. The findings offer practical guidance for designing agricultural robot teams and other multi-agent systems.
-
-Future work should complete the RQ2 investigation (resource dynamics), enhance agent behaviors (learning, adaptation), add realism (continuous space, communication constraints), and validate findings with physical robots. The theoretical framework developed here—balancing information sharing benefits against communication costs—applies broadly to multi-agent coordination problems.
-
-In the end, this dissertation shows that communication matters, but the details matter too. Effective multi-agent systems require careful design of communication strategies tailored to the task and environment. The tools and insights developed here provide a starting point for that design process.
-
-\subsection{Final Thoughts}
-
-Working on this project taught me several lessons:
-
-\textbf{Simplicity works}: Simple agent behaviors and experimental designs can yield meaningful insights. You don't need complex AI to study interesting questions.
-
-\textbf{Visualization matters}: Watching the simulation run helped me understand agent behavior in ways that metrics alone couldn't capture. Always visualize your system.
-
-\textbf{Statistics are essential}: Without proper statistical testing, I couldn't confidently claim communication matters. Rigorous methodology separates speculation from evidence.
-
-\textbf{Context is everything}: There's no universal "best" communication range—it depends on the environment, team, and task. Good system design requires understanding these dependencies.
-
-I hope this work proves useful for others studying multi-agent coordination. The code is available, the methodology is documented, and the findings are reproducible. That's the best I can offer in 30 days.
+% NOTE: Conclusion will be written in Week 5-6 after results are complete
 

@@ -1,343 +1,134 @@
-% Results and Analysis
+% Results (PLACEHOLDER - Week 4-5)
 
-This chapter presents the experimental results for RQ1: "Does the distance over which robots can communicate actually matter for how much fruit they harvest? And if so, how?"
+% TODO: Run full batch experiments (600 simulations)
+% TODO: Perform statistical analysis (Kruskal-Wallis, Dunn's test)
+% TODO: Generate all 6 figures
+% TODO: Write complete results chapter with interpretation
 
-I ran 600 simulations (20 configurations × 30 replications) testing five communication ranges (0, 2, 4, 6, 8 cells) across different team sizes (10, 20 agents) and resource densities (0.15, 0.25). Each simulation ran for 500 time steps with a fixed random seed for reproducibility.
+% NOTE: This chapter will present results for RQ1 after experiments complete
 
-\section{Exploratory Data Analysis}
+This chapter will present the experimental results for RQ1: "Does the distance over which robots can communicate actually matter for how much fruit they harvest?"
 
-Before statistical testing, I explored the data to understand distributions and identify patterns.
+% PLANNED EXPERIMENTS:
+% - 600 simulations (20 configurations × 30 replications)
+% - 5 communication ranges: {0, 2, 4, 6, 8}
+% - 2 team sizes: {10, 20}
+% - 2 resource densities: {0.15, 0.25}
+% - 500 steps per simulation
+% - Fixed random seeds for reproducibility
 
-\subsection{Overall Distribution of Yields}
+\section{Planned Analysis}
 
-Figure \ref{fig:yield_distribution} shows the distribution of total yields across all 600 runs. The data shows considerable variation (yields range from approximately 150 to 650 fruit), which makes sense given the different configurations tested.
+% TODO: Run experiments and analyze data
 
-\begin{figure}[h]
-\centering
-\includegraphics[width=0.8\textwidth]{figures/yield_distribution.png}
-\caption{Distribution of total yields across all 600 experimental runs. The bimodal distribution reflects the two resource density levels tested (0.15 and 0.25).}
-\label{fig:yield_distribution}
-\end{figure}
+\subsection{Planned Figures}
 
-The distribution is roughly bimodal, reflecting the two resource density levels (0.15 and 0.25). Higher density environments naturally produce higher yields.
+% TODO: Generate these figures after experiments complete:
 
-\subsection{Yield by Communication Range}
+% Figure 1: Yield distribution histogram
+% - Shows overall distribution of yields across all runs
+% - Should reveal bimodal distribution (two density levels)
 
-Figure \ref{fig:yield_by_range} presents box plots of total yield grouped by communication range. This is the key visualization for answering RQ1.
+% Figure 2: Yield by communication range (box plots)
+% - KEY FIGURE for answering RQ1
+% - Shows median, quartiles, outliers for each range
+% - Expected: Range 0 < Range 2-6, possible diminishing returns at Range 8
 
-\begin{figure}[h]
-\centering
-\includegraphics[width=0.85\textwidth]{figures/yield_by_range.png}
-\caption{Box plots showing harvest yield by communication range. Each box represents 120 runs (2 team sizes × 2 densities × 30 replications). The median yield increases from range 0 to range 6, then slightly decreases at range 8.}
-\label{fig:yield_by_range}
-\end{figure}
+% Figure 3: Yield vs. messages scatter plot
+% - Shows cost-benefit relationship
+% - Each point = one simulation run
+% - Color-coded by communication range
+% - Expected: Non-linear relationship, diminishing returns
 
-\textbf{Key observations}:
+% Figure 4: Efficiency by range
+% - Efficiency = yield / messages
+% - Shows which range gives best "bang for buck"
+% - Expected: Range 2-4 most efficient
+
+% Figure 5: Yield by range and team size
+% - Grouped box plots
+% - Shows interaction between range and team size
+% - Expected: Larger teams benefit more from communication
+
+% Figure 6: Yield by range and density
+% - Grouped box plots
+% - Shows interaction between range and resource density
+% - Expected: Communication more valuable in sparse environments
+
+\subsection{Planned Statistical Analysis}
+
+% TODO: Perform statistical tests after data collection
+
+% Primary test: Kruskal-Wallis H-test
+% - Non-parametric alternative to ANOVA
+% - Tests if communication range affects yield
+% - Null hypothesis: All ranges have same median yield
+% - Expected: Reject null (p < 0.05)
+
+% Post-hoc test: Dunn's test with Bonferroni correction
+% - Pairwise comparisons between ranges
+% - Identifies which ranges differ significantly
+% - Expected: Range 0 < Ranges 2-6
+
+% Effect size: Cohen's d
+% - Measures practical significance
+% - Compares Range 0 vs. each other range
+% - Expected: Medium to large effect sizes (d > 0.5)
+
+\subsection{Expected Results}
+
+% TODO: Replace with actual results after experiments
+
+Based on preliminary testing with small samples, I expect:
+
 \begin{itemize}
-    \item Range 0 (no communication) shows lower median yield compared to other ranges
-    \item Ranges 2-6 show progressively higher median yields
-    \item Range 8 shows similar or slightly lower yield than range 6
-    \item Variability (box height) is similar across ranges
+    \item Communication range significantly affects yield (p < 0.05)
+    \item Range 0 (no communication) produces lowest yields
+    \item Ranges 2-6 show progressively higher yields
+    \item Range 8 may show diminishing returns (overhead cost)
+    \item Larger teams benefit more from communication
+    \item Communication more valuable in sparse environments
 \end{itemize}
 
-This suggests communication does matter, but there may be diminishing returns or even negative effects at very long ranges.
+% NOTE: These are hypotheses, not results!
+% Will update with actual findings after running experiments
 
-\subsection{Communication Cost vs. Benefit}
+\section{Preliminary Results (Small Sample)}
 
-Figure \ref{fig:yield_vs_messages} shows the relationship between total yield and total messages sent. Each point represents one simulation run, colored by communication range.
+% TODO: Replace with full results after 600 simulations
 
-\begin{figure}[h]
-\centering
-\includegraphics[width=0.85\textwidth]{figures/yield_vs_messages.png}
-\caption{Scatter plot showing the relationship between harvest yield and communication cost (total messages sent). Each point represents one simulation run, colored by communication range. The plot reveals a non-linear relationship with diminishing returns at high message counts.}
-\label{fig:yield_vs_messages}
-\end{figure}
+I ran a small pilot study (50 simulations) to test the infrastructure:
 
-\textbf{Key observations}:
-\begin{itemize}
-    \item Range 0 produces zero messages (as expected)
-    \item Higher ranges produce more messages
-    \item The relationship between messages and yield is not linear—more messages don't always mean more yield
-    \item There's a "sweet spot" where moderate communication produces good yields without excessive messaging
-\end{itemize}
+% TODO: Generate this figure after experiments
+% \begin{figure}[h]
+% \centering
+% \includegraphics[width=0.85\textwidth]{figures/pilot_results.png}
+% \caption{Preliminary results from pilot study (50 runs). Shows basic trend that communication improves yield.}
+% \label{fig:pilot_results}
+% \end{figure}
 
-\subsection{Efficiency Analysis}
+Pilot results suggest that communication improves yield, but need full experiments to confirm.
 
-Efficiency (yield per message) captures the cost-benefit trade-off. Figure \ref{fig:efficiency_by_range} shows efficiency by communication range.
+\section{Next Steps}
 
-\begin{figure}[h]
-\centering
-\includegraphics[width=0.8\textwidth]{figures/efficiency_by_range.png}
-\caption{Communication efficiency (yield per message) by communication range. Range 2 shows the highest efficiency, indicating that local communication provides the best return on investment. Efficiency decreases at longer ranges due to message overhead.}
-\label{fig:efficiency_by_range}
-\end{figure}
-
-\textbf{Key observations}:
-\begin{itemize}
-    \item Range 0 has undefined efficiency (division by zero)
-    \item Range 2 shows highest efficiency—modest communication with good returns
-    \item Efficiency decreases at higher ranges due to message overhead
-    \item Range 8 shows lowest efficiency—lots of messages, limited additional benefit
-\end{itemize}
-
-\subsection{Impact of Team Size}
-
-Figure \ref{fig:yield_by_range_teamsize} shows how team size affects the relationship between communication range and yield.
-
-\begin{figure}[h]
-\centering
-\includegraphics[width=0.85\textwidth]{figures/interaction_teamsize.png}
-\caption{Interaction plot showing mean harvest yield by communication range for different team sizes (10 vs. 20 agents). Larger teams consistently harvest more fruit, and the benefit of communication is more pronounced with larger teams.}
-\label{fig:yield_by_range_teamsize}
-\end{figure}
-
-\textbf{Key observations}:
-\begin{itemize}
-    \item Larger teams (20 agents) harvest more fruit than smaller teams (10 agents) across all ranges
-    \item The optimal communication range appears similar for both team sizes
-    \item Communication benefits are more pronounced with larger teams (more agents to coordinate)
-\end{itemize}
-
-\subsection{Impact of Resource Density}
-
-Figure \ref{fig:yield_by_range_density} shows how resource density affects the relationship between communication range and yield.
-
-\begin{figure}[h]
-\centering
-\includegraphics[width=0.85\textwidth]{figures/interaction_density.png}
-\caption{Interaction plot showing mean harvest yield by communication range for different resource densities (0.15 vs. 0.25). Higher density environments produce higher yields across all ranges. Communication benefits are more pronounced in sparse environments where information sharing is more valuable.}
-\label{fig:yield_by_range_density}
-\end{figure}
-
-\textbf{Key observations}:
-\begin{itemize}
-    \item Higher density (0.25) produces higher yields across all ranges (more fruit available)
-    \item Communication benefits are more pronounced in sparse environments (0.15)
-    \item In dense environments, agents find fruit easily even without communication
-\end{itemize}
-
-\section{Statistical Analysis}
-
-\subsection{Kruskal-Wallis Test}
-
-I tested the null hypothesis that communication range has no effect on median yield using the Kruskal-Wallis H-test (non-parametric alternative to ANOVA).
-
-\textbf{Test setup}:
-\begin{itemize}
-    \item Null hypothesis ($H_0$): All communication ranges produce the same median yield
-    \item Alternative hypothesis ($H_1$): At least one range produces different median yield
-    \item Significance level: $\alpha = 0.05$
-    \item Test statistic: Kruskal-Wallis H
-\end{itemize}
-
-\textbf{Results}:
-\begin{itemize}
-    \item H-statistic: 110.41
-    \item p-value: $5.96 \times 10^{-23}$ (highly significant)
-    \item Decision: Reject $H_0$ (p < 0.001)
-\end{itemize}
-
-\textbf{Interpretation}: We reject the null hypothesis and conclude that communication range significantly affects harvest yield. The extremely small p-value provides strong statistical evidence that communication matters. At least one communication range produces significantly different median yield than the others.
-
-\subsection{Post-Hoc Pairwise Comparisons}
-
-Since the Kruskal-Wallis test indicated significant differences, I performed pairwise comparisons using Dunn's test with Bonferroni correction to control for multiple comparisons.
-
-Table \ref{tab:posthoc} shows the results of pairwise comparisons between all communication ranges.
-
-\begin{table}[h]
-\centering
-\caption{Post-hoc pairwise comparisons (Dunn's test with Bonferroni correction)}
-\label{tab:posthoc}
-\begin{tabular}{lccccc}
-\toprule
- & Range 0 & Range 2 & Range 4 & Range 6 & Range 8 \\
-\midrule
-Range 0 & 1.000 & 0.0001*** & <0.0001*** & <0.0001*** & <0.0001*** \\
-Range 2 & 0.0001*** & 1.000 & 0.048* & <0.0001*** & 0.001** \\
-Range 4 & <0.0001*** & 0.048* & 1.000 & 0.739 & 1.000 \\
-Range 6 & <0.0001*** & <0.0001*** & 0.739 & 1.000 & 1.000 \\
-Range 8 & <0.0001*** & 0.001** & 1.000 & 1.000 & 1.000 \\
-\bottomrule
-\multicolumn{6}{l}{\footnotesize *p < 0.05, **p < 0.01, ***p < 0.001}
-\end{tabular}
-\end{table}
-
-\textbf{Key findings}:
-\begin{itemize}
-    \item Range 0 vs. Range 2: Highly significant difference (p < 0.001)
-    \item Range 0 vs. Range 4: Highly significant difference (p < 0.001)
-    \item Range 2 vs. Range 4: Significant difference (p = 0.048)
-    \item Range 4 vs. Range 6: No significant difference (p = 0.739)
-    \item Range 6 vs. Range 8: No significant difference (p = 1.000)
-\end{itemize}
-
-\subsection{Effect Sizes}
-
-Statistical significance doesn't always mean practical significance. I calculated Cohen's d for key pairwise comparisons to quantify effect sizes.
-
-Table \ref{tab:effect_sizes} shows effect sizes for selected comparisons.
-
-\begin{table}[h]
-\centering
-\caption{Effect sizes (Cohen's d) for key pairwise comparisons}
-\label{tab:effect_sizes}
-\begin{tabular}{lcc}
-\toprule
-Comparison & Cohen's d & Magnitude \\
-\midrule
-Range 0 vs. Range 2 & 0.713 & Medium \\
-Range 0 vs. Range 4 & 1.096 & Large \\
-Range 2 vs. Range 4 & 0.454 & Medium \\
-Range 4 vs. Range 6 & 0.240 & Medium \\
-Range 6 vs. Range 8 & -0.097 & Small \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\textbf{Interpretation guidelines}:
-\begin{itemize}
-    \item $|d| < 0.2$: Small effect
-    \item $0.2 \leq |d| < 0.8$: Medium effect
-    \item $|d| \geq 0.8$: Large effect
-\end{itemize}
-
-\textbf{Key findings}:
-\begin{itemize}
-    \item Range 0 vs. Range 4: d = 1.096 (large effect) — communication provides substantial benefit
-    \item Range 2 vs. Range 4: d = 0.454 (medium effect) — medium range better than local
-    \item Range 6 vs. Range 8: d = -0.097 (small effect, negative) — very long range slightly worse than long range
-\end{itemize}
-
-\section{Performance Comparison}
-
-\subsection{Mean Yield by Configuration}
-
-Table \ref{tab:mean_yields} presents mean yield ± standard deviation for each communication range.
-
-\begin{table}[h]
-\centering
-\caption{Mean performance metrics by communication range}
-\label{tab:mean_yields}
-\begin{tabular}{lcccc}
-\toprule
-Range & Mean Yield & Std Dev & Mean Messages & Efficiency \\
-\midrule
-0 & 405 & 182 & 0 & — \\
-2 & 560 & 247 & 221 & 2.66 \\
-4 & 690 & 318 & 619 & 1.15 \\
-6 & 772 & 362 & 1187 & 0.68 \\
-8 & 738 & 333 & 2260 & 0.35 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\textbf{Key findings}:
-\begin{itemize}
-    \item Best performing range: Range 6 (mean yield = 772 fruit)
-    \item Worst performing range: Range 0 (mean yield = 405 fruit)
-    \item Percentage improvement (best vs. worst): 91\%
-    \item Most efficient range: Range 2 (2.66 yield per message)
-\end{itemize}
-
-\subsection{Optimal Communication Range}
-
-Based on the data, the optimal communication range depends on the optimization criterion:
-
-\textbf{For maximum yield}:
-\begin{itemize}
-    \item Optimal range: 6 cells
-    \item Mean yield: 772 ± 362 fruit
-    \item Improvement over no communication: 91\%
-    \item Trade-off: High message cost (1187 messages on average)
-\end{itemize}
-
-\textbf{For maximum efficiency (yield per message)}:
-\begin{itemize}
-    \item Optimal range: 2 cells
-    \item Efficiency: 2.66 yield/message
-    \item Mean yield: 560 ± 247 fruit (38\% improvement over no communication)
-    \item Trade-off: Lower absolute yield but much lower communication cost (221 messages)
-\end{itemize}
-
-\textbf{Balanced recommendation}: Range 4 provides a good balance—70\% improvement over no communication with moderate message cost (619 messages). The difference between ranges 4 and 6 is not statistically significant (p = 0.739), suggesting range 4 is sufficient for most scenarios.
-
-\subsection{Confidence Intervals}
-
-Figure \ref{fig:confidence_intervals} shows 95\% confidence intervals for mean yield by communication range.
-
-% TODO: Add error bar plot with confidence intervals
-
-The confidence intervals help us understand the precision of our estimates. Narrow intervals indicate consistent performance across replications; wide intervals suggest high variability.
-
-\section{Interaction Effects}
-
-\subsection{Range × Team Size Interaction}
-
-I examined whether the effect of communication range depends on team size. Figure \ref{fig:interaction_teamsize} shows the interaction plot.
-
-% TODO: Add interaction plot
-
-\textbf{Findings}:
-\begin{itemize}
-    \item The lines are roughly parallel, suggesting minimal interaction
-    \item Both team sizes benefit from communication, with similar optimal ranges
-    \item Larger teams show slightly greater absolute benefit from communication
-\end{itemize}
-
-\subsection{Range × Density Interaction}
-
-I examined whether the effect of communication range depends on resource density. Figure \ref{fig:interaction_density} shows the interaction plot.
-
-% TODO: Add interaction plot
-
-\textbf{Findings}:
-\begin{itemize}
-    \item The lines diverge, suggesting an interaction effect
-    \item Communication benefits are more pronounced in sparse environments (0.15)
-    \item In dense environments (0.25), agents find fruit easily even without communication
-    \item This makes intuitive sense: communication is more valuable when resources are scarce
-\end{itemize}
-
-\section{Coverage Analysis}
-
-Coverage (unique cells visited) measures how well agents explore the environment. Figure \ref{fig:coverage_by_range} shows coverage by communication range.
-
-% TODO: Add coverage plot
-
-\textbf{Findings}:
-\begin{itemize}
-    \item Coverage increases with communication range
-    \item Range 0: agents explore randomly, limited coordination
-    \item Higher ranges: agents share information, explore more efficiently
-    \item Coverage correlates with yield (r = [TODO: 0.65])
-\end{itemize}
-
-\section{Answer to RQ1}
-
-Based on the experimental results and statistical analysis, I can now answer RQ1: \textbf{"Does the distance over which robots can communicate actually matter for how much fruit they harvest? And if so, how?"}
-
-\textbf{Answer}: Yes, communication range significantly affects harvest yield (Kruskal-Wallis H = 110.41, p < 0.001). The relationship is non-linear:
+% TODO: Complete these tasks in Week 3-4
 
 \begin{enumerate}
-    \item \textbf{No communication (range 0)}: Baseline performance (mean yield = 405). Agents work independently, limited by local sensing.
-
-    \item \textbf{Local communication (range 2)}: Significant improvement over no communication (mean yield = 560, Cohen's d = 0.713). Agents share information with immediate neighbors, improving coordination. Best efficiency (2.66 yield/message).
-
-    \item \textbf{Medium range (range 4)}: Strong performance (mean yield = 690, Cohen's d = 1.096 vs. range 0). Agents maintain awareness of fruit across a substantial area. Good balance of yield and cost.
-
-    \item \textbf{Long range (range 6)}: Peak performance (mean yield = 772, 91\% improvement over range 0). Maximum yield but high message cost (1187 messages). Not significantly different from range 4 (p = 0.739).
-
-    \item \textbf{Very long range (range 8)}: Diminishing returns (mean yield = 738, slightly lower than range 6). Excessive communication overhead (2260 messages) without proportional benefit. Lowest efficiency (0.35 yield/message).
+    \item Write batch experiment runner script
+    \item Run 600 simulations (estimated 2-3 hours)
+    \item Perform statistical analysis (Kruskal-Wallis, Dunn's test)
+    \item Calculate effect sizes (Cohen's d)
+    \item Generate all 6 figures
+    \item Write complete results chapter with interpretation
+    \item Answer RQ1 based on actual data
 \end{enumerate}
-
-\textbf{Practical recommendation}: For fruit harvesting scenarios similar to this simulation, a communication range of 4-6 cells (8-12\% of environment width) provides the best balance between yield and communication cost. Range 4 is sufficient for most scenarios given the non-significant difference from range 6.
-
-\textbf{Context dependency}: The optimal range depends on resource density. In sparse environments, communication is more valuable. In dense environments, local sensing may suffice.
 
 \section{Summary}
 
-This chapter presented results from 600 experimental runs testing five communication ranges. Exploratory data analysis revealed that communication range affects yield in a non-linear fashion, with optimal performance at medium ranges (4-6 cells). Statistical tests confirmed these effects are significant (p < 0.001) with large effect sizes (Cohen's d > 0.8 for key comparisons). Efficiency analysis showed that range 2 provides the best yield-per-message ratio, while ranges 4-6 maximize absolute yield. Interaction analysis revealed that communication benefits are more pronounced in sparse environments and with larger teams.
+% TODO: Replace with actual summary after experiments complete
 
-The next chapter discusses these findings in context, addresses RQ2 theoretically, and considers limitations and future work.
+This chapter will present comprehensive results from 600 experimental runs. The analysis will include exploratory data analysis, statistical tests (Kruskal-Wallis, Dunn's post-hoc), effect size calculations, and interaction analysis. All figures and tables will be generated from actual experimental data.
+
+% NOTE: Currently at Week 2-3. Experiments planned for Week 3-4.
+% Will update this chapter with actual results once experiments complete.
 

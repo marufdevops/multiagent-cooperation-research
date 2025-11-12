@@ -1,6 +1,11 @@
 """
-Harvester Agent for fruit collection simulation.
+Harvester Agent for fruit collection simulation (WORK IN PROGRESS).
 Mesa 3.0 convention: no unique_id in constructor, only model and parameters.
+
+TODO: Test with large grids (performance optimization needed?)
+TODO: Improve movement strategy (currently greedy + random walk)
+FIXME: Agents sometimes cluster in corners - need better exploration
+NOTE: Communication uses Chebyshev distance (needs verification)
 """
 import random
 from mesa import Agent

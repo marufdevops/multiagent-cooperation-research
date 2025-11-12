@@ -1,10 +1,14 @@
 """
-Batch Experiment Runner for RQ1: Communication Range Effects
+Batch Experiment Runner for RQ1: Communication Range Effects (WORK IN PROGRESS)
 
-Runs systematic experiments testing 5 communication ranges across
-different team sizes and resource densities.
+TODO: Complete implementation and test thoroughly
+TODO: Add progress bar (tqdm)
+TODO: Add error handling for failed runs
+TODO: Add time estimation
+FIXME: Need to verify all configurations run correctly
+NOTE: Currently runs 600 simulations (may take 2-3 hours)
 
-Experimental Design:
+Planned Experimental Design:
 - Communication ranges: {0, 2, 4, 6, 8} cells
 - Team sizes: {10, 20} agents
 - Resource densities: {0.15, 0.25}

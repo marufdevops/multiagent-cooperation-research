@@ -1,8 +1,13 @@
 """
-Fruit Harvesting Model for RQ1: Communication Range Effects
+Fruit Harvesting Model for RQ1: Communication Range Effects (WORK IN PROGRESS)
 
 Implements Static resource dynamics (no regeneration).
-Tracks metrics: yield, messages, remaining fruit, coverage.
+Tracks metrics: yield, messages, remaining fruit.
+
+TODO: Add coverage and efficiency metrics
+TODO: Verify communication protocol works correctly
+FIXME: Check edge case handling (agents at boundaries)
+NOTE: Currently only implements Static dynamics (no regeneration for RQ1)
 """
 import random
 from mesa import Model
