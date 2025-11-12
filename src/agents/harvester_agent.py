@@ -21,7 +21,7 @@ class HarvesterAgent(Agent):
         Args:
             model: The model instance
         """
-        super().__init__(model=model)
+        super().__init__(model)
         self.harvested = 0
         self.messages_sent = 0
         self.messages_received = 0
