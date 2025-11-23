@@ -1,19 +1,13 @@
 """
-Batch Experiment Runner for RQ1: Communication Range Effects (WORK IN PROGRESS)
+Batch Experiment Runner for RQ1: Communication Range Effects
 
-TODO: Complete implementation and test thoroughly
-TODO: Add progress bar (tqdm)
-TODO: Add error handling for failed runs
-TODO: Add time estimation
-FIXME: Need to verify all configurations run correctly
-NOTE: Currently runs 600 simulations (may take 2-3 hours)
-
-Planned Experimental Design:
+Experimental Design (Static dynamics only):
 - Communication ranges: {0, 2, 4, 6, 8} cells
 - Team sizes: {10, 20} agents
 - Resource densities: {0.15, 0.25}
-- Replications: 30 per configuration
-- Total runs: 5 × 2 × 2 × 30 = 600 simulations
+- Replications: 20-30 per configuration (configurable)
+- Total runs: 5 × 2 × 2 × 20 = 400 simulations (or 600 with 30 reps)
+- Episode length: 500 steps
 
 Output: CSV file with all experimental results
 """
@@ -23,7 +17,6 @@ import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 import pandas as pd
-import numpy as np
 from datetime import datetime
 from tqdm import tqdm
 import time
@@ -34,23 +27,21 @@ from models.harvest_model import HarvestModel
 def run_single_experiment(config, replication):
     """
     Run a single simulation with given configuration.
-    
+
     Args:
         config: Dictionary with experimental parameters
         replication: Replication number (for random seed)
-    
+
     Returns:
         Dictionary with results
     """
-    # Create model with configuration
+    # Create model with configuration (Static dynamics only for RQ1)
     model = HarvestModel(
         width=50,
         height=50,
         num_agents=config['num_agents'],
         fruit_density=config['fruit_density'],
         comm_range=config['comm_range'],
-        dynamics='Static',  # RQ1 uses Static only
-        regen_prob=0.0,
         seed=replication  # Use replication number as seed for reproducibility
     )
     

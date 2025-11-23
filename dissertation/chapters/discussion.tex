@@ -1,83 +1,83 @@
-% Discussion and Conclusion (PLACEHOLDER - Week 5)
+% Discussion and Conclusion
 
-% TODO: Write this chapter after completing results analysis
-% TODO: Interpret findings in context of literature
-% TODO: Discuss RQ2 theoretically
-% TODO: Acknowledge limitations
-% TODO: Suggest future work
-
-% NOTE: This chapter will be written in Week 5 after results are complete
-
-This chapter will interpret the experimental findings, discuss RQ2 theoretically, acknowledge limitations, and suggest future research directions.
+This chapter interprets the experimental findings from RQ1, discusses limitations of the current work, and outlines future research directions including RQ2 and machine learning extensions.
 
 \section{Interpretation of Results}
 
-% TODO: Write after analyzing results
+\subsection{Communication Range Effects on Harvesting Efficiency}
 
-\subsection{Why Does Communication Range Matter?}
+The experimental results provide clear evidence that communication range has a dramatic effect on harvesting performance. The key findings are:
 
-% TODO: Explain mechanisms (information sharing, coordination overhead, sweet spot)
-% TODO: Compare with literature (ant colonies, swarm robotics, agricultural robots)
-% TODO: Discuss context dependency (density, team size)
+\begin{itemize}
+    \item \textbf{Communication is essential:} Agents with no communication (range 0) harvest only 354.61 fruits on average, compared to 487-500 fruits with communication. This represents a 37-41\% improvement.
+
+    \item \textbf{Optimal range is range 2:} While ranges 4, 6, and 8 achieve slightly higher yields (499-500 fruits), range 2 is most efficient, achieving 97.6\% of maximum yield while using only 67.5\% of the messages required by range 8.
+
+    \item \textbf{Diminishing returns at larger ranges:} Ranges 4, 6, and 8 show a plateau effect with nearly identical yields (within 1.2 fruits) despite increasingly higher message overhead. This indicates that beyond range 4, additional communication provides minimal benefit.
+\end{itemize}
+
+These results directly answer RQ1: communication range significantly affects harvesting efficiency, with an optimal range that balances coordination benefits against communication costs.
 
 \subsection{Comparison with Literature}
 
-% TODO: Compare findings with previous research
+These findings align with research on swarm robotics and multi-agent coordination. Similar to ant colonies that use pheromone trails (a form of local communication), our agents benefit from sharing information within a limited range. The sweet spot we observe (range 2) is consistent with the principle that local communication is often more efficient than global broadcast, as discussed in the literature on distributed systems and swarm intelligence.
 
-\subsection{Context Dependency}
+The diminishing returns at larger ranges support the theoretical understanding that communication overhead can outweigh coordination benefits. This is particularly relevant for resource-constrained systems where message passing has computational costs.
 
-% TODO: Discuss how optimal range depends on environment
+\subsection{Robustness Across Configurations}
 
-\section{Theoretical Discussion of RQ2}
+The experimental results show that the communication range effect is robust and consistent:
 
-% TODO: Discuss RQ2 theoretically (no experiments yet)
+\begin{itemize}
+    \item The pattern holds across different team sizes (10 and 20 agents)
+    \item The pattern holds across different resource densities (0.15 and 0.25)
+    \item The relative ranking of ranges remains consistent: 0 < 2 < 4 ≈ 6 ≈ 8
+\end{itemize}
 
-RQ2 asks: "Does it make a difference whether the fruit grows back or not?"
-
-% NOTE: RQ2 is out of scope for this dissertation due to time constraints
-% Focusing on RQ1 (communication range effects) only
-% RQ2 could be addressed in future work
-
-\subsection{Static vs. Replenishing Dynamics}
-
-% TODO: Discuss theoretical differences between Static and Replenishing modes
-
-\subsection{Hypothesized Effects}
-
-% TODO: Develop hypotheses about how resource dynamics might affect communication benefits
-
-\subsection{Future Work}
-
-% TODO: Outline how RQ2 could be tested in future research
+This consistency suggests that the findings are not artifacts of specific parameter choices but reflect fundamental principles of multi-agent coordination.
 
 \section{Limitations}
 
-% TODO: Acknowledge limitations of the study
+This study has several limitations that should be acknowledged:
 
 \begin{itemize}
-    \item Simplified agent behaviors (greedy movement, random walk)
-    \item Grid-based abstraction (not continuous space)
-    \item Homogeneous agents (all identical)
-    \item Static environment (no obstacles)
-    \item Limited experimental scope (RQ2 not tested)
+    \item \textbf{Simplified agent behaviors:} Agents use greedy movement and random walk, not sophisticated planning or learning algorithms.
+    \item \textbf{Grid-based abstraction:} The discrete grid environment is simpler than continuous space with realistic physics.
+    \item \textbf{Homogeneous agents:} All agents are identical with the same capabilities and behaviors.
+    \item \textbf{Static environment:} No obstacles, no dynamic changes beyond fruit harvesting.
+    \item \textbf{Static resources only:} Experiments focus on non-regenerating fruit; regenerating resources are not tested.
+    \item \textbf{Deterministic communication:} All agents within range receive messages; no communication failures or noise.
 \end{itemize}
 
 \section{Future Work}
 
-% TODO: Suggest future research directions
+Several promising directions emerge from this research:
+
+\subsection{Resource Dynamics (RQ2)}
+
+The original RQ2 asks whether resource dynamics affect optimal communication range. Future work should implement and test Replenishing mode where fruit regenerates with some probability. We hypothesize that sustained communication becomes more valuable in replenishing environments, potentially shifting the optimal range higher.
+
+\subsection{Machine Learning Extensions}
 
 \begin{itemize}
-    \item Complete RQ2 investigation (Replenishing mode experiments)
-    \item Enhance agent behaviors (learning, adaptation)
-    \item Add realism (continuous space, communication constraints)
-    \item Real-world validation (physical robot experiments)
+    \item \textbf{Reinforcement Learning:} Train agents to learn when and what to communicate using Q-learning or policy gradient methods, potentially discovering adaptive communication strategies.
+    \item \textbf{Deep Learning:} Use neural networks to predict optimal communication ranges from environment properties (density, team size, grid size).
+    \item \textbf{Multi-Agent Reinforcement Learning (MARL):} Investigate how agents can learn communication policies in a decentralized manner.
+    \item \textbf{Transfer Learning:} Train on one environment and transfer to different team sizes or resource densities.
+\end{itemize}
+
+\subsection{Realism and Validation}
+
+\begin{itemize}
+    \item Extend to continuous space with realistic movement dynamics.
+    \item Add communication constraints (bandwidth limits, message delays, noise).
+    \item Implement heterogeneous agents with different capabilities.
+    \item Validate findings with physical robot experiments.
 \end{itemize}
 
 \section{Conclusion}
 
-% TODO: Write conclusion after completing results
+This dissertation investigated RQ1: "Does communication range affect harvesting efficiency in multi-agent systems?" Through systematic experimentation with 400 simulation runs across five communication ranges, two team sizes, and two resource densities, we found that communication range significantly affects harvesting performance. The results demonstrate that there is an optimal communication distance that balances the benefits of information sharing against the costs of message overhead.
 
-This dissertation will investigate how communication range affects multi-agent fruit harvesting performance. The work will provide insights into optimal communication strategies for multi-agent coordination tasks.
-
-% NOTE: Conclusion will be written in Week 5-6 after results are complete
+These findings contribute to our understanding of multi-agent coordination and provide a foundation for future work on adaptive communication strategies, resource dynamics, and machine learning approaches to agent communication.
 

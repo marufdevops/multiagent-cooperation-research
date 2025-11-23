@@ -1,16 +1,9 @@
 % Abstract
 
-Coordinating multiple robots for fruit harvesting isn't straightforward. While communication lets them share information about resource locations, it comes with costs—bandwidth gets consumed, processing power gets tied up handling messages. The question is: how far should robots be able to communicate? This dissertation explores that question through simulation.
+Coordinating multiple agents for fruit harvesting is not straightforward. While communication lets them share information about resource locations, it comes with costs: bandwidth gets consumed, processing power gets tied up handling messages. The question is: Does the distance over which agents can communicate actually matter for how much fruit they harvest? And if so, how? This dissertation explores that question through simulation.
 
-Using Mesa 3.0, I've implemented a grid-based environment where harvester agents roam around looking for fruit. When they find some, they broadcast the location to teammates within their communication range. The interesting bit is comparing two scenarios: static environments where fruit doesn't regenerate once picked, versus replenishing environments where new fruit keeps appearing. Agent behaviors are deliberately simple—move, harvest when you encounter fruit, and share what you find with nearby teammates.
+Using Mesa 3.0, I have implemented a grid-based environment where harvesting agents roam around looking for fruits. When they find some, they tell other agents in their communication range where they are. Agent behaviors are deliberately simple: move, harvest when you encounter fruit, and share what you find with nearby agents. The experiments test five different communication ranges across multiple team sizes and resource densities in static environments where fruit doesn't regenerate once picked.
 
-This is early-stage work, roughly the first couple weeks of the project. The simulation runs, tracks metrics like total yield and message counts, and there's a web interface for watching everything unfold in real-time. You can actually see which agents are communicating with whom, which turns out to be quite informative.
-
-Two questions drive this research. First: does communication range actually matter for collective harvest performance? Second: does the answer change depending on whether resources regenerate or not? Maybe the optimal range for a one-time harvest differs from continuous production scenarios.
-
-Future work involves systematic experimentation—varying communication ranges, team sizes, resource distributions—followed by statistical analysis to identify what actually works. For now, the foundation is in place.
-
-The practical motivation is agricultural robotics, though the insights might generalize to other multi-robot coordination problems. We'll see where it goes.
+The main research question is: does communication range actually matter for collective harvest performance? Through systematic experimentation with 400 simulation runs, I analyze how communication range affects harvesting efficiency, message overhead, and coverage. Results show that communication range has a significant effect on yield, with an optimal range that balances information sharing against message costs.
 
 \textbf{Keywords:} Multi-agent systems, communication protocols, fruit harvesting, agent-based modeling, Mesa framework
-

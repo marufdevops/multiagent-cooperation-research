@@ -1,11 +1,6 @@
-% Implementation (WORK IN PROGRESS - Week 3)
+% Implementation
 
-% TODO: Expand this chapter after completing experiments
-% TODO: Add code snippets and examples
-% TODO: Create architecture diagrams
-% TODO: Add screenshots of visualization
-
-This chapter describes the implementation of the multi-agent fruit harvesting simulation. The system is built using Mesa 3.0, a Python framework for agent-based modeling.
+This chapter describes the implementation of the multi-agent fruit harvesting simulation. The system is built using Mesa 3.0, a Python framework for agent-based modeling. The implementation focuses on RQ1 (communication range effects) with Static resource dynamics only.
 
 \section{System Architecture}
 
@@ -33,33 +28,36 @@ The implementation follows Mesa's standard architecture:
 
 \subsection{Model Class}
 
-% TODO: Add detailed explanation of HarvestModel class
-% TODO: Include code snippet showing initialization
+The \texttt{HarvestModel} class (in \texttt{src/models/harvest\_model.py}) manages the simulation. It inherits from Mesa's \texttt{Model} class and handles initialization, agent placement, fruit placement, and data collection.
 
-The \texttt{HarvestModel} class manages the simulation. Key parameters:
-
+\textbf{Constructor parameters}:
 \begin{itemize}
-    \item \texttt{width}, \texttt{height}: Grid dimensions
+    \item \texttt{width}, \texttt{height}: Grid dimensions (default: 50×50)
     \item \texttt{num\_agents}: Number of harvester agents
-    \item \texttt{fruit\_density}: Proportion of cells with fruit
-    \item \texttt{comm\_range}: Communication range in cells
+    \item \texttt{fruit\_density}: Proportion of cells with fruit (0.0-1.0)
+    \item \texttt{comm\_range}: Communication range in cells (Chebyshev distance)
     \item \texttt{seed}: Random seed for reproducibility
 \end{itemize}
 
-% TODO: Explain step() method in detail
-% TODO: Add flowchart of simulation loop
+\textbf{Key methods}:
+\begin{itemize}
+    \item \texttt{step()}: Executes one simulation step using Mesa 3.0's \texttt{shuffle\_do('step')} for randomized agent activation
+    \item \texttt{run\_model(steps)}: Runs the model for a specified number of steps
+    \item \texttt{\_place\_fruits()}: Randomly places fruit on the grid according to density (Static dynamics only)
+    \item \texttt{\_place\_agents()}: Randomly places harvester agents on the grid
+    \item \texttt{\_get\_total\_yield()}: Calculates total fruit harvested across all agents
+    \item \texttt{\_get\_messages\_this\_step()}: Counts messages sent in current step
+    \item \texttt{\_get\_remaining\_fruit()}: Counts available fruit on grid
+    \item \texttt{\_get\_coverage()}: Counts unique cells visited by all agents
+\end{itemize}
+
+The model uses Mesa's \texttt{DataCollector} to automatically track metrics at each step, including total yield, messages sent, remaining fruit, and coverage.
 
 \subsection{Grid and Spatial Representation}
 
-% TODO: Add figure showing grid layout
-% TODO: Explain boundary conditions
+The environment is a 50×50 grid with non-toroidal boundaries (implemented using Mesa's \texttt{MultiGrid} class). Non-toroidal boundaries create realistic edge effects where agents near boundaries have fewer neighbors, which is appropriate for a harvesting scenario where the field has physical boundaries.
 
-The environment is a 50×50 grid with non-toroidal boundaries. This creates realistic edge effects where agents near boundaries have fewer neighbors.
-
-% TODO: Justify grid size choice
-\end{itemize}
-
-% TODO: Explain MultiGrid vs SingleGrid choice
+The \texttt{MultiGrid} class allows multiple agents to occupy the same cell, which is necessary since both harvester agents and fruit resources share the grid. The grid uses standard Cartesian coordinates with (0,0) at the bottom-left corner.
 
 \section{Agent Implementation}
 
@@ -67,57 +65,49 @@ The environment is a 50×50 grid with non-toroidal boundaries. This creates real
 
 \subsection{Harvester Agent}
 
-% TODO: Expand this section with detailed explanation
-
-The \texttt{HarvesterAgent} class implements the harvesting behavior. Each agent maintains:
+The \texttt{HarvesterAgent} class (in \texttt{src/agents/harvester\_agent.py}) implements agent behavior. Each agent maintains:
 
 \begin{itemize}
-    \item \texttt{pos}: Current position
-    \item \texttt{harvested}: Count of fruit harvested
-    \item \texttt{messages\_sent}: Communication counter
+    \item \texttt{pos}: Current position on grid
+    \item \texttt{harvested}: Count of fruit harvested by this agent
+    \item \texttt{messages\_sent}: Number of messages sent this step
+    \item \texttt{messages\_received}: Number of messages received
     \item \texttt{current\_target}: Target fruit location (if any)
-    \item \texttt{visited\_cells}: Set of visited cells (for coverage)
+    \item \texttt{visited\_cells}: Set of unique cells visited (for coverage metric)
+    \item \texttt{travel\_distance}: Total distance traveled
 \end{itemize}
 
-\subsubsection{Agent Behavior}
+\subsubsection{Agent Behavior Algorithm}
 
-% TODO: Add pseudocode or flowchart
+The agent's \texttt{step()} method executes the following sequence:
 
-The agent's \texttt{step()} method:
 \begin{enumerate}
-    \item Move (toward target or random walk)
-    \item Harvest fruit if present
-    \item Communicate with nearby agents
+    \item \textbf{Move}: Move to adjacent cell (Moore neighborhood, 8 directions)
+    \begin{itemize}
+        \item If agent has a target: move one step toward target using greedy movement
+        \item Otherwise: perform random walk to adjacent cell
+    \end{itemize}
+    \item \textbf{Harvest}: Check current cell for fruit and harvest if available
+    \item \textbf{Communicate}: Broadcast nearest known fruit location to neighbors within communication range
 \end{enumerate}
 
-% TODO: Explain movement algorithm in detail
-% TODO: Explain harvesting logic
-% TODO: Explain communication protocol
+\textbf{Movement Details}: The \texttt{move()} method uses greedy movement toward targets (moving in the direction that minimizes Chebyshev distance). If the target is reached, it is cleared. Random walk uses Mesa's \texttt{get\_neighborhood()} method with Moore neighborhood.
 
-\textbf{Movement}: Agents move toward their target if they have one, otherwise they perform a random walk.
+\textbf{Harvesting Details}: The \texttt{harvest()} method checks the current cell for fruit using \texttt{get\_cell\_list\_contents()}. If fruit is found and available, it calls the fruit's \texttt{harvest()} method to mark it as unavailable. The agent then clears its target.
 
-% TODO: Add code snippet showing movement logic
-
-\textbf{Harvesting}: When an agent reaches a cell with fruit, it harvests the fruit and clears its target.
-
-% TODO: Explain what happens to harvested fruit
-
-\textbf{Communication}: Agents broadcast fruit locations to neighbors within communication range.
-
-% TODO: Explain selective broadcasting (only to agents without targets)
+\textbf{Communication Details}: The \texttt{communicate()} method finds neighbors within communication range using \texttt{get\_neighbors()} with Chebyshev distance (Moore neighborhood with radius parameter). It broadcasts the nearest available fruit location to neighbors that don't already have a target. Each message sent increments the agent's \texttt{messages\_sent} counter.
 
 \subsection{Fruit Agent}
 
-% TODO: Expand fruit agent description
-
-The \texttt{Fruit} class represents harvestable resources. Key properties:
+The \texttt{Fruit} class (in \texttt{src/agents/fruit.py}) represents harvestable resources. For RQ1, the implementation uses Static dynamics only (no regeneration). Key properties:
 
 \begin{itemize}
-    \item \texttt{available}: Whether fruit can be harvested
-    \item \texttt{times\_harvested}: Harvest counter
+    \item \texttt{available}: Boolean flag indicating whether fruit can be harvested
+    \item \texttt{is\_fruit}: Marker attribute to distinguish fruit from agents
+    \item \texttt{times\_harvested}: Counter tracking harvest attempts
 \end{itemize}
 
-% TODO: Explain Static vs Replenishing dynamics (focus on Static for RQ1)
+\textbf{Static Dynamics}: Once a fruit is harvested, it becomes permanently unavailable for the rest of the simulation. The \texttt{harvest()} method sets \texttt{available = False} and increments \texttt{times\_harvested}. The fruit's \texttt{step()} method is a no-op (does nothing) for Static dynamics, included only for Mesa compatibility.
 
 \section{Communication Protocol}
 
@@ -152,21 +142,21 @@ Communication cost is tracked by counting messages sent. Each message to a neigh
 
 \section{Data Collection}
 
-% TODO: Add detailed explanation of DataCollector setup
+The system uses Mesa's \texttt{DataCollector} class to automatically track metrics at each simulation step. The model defines reporter functions that calculate metrics on-demand.
 
 \subsection{Metrics Tracked}
 
 The system tracks the following metrics at each step:
 
 \begin{enumerate}
-    \item \textbf{total\_yield}: Cumulative fruit harvested
-    \item \textbf{cumulative\_messages}: Total messages sent
-    \item \textbf{remaining\_fruit}: Available fruit on grid
+    \item \textbf{total\_yield}: Cumulative fruit harvested by all agents
+    \item \textbf{messages\_this\_step}: Messages sent in current step
+    \item \textbf{cumulative\_messages}: Total messages sent since simulation start
+    \item \textbf{remaining\_fruit}: Count of available (unharvested) fruit on grid
+    \item \textbf{coverage}: Number of unique cells visited by all agents combined
 \end{enumerate}
 
-% TODO: Add coverage and efficiency metrics
-% TODO: Explain how metrics are calculated
-% TODO: Add code snippet showing DataCollector setup
+These metrics are calculated by reporter functions in the \texttt{HarvestModel} class and collected at each step via \texttt{datacollector.collect(self)}. The collected data can be accessed as a pandas DataFrame for analysis.
 
 \section{Parameter Selection}
 
@@ -203,13 +193,7 @@ Testing two team sizes (10, 20 agents) and two resource densities (0.15, 0.25).
 
 \subsection{Replications}
 
-% TODO: Justify 30 replications per configuration
-% TODO: Discuss statistical power
-
-% TODO: Calculate statistical power properly
-% TODO: Justify 30 replications with power analysis
-
-Planning to run 30 replications per configuration for statistical robustness.
+The experimental design uses 20 replications per configuration with fixed random seeds (0-19) for reproducibility. This provides sufficient data for descriptive statistical analysis while keeping total runtime manageable. With 20 configurations (5 ranges × 2 team sizes × 2 densities) and 20 replications, the total is 400 simulation runs.
 
 \section{Testing and Validation}
 
@@ -248,64 +232,58 @@ The Solara visualization helps debug agent behavior by showing:
 
 \section{Experimental Infrastructure}
 
-% TODO: Write batch experiment runner script
-% TODO: Implement progress tracking
-% TODO: Add result saving to CSV
+\subsection{Batch Experiment Runner}
 
-\subsection{Planned Batch Runner}
-
-Need to write a script to automate the 600 experimental runs:
+The batch experiment runner (in \texttt{scripts/run\_experiments.py}) automates the 400 experimental runs:
 
 \begin{itemize}
-    \item Generate all 20 configurations
-    \item Run 30 replications per configuration
-    \item Save results to CSV
-    \item Track progress
+    \item Generates all 20 configurations (5 ranges × 2 team sizes × 2 densities)
+    \item Runs 20 replications per configuration with fixed seeds (0-19)
+    \item Saves results to CSV with timestamp
+    \item Tracks progress and execution time
 \end{itemize}
 
-% TODO: Implement this script (Week 3-4)
+The runner creates a \texttt{HarvestModel} instance for each configuration and replication, runs it for 500 steps, and collects final metrics. Results are saved to \texttt{results/experimental\_results\_[timestamp].csv}.
 
 \subsection{Reproducibility}
 
-Using fixed random seeds (0-29) for reproducibility.
+Fixed random seeds (0-19) ensure reproducibility of results. Each configuration-replication pair uses a unique seed, allowing the same results to be regenerated by running the experiment with the same seed sequence. Mesa 3.0 handles seed management through the model's \texttt{seed} parameter passed to the parent \texttt{Model} class.
 
-% TODO: Verify seed handling in Mesa 3.0
-% TODO: Test that same seed produces same results
-
-\section{Implementation Challenges}
-
-% TODO: Document challenges encountered and solutions
+\section{Implementation Notes}
 
 \subsection{Mesa 3.0 API}
 
-Learning Mesa 3.0 API (different from 2.x):
+The implementation uses Mesa 3.0 API conventions:
 
 \begin{itemize}
-    \item No \texttt{unique\_id} in agent constructors
-    \item Agent activation via \texttt{shuffle\_do('step')}
-    \item Visualization requires model instance
+    \item Agent constructors take only \texttt{model} parameter (no \texttt{unique\_id})
+    \item Agent activation uses \texttt{model.agents.shuffle\_do('step')} for randomized order
+    \item Visualization uses \texttt{SolaraViz} with model instance
+    \item \texttt{DataCollector} uses reporter functions for metric calculation
 \end{itemize}
 
-% TODO: Add more details about API differences
+\subsection{Design Decisions}
 
-\subsection{Known Issues}
+\textbf{Chebyshev Distance}: Communication range uses Chebyshev distance (max of absolute differences) rather than Euclidean distance. This is appropriate for grid-based environments where agents move in 8 directions (Moore neighborhood).
 
-% TODO: Fix these issues before running full experiments
+\textbf{Greedy Movement}: Agents use greedy movement toward targets (moving in the direction that minimizes Chebyshev distance). This is simple and interpretable, though not optimal for all scenarios.
 
-Current issues to resolve:
+\textbf{Selective Broadcasting}: Agents only broadcast to neighbors that don't already have a target. This reduces unnecessary communication and focuses information sharing on agents that can act on it.
 
-\begin{itemize}
-    \item Communication range calculation needs verification
-    \item Agents sometimes cluster in corners
-    \item Visualization is slow with many agents
-    \item Need to add coverage and efficiency metrics
-\end{itemize}
+\textbf{Static Dynamics Only}: For RQ1, the implementation uses Static resource dynamics (no regeneration). This simplifies the analysis and allows clear focus on communication range effects without confounding factors from resource dynamics.
 
 \section{Summary}
 
-% TODO: Expand summary after completing implementation
+This chapter described the implementation of the multi-agent fruit harvesting simulation for RQ1. The system uses Mesa 3.0 with a 50×50 grid environment, harvester agents with communication capabilities, and Static resource dynamics. Key components include:
 
-This chapter outlined the implementation approach. The system uses Mesa 3.0 with a grid-based environment, harvester agents, and communication protocol. Basic functionality is working, but several components need completion before running full experiments.
+\begin{itemize}
+    \item \textbf{HarvestModel}: Manages simulation, agent/fruit placement, and data collection
+    \item \textbf{HarvesterAgent}: Implements movement, harvesting, and communication behaviors
+    \item \textbf{Fruit}: Represents static resources that can be harvested once
+    \item \textbf{Communication Protocol}: Chebyshev distance-based range with selective broadcasting
+    \item \textbf{Data Collection}: Automated metric tracking via Mesa's DataCollector
+    \item \textbf{Experimental Infrastructure}: Batch runner for 400 simulations with fixed seeds
+\end{itemize}
 
-% TODO: Write Results chapter after experiments complete
+The implementation successfully completed 400 experimental runs (5 ranges × 2 team sizes × 2 densities × 20 replications) with all metrics collected. The next chapter presents the experimental results.
 

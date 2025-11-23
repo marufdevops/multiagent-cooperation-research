@@ -2,25 +2,25 @@
 
 \section{Introduction}
 
-Before diving into my own work, it's worth looking at what other researchers have already figured out. This chapter covers three main areas: how multiple agents coordinate when foraging for resources, how communication affects their performance, and what's been done specifically in agricultural robotics. At the end, I'll explain where my work fits into all this.
+I have gone through some of the research papers available related to my dissertation topic. This chapter addresses three key points: how multiple agents work together to find resources, how communication strategies determines their performance, and what has been done in the field of agricultural robots. In the end, I'll try to show how my work integrates into all of this.
 
 \section{Multi-Agent Coordination and Foraging}
 
-The problem of getting multiple agents to find and collect resources scattered around an environment has been studied for decades. It's trickier than it sounds because each agent has to decide: should I keep searching for new stuff, or should I focus on collecting what I already know about? And how do I avoid stepping on my teammates' toes?
+The problem of getting multiple agents to find and collect resources scattered around an environment has been studied for decades. It's harder than it sounds because each agent has to decide: should I keep searching for new stuff, or should I focus on collecting what I already know about (exploration vs exploitation)? And how do I avoid conflicts with other agents?
 
-Ant colonies are the classic example here. Individual ants aren't particularly smart, but collectively they're remarkably efficient at finding food. They do this by leaving pheromone trails—chemical markers that other ants can detect and follow \citep{ant-foraging}. No central coordinator needed; the coordination just emerges from ants following simple local rules. It's elegant, really.
+Ant colonies are the classic example here. Individual ants aren't particularly smart, but collectively they're remarkably efficient at finding food. They do this by leaving pheromone trails, chemical markers that other ants can detect and follow \citep{ant-foraging}. No central coordinator needed; coordination emerges from the ants following simple local rules.
 
-But for robots, pheromones aren't exactly practical. You'd need to physically deposit something in the environment, and that gets messy. Direct communication—just sending messages—is way more straightforward. If a robot finds fruit, it can broadcast "hey, there's fruit at location X" and nearby teammates can head straight there instead of wandering around randomly.
+But for robotic agents, pheromones aren't exactly practical. You'd need to physically deposit something in the environment, which is not practical either on a large scale. Sending direct messages over the cloud is the right solution to this; if a robot finds fruit, it can broadcast, "hey, there's fruit at location X" and nearby agents can head straight there instead of searching around randomly.
 
-Of course, it's not quite that simple. A few things matter a lot:
+Of course, it's not quite that simple; there are a few questions:
 
 \begin{itemize}
     \item \textbf{Resource distribution:} Are resources clumped together or spread out evenly? This changes optimal search strategies.
-    \item \textbf{Team size:} More robots means more coverage, but also more potential for interference and redundant communication.
-    \item \textbf{Communication range:} This is the big one. How far can robots send and receive messages? Too short and they're isolated; too long and they're drowning in messages.
+    \item \textbf{Team size:} More agents means more coverage, but also more potential for interference and redundant communication.
+    \item \textbf{Communication range:} This is the big one. How far can agents send and receive messages? Too short and they're isolated; too long and they're drowning in messages.
 \end{itemize}
 
-The benefit of communication is obvious—share information, reduce wasted searching. But there's a cost too. Every message uses bandwidth and processing time. Finding the right balance is what this whole project is about.
+The benefit of communication is obvious share information, reduce wasted searching. But there's a cost too. Every message uses bandwidth and processing time. Finding the right balance is what this whole project is about.
 
 \section{Communication in Multi-Agent Systems}
 
@@ -28,14 +28,14 @@ The benefit of communication is obvious—share information, reduce wasted searc
 
 Here's something interesting that researchers have noticed: more communication isn't always better. You'd think that letting robots talk over longer distances would always help, but it doesn't work that way.
 
-When communication range is too small, robots basically work alone. They can't reach their teammates, so they miss out on useful information. But when the range is too large, robots get flooded with messages from everyone, and they spend all their time processing communications instead of actually doing work. There's a sweet spot in the middle \citep{range-effects}.
+When communication range is too small, agents basically work alone. They can't reach other agents within the environment, so they miss out on useful information. But when the range is too large, agents get flooded with messages from everyone, and they spend all their time processing communications instead of actually doing work. There's a sweet spot in the middle.
 
 Think of it like this:
 
 \begin{itemize}
-    \item \textbf{Too small:} Robots are isolated. They might as well be working solo.
-    \item \textbf{Just right:} Robots can share useful info with nearby teammates without getting overwhelmed.
-    \item \textbf{Too large:} Message overload. Robots waste time and bandwidth on communications that don't really help.
+    \item \textbf{Too small:} Robots are isolated with less information about their surroundings.
+    \item \textbf{Just right:} Robots can share useful information with nearby agents without getting overwhelmed.
+    \item \textbf{Too large:} Message overload. Agents waste time and bandwidth on communications that don't really help.
 \end{itemize}
 
 The trick is figuring out where that sweet spot actually is. And it probably changes depending on how many robots you have, how they're distributed, and what the environment looks like.
@@ -47,12 +47,30 @@ There are a few different ways robots can communicate:
 \begin{itemize}
     \item \textbf{Broadcast:} Just shout to everyone within range. Simple to implement, but you might send messages to robots that don't need them.
 
-    \item \textbf{Direct messaging:} Send targeted messages to specific teammates. More efficient, but you need to keep track of who's who and where they are.
+    \item \textbf{Direct messaging:} Send targeted messages to specific agents. More efficient, but you need to keep track of who's who and where they are.
 
     \item \textbf{Environmental markers:} Leave information in the environment itself (like those ant pheromones). Clever, but the information can fade or get misinterpreted.
 \end{itemize}
 
-For this project, I went with broadcast communication. It's straightforward—agents just send messages to everyone within their communication range. No need to maintain a contact list or figure out who needs what information. Keep it simple.
+For this project, due to time constraints and complexity, I went with broadcast communication. It's straightforward; agents just send messages to everyone within their communication range. No need to maintain a contact list or figure out who needs what information.
+
+\subsection{Animal-Inspired Collective Behaviors}
+
+Here's something interesting from recent research: nature has already solved many of the coordination problems we're trying to tackle. Duan, Huo, and Fan (2023) conducted a comprehensive review of how animal collective behaviors can inspire swarm robotic systems \citep{animal-collective-2023}. Their work bridges the gap between biological systems (like bird flocks, fish schools, and ant colonies) and artificial swarm systems.
+
+What makes their work particularly relevant to our research is their analysis of how information transfer mechanisms in nature translate to robotic systems. Animals don't have unlimited communication ranges either; they rely on local sensing and neighbor-to-neighbor information sharing. This is exactly the constraint we're investigating. Their findings suggest that effective coordination doesn't require global communication, but rather intelligent use of local interactions. This validates our approach of testing different communication ranges to find the optimal balance.
+
+\subsection{Multi-Agent Foraging Strategies}
+
+The foraging problem has been extensively studied in the multi-agent systems literature. Zedadra et al. (2017) provide a comprehensive state-of-the-art review of multi-agent foraging approaches, including taxonomies for classifying different foraging strategies \citep{multi-agent-foraging-2017}. Their work identifies key challenges that directly relate to our research: how agents coordinate search efforts, how they communicate discoveries, and how they balance exploration versus exploitation.
+
+One particularly relevant finding from their review is that communication constraints significantly impact foraging efficiency. They discuss how different communication methods (broadcast, direct messaging, stigmergy) affect the overall system performance. Their taxonomy helps us understand where our work fits in the broader landscape of foraging research. By focusing on communication range effects in a static harvesting environment, we're addressing a specific but important aspect of the general foraging problem.
+
+\subsection{Communication Constraints in Marine Robotics}
+
+While our application is agricultural, there's valuable work being done in marine robotics that faces similar communication challenges. Martorell-Torres et al. (2023) studied coordination of multi-robot systems with communication constraints in underwater environments \citep{marine-coordination-2023}. The underwater domain is particularly interesting because communication is severely limited by water properties, making it a natural testbed for studying range-constrained coordination.
+
+Their research demonstrates that effective multi-robot coordination is possible even with significant communication limitations. They propose strategies for implicit coordination (where robots infer each other's intentions from observed behavior) alongside explicit communication. This is highly relevant to our work because it suggests that communication range effects might not be purely negative. There may be a trade-off where moderate communication ranges force robots to develop more robust, implicit coordination strategies that are actually more efficient than relying on unlimited communication. This is exactly the kind of insight our experiments are designed to explore.
 
 \section{Agricultural Robotics}
 
@@ -64,49 +82,78 @@ There's been quite a bit of work on using robots for agricultural tasks, includi
     \item \textbf{Efficient coverage:} Ideally, robots should spread out to cover the area effectively rather than all clustering in one spot.
 \end{itemize}
 
-Communication helps with all of these. If robots share what they've found, they don't waste time re-searching areas teammates have already covered. If they broadcast their positions, they can steer clear of each other and distribute themselves better.
-
-The problem is, most existing systems either use a central controller (one brain telling all the robots what to do) or assume perfect communication (every robot can talk to every other robot). That's fine for small-scale demos, but it doesn't scale well. What happens when you've got dozens of robots spread across a large field? Or when there are obstacles blocking communication? That's why looking at limited communication ranges matters—it's closer to how these systems would actually work in the real world.
+Communication helps with all of these. If robots share what they've found, they don't waste time re-searching areas other robots have already covered. If they broadcast their positions, they can steer clear of each other and distribute themselves better.
 
 \section{Resource Dynamics}
 
-One thing that doesn't get talked about enough: not all agricultural environments are the same. Some crops are one-and-done, while others keep producing.
+One thing that doesn't get talked about enough: not all agricultural environments are the same. Some crops don't reproduce, while others keep producing.
 
 \begin{itemize}
-    \item \textbf{Static resources:} Think grain fields. You harvest once and that's it. What's gone is gone.
+    \item \textbf{Static resources:} Think grain fields. You harvest once and that's it.
 
     \item \textbf{Replenishing resources:} Think strawberry fields. New fruit keeps ripening over time, so there's a continuous supply.
 \end{itemize}
 
-This distinction probably matters for communication strategies. In a static environment, the main thing is avoiding redundant work—you don't want two robots harvesting the same spot. Once the field is cleared, you're done. But in a replenishing environment, you're playing a longer game. Resources keep appearing, so sustained coordination might be more valuable. Maybe the optimal communication range is different in these two scenarios.
+This distinction probably matters for communication strategies. In a static environment, the main thing is avoiding redundant work you don't want two robots harvesting the same spot. Once the field is cleared, you're done. But in a replenishing environment, resources keep appearing, so sustained coordination might be more valuable. Maybe the optimal communication range is different in these two scenarios.
 
-Nobody's really explored this systematically, which is part of why I'm interested in it. The simulation I've built can handle both types of dynamics, so it's set up to investigate this question properly.
+As we have limited time for this dissertation, I will focus only on the communication range effect, and the effects of resource dynamics can be researched later.
 
 \section{Agent-Based Modeling with Mesa}
 
-For actually building the simulation, I'm using Mesa, which is a Python framework designed for agent-based modeling. It's pretty handy because it handles a lot of the tedious infrastructure stuff—managing the grid, scheduling agent actions, collecting data, visualizing results. Mesa 3.0 has some nice improvements:
+Agent-based modeling (ABM) requires robust infrastructure to manage agents, their interactions, spatial environments, and data collection. For this project, I selected \textbf{Mesa 3.0}, a Python framework specifically designed for agent-based simulations. Mesa provides essential abstractions that allow researchers to focus on modeling domain specific behavior rather than implementing low-level simulation mechanics.
+
+\subsection{Why Mesa?}
+
+Mesa was chosen for several key reasons aligned with the requirements of this research:
+
+\subsubsection{Simplified Agent Management}
+Mesa abstracts away the complexity of agent lifecycle management.
+
+\subsubsection{Built-in Spatial Modeling}
+The framework provides a \texttt{MultiGrid} class that handles discrete spatial environments with efficient neighbor queries. This is essential for our communication range model, where agents must quickly identify neighbors within a specified Chebyshev distance. Mesa's grid implementation optimizes these spatial queries, which would otherwise require manual implementation and potential performance bottlenecks.
+
+\subsubsection{Integrated Data Collection}
+Mesa includes a \texttt{DataCollector} class that automatically tracks agent and model-level metrics throughout simulation runs. Rather than manually logging data at each step, researchers define which metrics to collect and Mesa handles the aggregation. This reduces code complexity and minimizes the risk of data collection bugs---a critical concern when running hundreds of experiments.
+
+\subsubsection{Web-Based Visualization}
+Mesa 3.0 integrates with \textbf{Solara}, a modern web framework, enabling real-time interactive visualization of simulations. This is valuable for debugging agent behavior and validating model logic before running large experimental batches. The visualization can be deployed locally or remotely without additional configuration.
+
+\subsubsection{Active Development and Community}
+Mesa is actively maintained with regular updates and has a growing community of researchers using it for published work. This ensures long-term support and access to best practices from the ABM research community.
+
+\subsection{Comparison with Alternative Frameworks}
+
+Several other frameworks exist for agent-based modeling in Python and other languages. Here's how Mesa compares:
+
+\subsubsection{NetLogo}
+NetLogo is a mature, widely-used ABM platform with an intuitive visual interface. However, it uses its own domain-specific language (DSL), which limits integration with Python data science tools and makes version control difficult. For research requiring custom analysis pipelines and reproducible computational workflows, Python-based frameworks are more suitable.
+
+\subsubsection{JADE (Java Agent Development Framework)}
+JADE is a robust framework for multi-agent systems with strong support for distributed computing and agent communication protocols. However, it introduces significant complexity for simpler spatial simulations and requires Java expertise. For this project's scope---focused on local communication and spatial coordination---JADE's distributed capabilities are unnecessary overhead.
+
+
+\subsubsection{Custom Implementation}
+Implementing a simulation framework from scratch is an option but introduces significant risk. Custom implementations often lack optimization for spatial queries, struggle with scalability, and require extensive testing. By using Mesa, we leverage battle-tested infrastructure and can allocate development effort toward domain-specific modeling logic.
+
+\subsection{Mesa's Role in This Research}
+
+For this dissertation, Mesa provides the foundational infrastructure that enables focus on the core research questions:
 
 \begin{itemize}
-    \item Agent activation is straightforward: just call \texttt{model.agents.shuffle\_do('step')} and all agents take their turn in random order
-    \item You don't need to manually assign unique IDs to every agent anymore
-    \item There's built-in support for web-based visualization using Solara, which makes it easy to watch simulations in real-time
-    \item Data collection is built in, so you can track whatever metrics you care about over time
+    \item \textbf{Communication Range Modeling}: Mesa's grid and neighbor-finding capabilities make it straightforward to implement distance-based communication constraints.
+    \item \textbf{Scalability}: The framework's efficient data structures allow us to run experiments with varying grid sizes and agent populations without performance degradation.
 \end{itemize}
-
-The nice thing about Mesa is that it lets you focus on the interesting parts—how agents behave, how they coordinate—without getting bogged down in simulation plumbing. That's exactly what I needed for this project.
 
 \section{Summary and Research Direction}
 
 So what have we learned from the literature?
 
 \begin{itemize}
-    \item Communication helps robots coordinate by letting them share information—that much is obvious
+    \item Communication helps agents coordinate by letting them share informations
     \item But more communication isn't always better. There's a sweet spot where you get the benefits without drowning in message overhead
     \item The type of environment matters. Static resources (one-time harvest) versus replenishing resources (continuous production) probably require different strategies
     \item Tools like Mesa make it feasible to actually test these ideas through simulation
 \end{itemize}
 
-The gap is that most studies either pick a communication range arbitrarily or just compare the extremes (no communication versus everyone talks to everyone). There hasn't been much systematic exploration of the middle ground, especially across different environmental conditions.
-
-That's where this work comes in. I've built a simulation that can test different communication ranges in both static and replenishing environments. It's early days—just the foundation—but the setup is there to start answering these questions properly. Eventually, with enough experimentation, we might be able to say something useful about how to design communication systems for agricultural robot teams.
+I've built a simulation that can test different communication ranges in static environments. Effect of communication ranges in dynamic environment is scoped to future work.
 
