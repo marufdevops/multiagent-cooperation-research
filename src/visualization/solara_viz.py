@@ -1,6 +1,5 @@
 """
 Solara visualization components for harvest model.
-Uses Mesa 3.0 SolaraViz with make_space_component and make_plot_component.
 """
 import sys
 import os
@@ -17,12 +16,11 @@ from agents.fruit import Fruit
 def agent_portrayal(agent):
     """
     Define agent portrayal as dictionary with color/size/marker keys.
-    Mesa 3.0 convention for Solara visualization.
     """
     if isinstance(agent, HarvesterAgent):
         # Agents: blue circles, size based on harvest count
         return {
-            "color": "#1f77b4",
+            "color": "#f41414",
             "size": 20 + agent.harvested * 2,
             "marker": "o",
         }
@@ -51,7 +49,6 @@ def make_model(params):
         num_agents=params.get("num_agents", 5),
         fruit_density=params.get("fruit_density", 0.2),
         comm_range=params.get("comm_range", 2),
-        seed=params.get("seed", None),
     )
 
 
@@ -96,11 +93,6 @@ model_params = {
         "min": 0,
         "max": 8,
         "step": 1,
-    },
-    "seed": {
-        "type": "InputText",
-        "value": None,
-        "label": "Random Seed (optional)",
     },
 }
 

@@ -1,7 +1,6 @@
 """
 Launch Solara visualization server.
 Run with: python scripts/run_visualization.py
-Then open browser to http://localhost:8765
 """
 import os
 import subprocess
@@ -21,7 +20,7 @@ if __name__ == "__main__":
     src_path = os.path.join(os.getcwd(), 'src')
     env['PYTHONPATH'] = f"{src_path}:{current_path}" if current_path else src_path
 
-    # Run solara with the visualization module
+    # Run solara with the visualization
     try:
         subprocess.run(
             ['/opt/anaconda3/bin/solara', 'run', 'src/visualization/solara_viz.py', '--port', '8765'],

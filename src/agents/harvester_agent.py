@@ -1,11 +1,5 @@
 """
-Harvester Agent for fruit collection simulation (WORK IN PROGRESS).
-Mesa 3.0 convention: no unique_id in constructor, only model and parameters.
-
-TODO: Test with large grids (performance optimization needed?)
-TODO: Improve movement strategy (currently greedy + random walk)
-FIXME: Agents sometimes cluster in corners - need better exploration
-NOTE: Communication uses Chebyshev distance (needs verification)
+Harvester Agent for fruit collection simulation.
 """
 import random
 from mesa import Agent
@@ -65,7 +59,7 @@ class HarvesterAgent(Agent):
         x, y = self.pos
         tx, ty = target_pos
         
-        # Simple greedy movement
+        # Greedy moevement towards the target
         dx = 0 if tx == x else (1 if tx > x else -1)
         dy = 0 if ty == y else (1 if ty > y else -1)
         
@@ -126,14 +120,14 @@ class HarvesterAgent(Agent):
         """Find nearest available fruit position."""
         min_dist = float('inf')
         nearest = None
-        
+
         for fruit in self.model.fruits:
             if fruit.available:
                 dist = self._chebyshev_distance(self.pos, fruit.pos)
                 if dist < min_dist:
                     min_dist = dist
                     nearest = fruit.pos
-        
+
         return nearest
     
     def _chebyshev_distance(self, pos1, pos2):

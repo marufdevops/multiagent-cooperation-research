@@ -1,13 +1,8 @@
 """
-Fruit Harvesting Model for RQ1: Communication Range Effects (WORK IN PROGRESS)
+Fruit Harvesting Model for RQ1: Communication Range Effects
 
 Implements Static resource dynamics (no regeneration).
-Tracks metrics: yield, messages, remaining fruit.
-
-TODO: Add coverage and efficiency metrics
-TODO: Verify communication protocol works correctly
-FIXME: Check edge case handling (agents at boundaries)
-NOTE: Currently only implements Static dynamics (no regeneration for RQ1)
+Tracks metrics: yield, messages, remaining fruit, coverage.
 """
 import random
 from mesa import Model
@@ -25,7 +20,7 @@ class HarvestModel(Model):
     Fruit harvesting model with communication for RQ1.
 
     This model implements Static resource dynamics only (no regeneration).
-    Agents move, harvest fruit, and communicate within a configurable range.
+    Agents move, harvest fruit, and communicate within a configurable range {comm_range = 2, 4, 6, 8}.
 
     Parameters:
         width: Grid width
@@ -35,7 +30,6 @@ class HarvestModel(Model):
         comm_range: Communication range in cells (Chebyshev distance)
         seed: Random seed for reproducibility
     """
-
     # Class variable for Solara visualization
     steps = 0
 
@@ -57,7 +51,7 @@ class HarvestModel(Model):
         self.fruit_density = fruit_density
         self.comm_range = comm_range
         
-        # Grid (non-toroidal)
+        # Grid
         self.grid = MultiGrid(width, height, torus=False)
         
         # Track fruits separately for efficient lookup
@@ -113,13 +107,12 @@ class HarvestModel(Model):
             self.grid.place_agent(agent, (x, y))
     
     def step(self):
-        """Execute one step of the model using Mesa 3.0 convention."""
+        """Execute one step of the model using Mesa 3.0"""
         # Reset per-step message counters
         for agent in self.agents:
             if isinstance(agent, HarvesterAgent):
                 agent.messages_sent = 0
 
-        # Agents act (Mesa 3.0 convention: shuffle_do)
         self.agents.shuffle_do('step')
 
         # Update cumulative message count
