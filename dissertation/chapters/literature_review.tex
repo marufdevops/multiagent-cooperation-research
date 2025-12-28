@@ -2,57 +2,57 @@
 
 \section{Introduction}
 
-I have gone through some of the research papers available related to my dissertation topic. This chapter addresses three key points: how multiple agents work together to find resources, how communication strategies determines their performance, and what has been done in the field of agricultural robots. In the end, I'll try to show how my work integrates into all of this.
+This chapter synthesizes relevant literature across three key domains: multi-agent coordination and resource foraging, communication protocols in distributed systems, and agricultural robotics. The review establishes the theoretical foundation for this research and positions the investigation of communication range effects within the broader context of multi-agent systems research.
 
 \section{Multi-Agent Coordination and Foraging}
 
-The problem of getting multiple agents to find and collect resources scattered around an environment has been studied for decades. It's harder than it sounds because each agent has to decide: should I keep searching for new stuff, or should I focus on collecting what I already know about (exploration vs exploitation)? And how do I avoid conflicts with other agents?
+Multi-agent resource foraging represents a fundamental problem in distributed systems research. The challenge involves coordinating multiple autonomous agents to efficiently locate and collect resources distributed across an environment. This problem encompasses several interrelated challenges: exploration versus exploitation trade-offs, conflict avoidance, and information sharing mechanisms.
 
-Ant colonies are the classic example here. Individual ants aren't particularly smart, but collectively they're remarkably efficient at finding food. They do this by leaving pheromone trails, chemical markers that other ants can detect and follow \citep{ant-foraging}. No central coordinator needed; coordination emerges from the ants following simple local rules.
+Natural systems provide compelling examples of effective decentralized coordination. Ant colonies demonstrate remarkable foraging efficiency through stigmergic communication, where individual ants deposit pheromone trails that guide other colony members \citep{ant-foraging}. This mechanism enables emergent coordination without centralized control, relying instead on simple local rules followed by individual agents.
 
-But for robotic agents, pheromones aren't exactly practical. You'd need to physically deposit something in the environment, which is not practical either on a large scale. Sending direct messages over the cloud is the right solution to this; if a robot finds fruit, it can broadcast, "hey, there's fruit at location X" and nearby agents can head straight there instead of searching around randomly.
+For robotic systems, direct pheromone-based communication is impractical. Instead, explicit message-based communication enables agents to share resource location information. When an agent discovers resources, it can broadcast this information to nearby agents, enabling them to redirect search efforts toward known resource locations rather than continuing random exploration.
 
-Of course, it's not quite that simple; there are a few questions:
+However, effective multi-agent foraging requires addressing several design questions:
 
 \begin{itemize}
-    \item \textbf{Resource distribution:} Are resources clumped together or spread out evenly? This changes optimal search strategies.
-    \item \textbf{Team size:} More agents means more coverage, but also more potential for interference and redundant communication.
-    \item \textbf{Communication range:} This is the big one. How far can agents send and receive messages? Too short and they're isolated; too long and they're drowning in messages.
+    \item \textbf{Resource distribution:} How does spatial clustering of resources affect optimal search strategies?
+    \item \textbf{Team size:} How do team size effects interact with communication overhead and coverage?
+    \item \textbf{Communication range:} What communication distance optimizes the trade-off between information sharing benefits and communication costs?
 \end{itemize}
 
-The benefit of communication is obvious share information, reduce wasted searching. But there's a cost too. Every message uses bandwidth and processing time. Finding the right balance is what this whole project is about.
+While information sharing reduces redundant search effort, communication incurs computational and bandwidth costs. Determining the optimal communication range that balances these competing factors is central to this research.
 
 \section{Communication in Multi-Agent Systems}
 
 \subsection{Communication Range Trade-offs}
 
-Here's something interesting that researchers have noticed: more communication isn't always better. You'd think that letting robots talk over longer distances would always help, but it doesn't work that way.
+A critical insight from multi-agent systems research is that increased communication range does not necessarily improve system performance. This apparent paradox arises from the fundamental trade-off between coordination benefits and communication overhead.
 
-When communication range is too small, agents basically work alone. They can't reach other agents within the environment, so they miss out on useful information. But when the range is too large, agents get flooded with messages from everyone, and they spend all their time processing communications instead of actually doing work. There's a sweet spot in the middle.
+When communication range is insufficient, agents operate in relative isolation, unable to access information from other team members. This limits coordination opportunities and forces agents to rely on individual search strategies. Conversely, excessive communication range creates message flooding, where agents receive information from numerous sources, consuming computational resources and bandwidth without proportional performance gains.
 
-Think of it like this:
+This trade-off manifests across three dimensions:
 
 \begin{itemize}
-    \item \textbf{Too small:} Robots are isolated with less information about their surroundings.
-    \item \textbf{Just right:} Robots can share useful information with nearby agents without getting overwhelmed.
-    \item \textbf{Too large:} Message overload. Agents waste time and bandwidth on communications that don't really help.
+    \item \textbf{Insufficient range:} Agents lack access to information from distant team members, reducing coordination effectiveness.
+    \item \textbf{Optimal range:} Agents can share relevant information with nearby team members while avoiding message overload.
+    \item \textbf{Excessive range:} Communication overhead exceeds coordination benefits, reducing overall system efficiency.
 \end{itemize}
 
-The trick is figuring out where that sweet spot actually is. And it probably changes depending on how many robots you have, how they're distributed, and what the environment looks like.
+The optimal communication range is not fixed but depends on environmental and team characteristics including team size, resource distribution, and spatial scale. Identifying this optimal range for specific task configurations is essential for designing efficient multi-agent systems.
 
 \subsection{Communication Methods}
 
-There are a few different ways robots can communicate:
+Multi-agent systems employ several communication paradigms, each with distinct advantages and limitations:
 
 \begin{itemize}
-    \item \textbf{Broadcast:} Just shout to everyone within range. Simple to implement, but you might send messages to robots that don't need them.
+    \item \textbf{Broadcast communication:} Agents transmit messages to all agents within communication range. This approach is simple to implement and requires minimal state management, but may result in redundant message delivery to agents that do not require the information.
 
-    \item \textbf{Direct messaging:} Send targeted messages to specific agents. More efficient, but you need to keep track of who's who and where they are.
+    \item \textbf{Direct messaging:} Agents send targeted messages to specific recipients. This approach reduces message overhead but requires agents to maintain knowledge of other agents' identities and locations.
 
-    \item \textbf{Environmental markers:} Leave information in the environment itself (like those ant pheromones). Clever, but the information can fade or get misinterpreted.
+    \item \textbf{Stigmergic communication:} Agents deposit information in the environment (e.g., pheromone trails) that other agents can detect. This approach enables implicit coordination but introduces challenges with information decay and interpretation.
 \end{itemize}
 
-For this project, due to time constraints and complexity, I went with broadcast communication. It's straightforward; agents just send messages to everyone within their communication range. No need to maintain a contact list or figure out who needs what information.
+This research employs broadcast communication within a fixed communication range. This approach provides a clear, interpretable mechanism for studying communication range effects without the complexity of dynamic routing or environmental state management. Broadcast communication is widely used in multi-agent systems research and provides a suitable baseline for investigating range-dependent coordination.
 
 \subsection{Animal-Inspired Collective Behaviors}
 
@@ -74,29 +74,27 @@ Their research demonstrates that effective multi-robot coordination is possible 
 
 \section{Agricultural Robotics}
 
-There's been quite a bit of work on using robots for agricultural tasks, including harvesting. The challenges are pretty obvious when you think about it:
+Agricultural harvesting presents distinct challenges for multi-agent coordination. Key challenges include:
 
 \begin{itemize}
-    \item \textbf{Finding resources:} Robots need to locate ripe fruit, which isn't always easy when it's hidden among leaves or in varying light conditions.
-    \item \textbf{Avoiding collisions:} When you've got multiple robots working the same area, they need to not crash into each other or get in each other's way.
-    \item \textbf{Efficient coverage:} Ideally, robots should spread out to cover the area effectively rather than all clustering in one spot.
+    \item \textbf{Resource detection:} Robots must locate ripe fruit, which may be obscured by foliage or subject to variable lighting conditions.
+    \item \textbf{Collision avoidance:} Multiple robots operating in the same area must coordinate movement to prevent interference and collisions.
+    \item \textbf{Spatial coverage:} Effective harvesting requires agents to distribute themselves across the environment rather than clustering in resource-rich areas.
 \end{itemize}
 
-Communication helps with all of these. If robots share what they've found, they don't waste time re-searching areas other robots have already covered. If they broadcast their positions, they can steer clear of each other and distribute themselves better.
+Communication enables agents to address these challenges by sharing discovered resource locations, broadcasting position information for collision avoidance, and coordinating coverage strategies. Effective communication protocols can significantly improve harvesting efficiency and reduce redundant search effort.
 
 \section{Resource Dynamics}
 
-One thing that doesn't get talked about enough: not all agricultural environments are the same. Some crops don't reproduce, while others keep producing.
+Agricultural environments exhibit different resource characteristics that affect optimal coordination strategies:
 
 \begin{itemize}
-    \item \textbf{Static resources:} Think grain fields. You harvest once and that's it.
+    \item \textbf{Static resources:} Environments where resources are harvested once and do not regenerate (e.g., grain fields). In these environments, the primary coordination challenge is avoiding redundant harvesting of the same resources.
 
-    \item \textbf{Replenishing resources:} Think strawberry fields. New fruit keeps ripening over time, so there's a continuous supply.
+    \item \textbf{Replenishing resources:} Environments where new resources continuously appear (e.g., strawberry fields with continuous ripening). In these environments, sustained coordination becomes valuable as agents must continuously adapt to changing resource distributions.
 \end{itemize}
 
-This distinction probably matters for communication strategies. In a static environment, the main thing is avoiding redundant work you don't want two robots harvesting the same spot. Once the field is cleared, you're done. But in a replenishing environment, resources keep appearing, so sustained coordination might be more valuable. Maybe the optimal communication range is different in these two scenarios.
-
-As we have limited time for this dissertation, I will focus only on the communication range effect, and the effects of resource dynamics can be researched later.
+These resource dynamics likely affect optimal communication strategies. In static environments, communication primarily prevents redundant work. In replenishing environments, sustained information sharing may provide greater value. However, this research focuses exclusively on static resource environments, deferring investigation of replenishing resources to future work.
 
 \section{Agent-Based Modeling with Mesa}
 
@@ -146,14 +144,14 @@ For this dissertation, Mesa provides the foundational infrastructure that enable
 
 \section{Summary and Research Direction}
 
-So what have we learned from the literature?
+The literature review establishes several key insights relevant to this research:
 
 \begin{itemize}
-    \item Communication helps agents coordinate by letting them share informations
-    \item But more communication isn't always better. There's a sweet spot where you get the benefits without drowning in message overhead
-    \item The type of environment matters. Static resources (one-time harvest) versus replenishing resources (continuous production) probably require different strategies
-    \item Tools like Mesa make it feasible to actually test these ideas through simulation
+    \item Communication enables multi-agent coordination by facilitating information sharing about resource locations and agent positions.
+    \item Increased communication range does not necessarily improve system performance; an optimal range exists that balances coordination benefits against communication overhead.
+    \item Resource dynamics (static versus replenishing) likely affect optimal communication strategies, though this distinction remains understudied.
+    \item Agent-based modeling frameworks like Mesa provide practical tools for investigating these questions through systematic simulation and experimentation.
 \end{itemize}
 
-I've built a simulation that can test different communication ranges in static environments. Effect of communication ranges in dynamic environment is scoped to future work.
+This research addresses the gap in understanding communication range effects through controlled experimentation in static resource environments. By systematically varying communication range while controlling other parameters, this work provides empirical evidence of the communication range trade-off and identifies optimal ranges for different task configurations. Investigation of resource dynamics effects is deferred to future research.
 

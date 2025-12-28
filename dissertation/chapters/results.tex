@@ -14,7 +14,7 @@ The experiments were executed successfully with the following parameters:
     \item \textbf{Replications per configuration:} 20 runs
     \item \textbf{Episode length:} 500 time steps
     \item \textbf{Grid size:} 50×50 cells
-    \item \textbf{Total execution time:} 2.54 minutes (0.38 seconds per run)
+    \item \textbf{Total configurations:} $5 \times 2 \times 2 = 20$ unique parameter combinations
 \end{itemize}
 
 All runs completed successfully with no errors or anomalies.
@@ -34,17 +34,17 @@ Table \ref{tab:summary_stats} presents the key metrics aggregated across all 400
 \begin{table}[h]
 \centering
 \small
-\caption{Summary statistics by communication range (400 runs total)}
+\caption{Summary statistics by communication range (400 runs total, 80 runs per range)}
 \label{tab:summary_stats}
-\begin{tabular}{|c|c|c|c|c|c|c|}
+\begin{tabular}{|c|c|c|c|}
 \hline
-\textbf{Range} & \textbf{Yield} & \textbf{Std} & \textbf{Messages} & \textbf{Efficiency} & \textbf{Min} & \textbf{Max} \\
+\textbf{Range} & \textbf{Mean Yield} & \textbf{Std Dev} & \textbf{Mean Messages} \\
 \hline
-0 & 354.61 & 112.34 & 0.00 & 354.61 & 185 & 560 \\
-2 & 487.48 & 120.00 & 682.75 & 0.77 & 318 & 625 \\
-4 & 499.56 & 125.38 & 919.80 & 0.55 & 375 & 625 \\
-6 & 499.80 & 125.60 & 993.12 & 0.51 & 375 & 625 \\
-8 & 498.58 & 124.44 & 1013.11 & 0.49 & 375 & 625 \\
+0 (none) & 358.2 & 116.7 & 0.0 \\
+2 (local) & 492.8 & 121.9 & 672.3 \\
+4 (medium) & 499.7 & 125.6 & 917.6 \\
+6 (long) & 499.3 & 125.2 & 1000.3 \\
+8 (very long) & 498.6 & 124.5 & 1042.1 \\
 \hline
 \end{tabular}
 \end{table}
@@ -53,32 +53,34 @@ Table \ref{tab:summary_stats} presents the key metrics aggregated across all 400
 
 \subsection{Communication Range Dramatically Affects Yield}
 
+Figure~\ref{fig:yield_vs_range} visualizes the relationship between communication range and harvesting yield:
+
 The most striking finding is that communication range has a substantial effect on harvesting performance:
 
 \begin{itemize}
-    \item \textbf{No communication (range 0):} Mean yield of 354.61 fruits
-    \item \textbf{With communication (ranges 2-8):} Mean yields of 487-500 fruits
-    \item \textbf{Improvement:} 37-41\% increase in yield when communication is enabled
+    \item \textbf{No communication (range 0):} Mean yield of 358.2 fruits
+    \item \textbf{With communication (ranges 2-8):} Mean yields of 492.8-499.7 fruits
+    \item \textbf{Improvement:} 38.9\% increase in yield when communication is enabled
 \end{itemize}
 
 This clearly demonstrates that communication is valuable for multi-agent coordination in harvesting tasks.
 
 \subsection{Optimal Range is Range 2}
 
-While ranges 4, 6, and 8 all achieve similar yields (499-500 fruits), range 2 stands out as the most efficient:
+While ranges 4, 6, and 8 all achieve similar yields (498.6-499.7 fruits), range 2 stands out as the most efficient:
 
 \begin{itemize}
-    \item \textbf{Range 2:} 487.48 yield with 682.75 messages (efficiency: 0.77)
-    \item \textbf{Range 4:} 499.56 yield with 919.80 messages (efficiency: 0.55)
-    \item \textbf{Range 6:} 499.80 yield with 993.12 messages (efficiency: 0.51)
-    \item \textbf{Range 8:} 498.58 yield with 1013.11 messages (efficiency: 0.49)
+    \item \textbf{Range 2:} 492.8 yield with 672.3 messages
+    \item \textbf{Range 4:} 499.7 yield with 917.6 messages
+    \item \textbf{Range 6:} 499.3 yield with 1000.3 messages
+    \item \textbf{Range 8:} 498.6 yield with 1042.1 messages
 \end{itemize}
 
-Range 2 achieves 97.6\% of the maximum yield while using only 67.5\% of the messages required by range 8. This suggests that a moderate communication range provides the best cost-benefit trade-off.
+Range 2 achieves 98.6\% of the maximum yield while using only 64.5\% of the messages required by range 8. This suggests that a moderate communication range provides the best cost-benefit trade-off.
 
 \subsection{Diminishing Returns at Larger Ranges}
 
-Ranges 4, 6, and 8 show a plateau effect: they achieve nearly identical yields (within 1.2 fruits of each other) despite increasingly higher message overhead. This indicates that beyond range 4, additional communication provides minimal benefit while significantly increasing computational and communication costs.
+Ranges 4, 6, and 8 show a plateau effect: they achieve nearly identical yields (within 1.1 fruits of each other) despite increasingly higher message overhead. This indicates that beyond range 4, additional communication provides minimal benefit while significantly increasing computational and communication costs.
 
 \subsection{Consistency Across Configurations}
 
@@ -97,11 +99,41 @@ The pattern holds consistently across different team sizes and resource densitie
 \textbf{Answer:} Yes, communication range has a dramatic and consistent effect on harvesting efficiency. The experimental results show:
 
 \begin{enumerate}
-    \item Communication is essential: agents with no communication (range 0) harvest 37-41\% fewer fruits than agents with communication
-    \item There is an optimal range: range 2 provides the best efficiency (yield per message)
-    \item Larger ranges show diminishing returns: ranges 4, 6, and 8 achieve similar yields despite increasingly higher message costs
-    \item The effect is robust: the pattern holds across different team sizes and resource densities
+    \item Communication is essential: agents with no communication (range 0) harvest 38.9\% fewer fruits than agents with communication
+    \item There is an optimal range: range 2 provides the best efficiency (yield per message), achieving 98.6\% of maximum yield with 64.5\% of the message cost of range 8
+    \item Larger ranges show diminishing returns: ranges 4, 6, and 8 achieve nearly identical yields (within 1.1 fruits) despite increasingly higher message costs
+    \item The effect is robust: the pattern holds across different team sizes (10 and 20 agents) and resource densities (0.15 and 0.25)
 \end{enumerate}
 
-These findings directly support the hypothesis that communication range is a critical parameter for multi-agent coordination in harvesting tasks.
+These findings directly support the hypothesis that communication range is a critical parameter for multi-agent coordination in harvesting tasks, and suggest that moderate communication ranges (r=2) provide optimal cost-benefit trade-offs.
+
+\section{Visualizations}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/yield_vs_range.pdf}
+\caption{Harvesting yield increases with communication range, with diminishing returns beyond r=2. Error bars show standard deviation across 80 runs per range.}
+\label{fig:yield_vs_range}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/messages_vs_range.pdf}
+\caption{Communication cost (messages sent) increases substantially with range, showing the trade-off between coordination benefits and communication overhead.}
+\label{fig:messages_vs_range}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/efficiency_vs_range.pdf}
+\caption{Efficiency (yield per message) peaks at r=2, indicating that local communication provides the best cost-benefit trade-off.}
+\label{fig:efficiency_vs_range}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.9\textwidth]{figures/yield_by_factors.pdf}
+\caption{Yield varies by team size and resource density. Larger teams and higher densities both increase absolute yield, though the communication range effect is consistent across all configurations.}
+\label{fig:yield_by_factors}
+\end{figure}
 

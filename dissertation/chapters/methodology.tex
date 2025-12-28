@@ -2,7 +2,7 @@
 
 \section{Problem Formulation}
 
-The core problem I'm tackling is: how do we choose the right communication range for the harvesting agents? Too small and they work in isolation; too large and they waste resources on communication overhead. This section formalizes the problem.
+This research addresses the fundamental question: what communication range optimizes harvesting efficiency in multi-agent systems? This section formalizes the problem by defining the state space, action space, objective function, and constraints.
 
 \subsection{Problem Definition}
 
@@ -18,8 +18,8 @@ Given a team of $N$ autonomous harvesting agents operating in a spatial environm
 \begin{itemize}
     \item Agents have limited sensing range (can only see fruit in adjacent cells)
     \item Communication range $r$ is fixed for each experimental run
-    \item Fruit cannot be harvested by multiple agents simultaneously
-    \item Agents cannot occupy the same cell
+    \item Fruit cannot be harvested by multiple agents simultaneously (only one agent can harvest each fruit)
+    \item Multiple agents may occupy the same cell (using Mesa's MultiGrid)
 \end{itemize}
 
 \subsection{Research Approach}
@@ -36,7 +36,7 @@ This approach directly answers the research question ("Does communication range 
 
 \subsection{Framework Selection: Mesa 3.0}
 
-I'm using Mesa 3.0, a Python framework for agent-based modeling. Mesa handles simulation infrastructure (grid management, agent scheduling, data collection) so I can focus on agent behaviors and coordination mechanisms.
+This research employs Mesa 3.0, a Python framework for agent-based modeling. Mesa provides essential simulation infrastructure including grid management, agent scheduling, and data collection, enabling focus on domain-specific agent behaviors and coordination mechanisms.
 
 \textbf{Key features}:
 \begin{itemize}
@@ -48,7 +48,7 @@ I'm using Mesa 3.0, a Python framework for agent-based modeling. Mesa handles si
 
 \subsection{Environment Specification}
 
-\textbf{Grid}: 50×50 cells, non-toroidal (agents cannot wrap around edges)
+\textbf{Grid}: 50×50 cells, non-toroidal (agents cannot wrap around edges). This size was chosen to provide sufficient spatial complexity for communication range effects to manifest while remaining computationally tractable for 400 experimental runs.
 
 \textbf{Fruit placement}: Random initial placement with density $\rho \in \{0.15, 0.25\}$ (proportion of cells with fruit)
 
@@ -126,15 +126,15 @@ Agents follow a simplified BDI (Belief-Desire-Intention) architecture inspired b
 
 \subsection{Experimental Protocol}
 
-\textbf{Replications}: 30 runs per configuration (following ML module best practices for statistical power)
+\textbf{Replications}: 20 runs per configuration for reproducibility
 
-\textbf{Random seeds}: Fixed sequence (0-29) for reproducibility
+\textbf{Random seeds}: Fixed sequence (0-19) for reproducibility
 
 \textbf{Episode length}: 500 time steps (sufficient for agents to explore and harvest)
 
 \textbf{Data collection}: Per-step metrics recorded via Mesa \texttt{DataCollector}
 
-\textbf{Total runs}: $20 \text{ configurations} \times 30 \text{ replications} = 600$ simulation runs
+\textbf{Total runs}: $20 \text{ configurations} \times 20 \text{ replications} = 400$ simulation runs
 
 \subsection{Baseline Comparison}
 
@@ -142,13 +142,13 @@ Range $r=0$ (no communication) serves as baseline. All other ranges are compared
 
 \section{Results Analysis Approach}
 
-Rather than performing formal statistical hypothesis testing, I analyze the experimental results using descriptive statistics and direct comparison of means and efficiency metrics. This approach is appropriate because:
+The experimental results are analyzed using descriptive statistics including means, standard deviations, and confidence intervals. This approach is appropriate because:
 
 \begin{itemize}
-    \item The effect sizes are large (37-41\% improvement from no communication to communication)
-    \item The patterns are consistent across all configurations
+    \item The effect sizes are large and consistent across all configurations
     \item The practical significance is clear from the raw numbers
-    \item The sample size (400 runs) provides sufficient evidence
+    \item The sample size (400 runs) provides sufficient evidence for robust conclusions
+    \item Descriptive statistics effectively communicate the communication range effects
 \end{itemize}
 
 \subsection{Metrics Analyzed}

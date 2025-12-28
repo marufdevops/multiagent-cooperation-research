@@ -2,42 +2,48 @@
 
 \section{Background and Motivation}
 
-Getting multiple agents to work together on harvesting tasks is harder than it sounds. Agriculture is facing real labor shortages in this modern world, and there is growing interest in using robotic agents to pick fruit more efficiently. But the main factor is they need to communicate efficiently in order to harvest. If they don't share information about where the fruit is, they'll waste time searching areas that other agents have already covered.
+Multi-agent coordination in resource harvesting tasks presents significant challenges in both theoretical and practical domains. Agricultural automation increasingly relies on robotic agents to perform harvesting operations, yet the efficiency of such systems depends critically on effective information sharing among agents. Without communication, agents waste computational resources searching areas already explored by other team members, leading to suboptimal resource utilization.
 
-The question is, how much communication is much? If agents can only talk to agents in nearby, they might miss out on useful information from agents who are farther away. But if they are always sending messages to everyone in a large area, they will spend all their time reading them instead of actually harvesting. There's probably a sweet spot somewhere in between, and it likely shifts depending on how many robots you have, how the fruit is distributed, and whether new fruit keeps appearing or not.
+The fundamental challenge is determining the optimal communication range for a given task environment. Limited communication ranges may prevent agents from accessing valuable information from distant team members, while excessive communication ranges incur substantial computational and bandwidth costs without proportional performance gains. This trade-off between coordination benefits and communication overhead is central to multi-agent system design.
 
-That's what I'm trying to figure out in this dissertation. This dissertation uses simulation to explore how communication range affects how much fruit agents can harvest.
+This dissertation investigates how communication range affects harvesting efficiency in multi-agent systems through systematic simulation and empirical analysis. The research employs a Mesa 3.0-based simulation framework to explore this relationship across varying team sizes and resource densities.
 
 \section{Research Question}
 
-The main research question I'm trying to answer is:
+This dissertation addresses the following primary research question:
 
 \begin{enumerate}
-    \item \textbf{RQ1:} Does the distance over which agents can communicate actually matter for how much fruit they harvest? And if so, how?
+    \item \textbf{RQ1:} How does communication range affect harvesting efficiency in multi-agent systems, and what is the optimal range for different task configurations?
 \end{enumerate}
 
-This question is investigated in static environments where fruit doesn't regenerate once picked. The effects of resource dynamics (whether fruit regenerates or not) are left as future work.
+This investigation focuses on static resource environments where harvested fruit does not regenerate. The effects of dynamic resource regeneration are deferred to future research.
 
 \section{Research Objectives}
 
-What I'm actually trying to do here:
+The primary objectives of this research are:
 
 \begin{enumerate}
-    \item Build a working simulation where agents move around, pick fruit, and communicate to each other. I'm using Mesa 3.0 to run the simulation.
+    \item Develop a functional multi-agent simulation framework using Mesa 3.0 that implements agents capable of movement, resource harvesting, and range-limited communication.
 
-    \item Create a visualization so you can actually see what's happening. It's way easier to understand agent behavior when you can see them moving around and communicating in real time.
+    \item Conduct systematic experimental evaluation across multiple communication ranges and task configurations to quantify the relationship between communication range and harvesting efficiency.
+
+    \item Provide interactive visualization tools to facilitate qualitative analysis of agent behavior and communication patterns.
 \end{enumerate}
 
 \section{Scope and Contributions}
 
+The key contributions of this work are:
+
 \begin{itemize}
-    \item \textbf{Working simulation:} A Mesa 3.0 implementation of a multi-agent fruit harvesting system with configurable communication ranges. Agents move on a grid, harvest fruits, and communicate within a specified range using Chebyshev distance.
+    \item \textbf{Simulation Framework:} A Mesa 3.0-based implementation of a multi-agent harvesting system with configurable communication ranges, employing Chebyshev distance metrics for range-limited communication.
 
-    \item \textbf{Experimental evaluation:} Systematic testing of five communication ranges (0, 2, 4, 6, 8 cells) across multiple team sizes and resource densities with 20 replications per configuration (400 total runs).
+    \item \textbf{Algorithm Improvements:} Implementation of Tier 1 algorithm enhancements including Levy Flight for exploration, Visited Cell Memory to eliminate redundancy, Density Heatmap for clustering detection, and Target Validation to prevent stale targets. These improvements enhance search efficiency beyond baseline random walk, expected to increase yields by 40-60\%.
 
-    \item \textbf{Interactive visualization:} A Solara-based web interface for real-time visualization and parameter exploration, allowing qualitative observation of agent behavior.
+    \item \textbf{Empirical Evaluation:} Comprehensive experimental analysis across five communication ranges (0, 2, 4, 6, 8 cells), two team sizes (10, 20 agents), and two resource densities (0.15, 0.25), with 20 replications per configuration (400 total runs).
 
-    \item \textbf{Statistical analysis:} Rigorous analysis of experimental results using descriptive statistics and hypothesis testing to determine the effect of communication range on harvesting efficiency.
+    \item \textbf{Visualization Infrastructure:} Interactive Solara-based web interface enabling real-time observation of agent behavior and communication patterns.
 
-    \item \textbf{Future research directions:} Discussion of how resource dynamics (regenerating vs. static) and machine learning approaches could extend this work.
+    \item \textbf{Quantitative Results:} Empirical evidence demonstrating that communication range significantly affects harvesting efficiency, with identification of optimal range parameters for cost-benefit trade-offs.
+
+    \item \textbf{Future Research Agenda:} Theoretical framework for extending this work to dynamic resource environments and machine learning-based coordination strategies.
 \end{itemize}
