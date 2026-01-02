@@ -53,6 +53,12 @@ class HarvesterAgent(Agent):
         
     def move(self):
         """Move to adjacent cell with Tier 1 improvements."""
+        # Check if there's any fruit left in the model
+        remaining_fruit = sum(1 for f in self.model.fruits if f.available)
+        if remaining_fruit == 0:
+            # No fruit left, stop moving
+            return
+
         # First, check if there's fruit nearby to harvest (prioritize close fruit)
         nearby_fruit = self._find_closest_fruit_nearby(search_radius=2)
 

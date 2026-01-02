@@ -68,6 +68,8 @@ class HarvestModel(Model):
         # Tracking variables for metrics
         self.cumulative_messages = 0
         self.steps = 0  # Track current step for visualization
+        self.simulation_complete = False  # Flag to indicate when all fruit is collected
+        self.completion_step = None  # Track which step the simulation completed
 
         # Data collection with basic metrics
         self.datacollector = DataCollector(
@@ -122,15 +124,29 @@ class HarvestModel(Model):
         # Update cumulative message count
         self.cumulative_messages += self._get_messages_this_step()
 
-        # Increment step counter
-        self.steps += 1
-
         # Collect data
         self.datacollector.collect(self)
+
+        # Check if all fruit has been collected
+        if self._get_remaining_fruit() == 0:
+            self.simulation_complete = True
+            self.completion_step = self.steps
+
+    def _wrapped_step(self):
+        """Override Mesa's _wrapped_step to pause when simulation is complete"""
+        # If simulation is complete, pause (don't increment counter or step)
+        if self.simulation_complete:
+            return
+
+        # Otherwise, call parent's _wrapped_step which increments counter and calls step()
+        from mesa import Model
+        Model._wrapped_step(self)
     
     def run_model(self, steps=100):
-        """Run model for specified number of steps."""
+        """Run model for specified number of steps or until all fruit is collected."""
         for _ in range(steps):
+            if self.simulation_complete:
+                break
             self.step()
 
     # Metric calculation methods
