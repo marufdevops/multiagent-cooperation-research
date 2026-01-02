@@ -39,5 +39,5 @@ if __name__ == '__main__':
         steps=100,
         seed=42
     )
-    print(data);
+    print(data)
 
