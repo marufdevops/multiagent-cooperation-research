@@ -3,6 +3,7 @@ Fruit Harvesting Model for RQ1: Communication Range Effects
 
 Implements Static resource dynamics (no regeneration).
 Tracks metrics: yield, messages, remaining fruit, coverage.
+Uses MultiGrid with occupancy checks to prevent agent overlaps.
 """
 import random
 from mesa import Model
@@ -51,7 +52,8 @@ class HarvestModel(Model):
         self.fruit_density = fruit_density
         self.comm_range = comm_range
         
-        # Grid
+        # Grid - MultiGrid allows multiple agents, but we check for HarvesterAgent occupancy
+        # Agents and fruit can coexist in same cell, but we prevent multiple HarvesterAgents per cell
         self.grid = MultiGrid(width, height, torus=False)
         
         # Track fruits separately for efficient lookup
@@ -96,15 +98,17 @@ class HarvestModel(Model):
             self.fruits.append(fruit)
 
     def _place_agents(self):
-        """Place harvester agents on grid."""
-        for _ in range(self.num_agents):
+        """Place harvester agents on grid (can coexist with fruit)."""
+        # Get all positions on the grid
+        all_positions = [(x, y) for x in range(self.width) for y in range(self.height)]
+
+        # Randomly select positions for agents
+        agent_positions = random.sample(all_positions, min(self.num_agents, len(all_positions)))
+
+        # Place agents
+        for pos in agent_positions:
             agent = HarvesterAgent(self)
-            
-            # Find empty position
-            x = random.randrange(self.width)
-            y = random.randrange(self.height)
-            
-            self.grid.place_agent(agent, (x, y))
+            self.grid.place_agent(agent, pos)
     
     def step(self):
         """Execute one step of the model using Mesa 3.0"""

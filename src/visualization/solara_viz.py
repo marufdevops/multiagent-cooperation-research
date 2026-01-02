@@ -43,12 +43,24 @@ def agent_portrayal(agent):
 
 def make_model(params):
     """Create model instance from parameters (Static dynamics only)."""
+    # Extract values from parameter definitions
+    # params can be either raw values or parameter definitions with "value" key
+    def get_param_value(param_dict, key, default):
+        if key not in param_dict:
+            return default
+        param = param_dict[key]
+        # If it's a dict with "value" key, extract the value
+        if isinstance(param, dict) and "value" in param:
+            return param["value"]
+        # Otherwise, use it directly
+        return param
+
     return HarvestModel(
-        width=params.get("width", 20),
-        height=params.get("height", 20),
-        num_agents=params.get("num_agents", 5),
-        fruit_density=params.get("fruit_density", 0.2),
-        comm_range=params.get("comm_range", 2),
+        width=get_param_value(params, "width", 20),
+        height=get_param_value(params, "height", 20),
+        num_agents=get_param_value(params, "num_agents", 5),
+        fruit_density=get_param_value(params, "fruit_density", 0.2),
+        comm_range=get_param_value(params, "comm_range", 2),
     )
 
 

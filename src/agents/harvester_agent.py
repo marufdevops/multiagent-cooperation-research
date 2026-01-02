@@ -1,22 +1,17 @@
 """
 Harvester Agent for fruit collection simulation.
 
-Implements Tier 1 + Tier 2 algorithm improvements:
+Implements Tier 1 algorithm improvements:
 
 TIER 1:
 1. Levy Flight - Power-law distributed step sizes for better exploration
 2. Visited Cell Memory - Avoids revisiting empty areas
 3. Density Heatmap - Biases movement toward fruit clusters
 4. Target Validation - Ensures target fruit still exists
-
-TIER 2:
-5. BFS Exploration - Systematic frontier-based exploration
-6. A* Pathfinding - Optimal path to target fruit
-7. Message Filtering - Intelligent message routing to idle agents
+5. Nearby Fruit Priority - Always prioritize close fruit over distant targets
 """
 import random
 import numpy as np
-from heapq import heappush, heappop
 from mesa import Agent
 
 
@@ -41,11 +36,6 @@ class HarvesterAgent(Agent):
 
         # Tier 1 Improvements
         self.empty_cells = set()  # Track cells with no fruit (avoid revisiting)
-
-        # Tier 2 Improvements
-        self.frontier = set()  # BFS frontier cells
-        self.path_to_target = []  # A* path queue
-        self.use_bfs = True  # Toggle between BFS and Levy Flight
         
     def step(self):
         """Execute one step: move, harvest, communicate."""
@@ -62,19 +52,81 @@ class HarvesterAgent(Agent):
         self.communicate()
         
     def move(self):
-        """Move to adjacent cell with Tier 1 + Tier 2 improvements."""
-        if self.current_target:
+        """Move to adjacent cell with Tier 1 improvements."""
+        # First, check if there's fruit nearby to harvest (prioritize close fruit)
+        nearby_fruit = self._find_closest_fruit_nearby(search_radius=2)
+
+        if nearby_fruit:
+            # Move toward nearby fruit instead of distant target
+            self.current_target = nearby_fruit
+            self._move_toward(nearby_fruit)
+        elif self.current_target:
             # Target Validation: Check if target still exists
             if self._is_target_valid():
-                # Move toward target using A* pathfinding
-                self._move_toward_with_astar(self.current_target)
+                # Move toward target
+                self._move_toward(self.current_target)
             else:
                 # Target was harvested, clear it and search
                 self.current_target = None
-                self._move_with_bfs()
+                self._move_with_levy_and_density()
         else:
-            # BFS exploration to find fruit
-            self._move_with_bfs()
+            # Levy Flight + Density exploration
+            self._move_with_levy_and_density()
+
+    def _find_closest_fruit_nearby(self, search_radius=2):
+        """Find closest available fruit within search radius."""
+        if not self.pos:
+            return None
+
+        min_dist = float('inf')
+        closest = None
+
+        for fruit in self.model.fruits:
+            if not fruit.available or fruit.pos in self.empty_cells:
+                continue
+
+            dist = self._chebyshev_distance(self.pos, fruit.pos)
+
+            # Only consider fruit within search radius
+            if dist <= search_radius and dist < min_dist:
+                min_dist = dist
+                closest = fruit.pos
+
+        return closest
+
+    def _move_toward(self, target_pos):
+        """Move one step toward target position (greedy movement)."""
+        if not self.pos:
+            return
+
+        x, y = self.pos
+        tx, ty = target_pos
+
+        # Greedy movement towards the target
+        dx = 0 if tx == x else (1 if tx > x else -1)
+        dy = 0 if ty == y else (1 if ty > y else -1)
+
+        new_pos = (x + dx, y + dy)
+
+        # Check if new position is valid
+        if self.model.grid.out_of_bounds(new_pos):
+            self.current_target = None
+            return
+
+        # Check if cell is occupied by another HarvesterAgent (prevent agent overlap)
+        cell_contents = self.model.grid.get_cell_list_contents([new_pos])
+        has_harvester = any(isinstance(obj, HarvesterAgent) and obj != self for obj in cell_contents)
+
+        if has_harvester:
+            # Cell occupied by another agent, don't move
+            return
+
+        # Move to the new position
+        self.model.grid.move_agent(self, new_pos)
+
+        # Clear target if reached
+        if new_pos == target_pos:
+            self.current_target = None
 
     def _is_target_valid(self):
         """Check if current target fruit still exists and is available."""
@@ -94,57 +146,8 @@ class HarvesterAgent(Agent):
         self.empty_cells.add(self.current_target)
         return False
 
-    def _move_with_bfs(self):
-        """Move using BFS exploration to systematically find fruit."""
-        # Initialize frontier on first call
-        if not self.frontier:
-            self._initialize_frontier()
-
-        # If frontier is empty, fall back to Levy Flight
-        if not self.frontier:
-            self._move_with_levy_fallback()
-            return
-
-        # Find closest frontier cell
-        closest_frontier = min(
-            self.frontier,
-            key=lambda cell: self._chebyshev_distance(self.pos, cell)
-        )
-
-        # Move toward frontier cell using A*
-        if not self.path_to_target or self.path_to_target[-1] != closest_frontier:
-            self.path_to_target = self._a_star_search(self.pos, closest_frontier)
-
-        # Follow A* path
-        if self.path_to_target:
-            next_cell = self.path_to_target.pop(0)
-            if not self.model.grid.out_of_bounds(next_cell):
-                self.model.grid.move_agent(self, next_cell)
-
-        # Expand frontier as we visit new cells
-        self._expand_frontier()
-
-    def _initialize_frontier(self):
-        """Initialize frontier with cells adjacent to starting position."""
-        neighborhood = self.model.grid.get_neighborhood(
-            self.pos, moore=True, include_center=False
-        )
-        self.frontier.update(neighborhood)
-
-    def _expand_frontier(self):
-        """Expand frontier as new cells are visited."""
-        neighborhood = self.model.grid.get_neighborhood(
-            self.pos, moore=True, include_center=False
-        )
-        for cell in neighborhood:
-            if cell not in self.visited_cells and cell not in self.empty_cells:
-                self.frontier.add(cell)
-
-        # Remove current cell from frontier (already visited)
-        self.frontier.discard(self.pos)
-
-    def _move_with_levy_fallback(self):
-        """Fallback to Levy Flight when frontier is exhausted."""
+    def _move_with_levy_and_density(self):
+        """Move using Levy Flight biased toward high-density areas."""
         possible_steps = self.model.grid.get_neighborhood(
             self.pos,
             moore=True,
@@ -165,7 +168,13 @@ class HarvesterAgent(Agent):
             new_position = self._density_biased_move(unvisited_steps)
 
         if new_position and not self.model.grid.out_of_bounds(new_position):
-            self.model.grid.move_agent(self, new_position)
+            # Check if cell is occupied by another HarvesterAgent (prevent agent overlap)
+            cell_contents = self.model.grid.get_cell_list_contents([new_position])
+            has_harvester = any(isinstance(obj, HarvesterAgent) and obj != self for obj in cell_contents)
+
+            if not has_harvester:
+                # Cell is free of other agents, move to it
+                self.model.grid.move_agent(self, new_position)
 
     def _levy_flight_jump(self, possible_steps):
         """Implement Levy Flight: occasional long-range jumps."""
@@ -224,73 +233,13 @@ class HarvesterAgent(Agent):
 
         return fruit_count
     
-    def _move_toward_with_astar(self, target_pos):
-        """Move toward target using A* pathfinding."""
-        # Compute path if not already computed
-        if not self.path_to_target or self.path_to_target[-1] != target_pos:
-            self.path_to_target = self._a_star_search(self.pos, target_pos)
 
-        # Follow A* path
-        if self.path_to_target:
-            next_cell = self.path_to_target.pop(0)
-            if not self.model.grid.out_of_bounds(next_cell):
-                self.model.grid.move_agent(self, next_cell)
-
-        # Clear target if reached
-        if self.pos == target_pos:
-            self.path_to_target = []
-            self.current_target = None
-
-    def _a_star_search(self, start, goal):
-        """A* pathfinding algorithm to find optimal path to goal."""
-        open_set = []
-        heappush(open_set, (0, start))
-        came_from = {}
-        g_score = {start: 0}
-        f_score = {start: self._manhattan_distance(start, goal)}
-        closed_set = set()
-
-        while open_set:
-            _, current = heappop(open_set)
-
-            if current == goal:
-                # Reconstruct path
-                path = []
-                while current in came_from:
-                    path.append(current)
-                    current = came_from[current]
-                return path[::-1]
-
-            if current in closed_set:
-                continue
-            closed_set.add(current)
-
-            # Explore neighbors
-            neighbors = self.model.grid.get_neighborhood(
-                current, moore=True, include_center=False
-            )
-
-            for neighbor in neighbors:
-                if self.model.grid.out_of_bounds(neighbor) or neighbor in closed_set:
-                    continue
-
-                tentative_g = g_score[current] + 1
-
-                if neighbor not in g_score or tentative_g < g_score[neighbor]:
-                    came_from[neighbor] = current
-                    g_score[neighbor] = tentative_g
-                    f = tentative_g + self._manhattan_distance(neighbor, goal)
-                    f_score[neighbor] = f
-                    heappush(open_set, (f, neighbor))
-
-        return []  # No path found
-
-    def _manhattan_distance(self, pos1, pos2):
-        """Calculate Manhattan distance between two positions."""
-        return abs(pos1[0] - pos2[0]) + abs(pos1[1] - pos2[1])
     
     def harvest(self):
         """Harvest fruit at current position if available."""
+        if not self.pos:
+            return
+
         cell_contents = self.model.grid.get_cell_list_contents([self.pos])
 
         fruit_found = False
@@ -308,7 +257,7 @@ class HarvesterAgent(Agent):
     
     def communicate(self):
         """Share information with intelligent message filtering."""
-        if self.model.comm_range == 0:
+        if not self.pos or self.model.comm_range == 0:
             return
 
         # Find nearby agents within communication range (Chebyshev distance)
