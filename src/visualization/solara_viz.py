@@ -1,5 +1,27 @@
 """
-Solara visualization components for harvest model.
+Solara Visualization for Fruit Harvesting Simulation.
+
+================================================================================
+PURPOSE
+================================================================================
+This module provides an interactive web-based visualization of the multi-agent
+fruit harvesting simulation using Mesa's Solara visualization framework.
+
+The visualization allows:
+- Real-time observation of agent behavior
+- Interactive parameter adjustment (grid size, agents, communication range)
+- Visual verification of simulation correctness
+
+USAGE:
+    /opt/anaconda3/bin/python scripts/run_visualization.py
+    # or
+    solara run src/visualization/solara_viz.py --port 8765
+
+COLOR SCHEME:
+- Red circles: Harvester agents (size grows with harvest count)
+- Green squares: Available fruit
+- Gray squares: Harvested fruit
+================================================================================
 """
 import sys
 import os
@@ -15,26 +37,39 @@ from agents.fruit import Fruit
 
 def agent_portrayal(agent):
     """
-    Define agent portrayal as dictionary with color/size/marker keys.
+    Define visual representation for each agent type.
+
+    This function is called by Mesa's visualization system to determine
+    how each agent should be rendered on the grid.
+
+    Args:
+        agent: A Mesa Agent instance (HarvesterAgent or Fruit)
+
+    Returns:
+        dict: Visualization properties with keys:
+            - color: Hex color string
+            - size: Marker size in pixels
+            - marker: Shape ('o' for circle, 's' for square)
     """
     if isinstance(agent, HarvesterAgent):
-        # Agents: blue circles, size based on harvest count
+        # Agents: Red circles, size increases with harvest success
         return {
-            "color": "#f41414",
-            "size": 20 + agent.harvested * 2,
-            "marker": "o",
+            "color": "#f41414",  # Red
+            "size": 20 + agent.harvested * 2,  # Grows with success
+            "marker": "o",  # Circle
         }
     elif isinstance(agent, Fruit):
-        # Fruit: green if available, gray if harvested
         if agent.available:
+            # Available fruit: Green squares
             return {
-                "color": "#2ca02c",
+                "color": "#2ca02c",  # Green
                 "size": 15,
-                "marker": "s",
+                "marker": "s",  # Square
             }
         else:
+            # Harvested fruit: Small gray squares
             return {
-                "color": "#d3d3d3",
+                "color": "#d3d3d3",  # Light gray
                 "size": 8,
                 "marker": "s",
             }
@@ -42,17 +77,27 @@ def agent_portrayal(agent):
 
 
 def make_model(params):
-    """Create model instance from parameters (Static dynamics only)."""
-    # Extract values from parameter definitions
-    # params can be either raw values or parameter definitions with "value" key
+    """
+    Factory function to create HarvestModel from UI parameters.
+
+    This function handles the parameter format conversion needed by Solara.
+    Parameters can come in two formats:
+    - Raw values (from programmatic use)
+    - Dict with "value" key (from Solara UI widgets)
+
+    Args:
+        params: Dictionary of model parameters
+
+    Returns:
+        HarvestModel: Configured model instance
+    """
     def get_param_value(param_dict, key, default):
+        """Extract value from raw or widget parameter format."""
         if key not in param_dict:
             return default
         param = param_dict[key]
-        # If it's a dict with "value" key, extract the value
         if isinstance(param, dict) and "value" in param:
             return param["value"]
-        # Otherwise, use it directly
         return param
 
     return HarvestModel(
@@ -64,7 +109,12 @@ def make_model(params):
     )
 
 
-# Model parameters for Solara UI
+# =============================================================================
+# SOLARA UI PARAMETER CONFIGURATION
+# =============================================================================
+# These parameters define the interactive controls shown in the web interface.
+# Users can adjust these while the simulation is running to explore behavior.
+
 model_params = {
     "width": {
         "type": "SliderInt",
@@ -102,22 +152,28 @@ model_params = {
         "type": "SliderInt",
         "value": 2,
         "label": "Communication Range",
-        "min": 0,
-        "max": 8,
+        "min": 0,  # 0 = no communication (control condition)
+        "max": 8,  # Maximum experimental range
         "step": 1,
     },
 }
 
 
-# Create initial model instance
+# =============================================================================
+# VISUALIZATION SETUP
+# =============================================================================
+# Create the Mesa Solara visualization with default parameters.
+# The visualization will be updated when parameters change in the UI.
+
+# Initial model instance with default parameters
 model = HarvestModel()
 
-# Create space renderer
+# Configure the spatial renderer
 from mesa.visualization import SpaceRenderer
 renderer = SpaceRenderer(model, backend="matplotlib")
 renderer.draw_agents(agent_portrayal)
 
-# Create visualization page
+# Create the Solara visualization page
 page = SolaraViz(
     model,
     renderer,
@@ -127,6 +183,7 @@ page = SolaraViz(
 
 
 if __name__ == "__main__":
-    # Run Solara server
+    # This is executed when running with: python src/visualization/solara_viz.py
+    # Use `solara run` instead for proper server execution
     page
 

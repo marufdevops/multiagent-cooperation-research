@@ -1,4 +1,4 @@
-"""Quick test of Tier 1 improvements with minimal runs."""
+"""Quick test with minimal runs."""
 import sys
 import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
@@ -6,7 +6,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 from models.harvest_model import HarvestModel
 
 # Test with just 2 runs per configuration
-print("Testing Tier 1 improvements...")
+print("Testing...")
 
 for comm_range in [0, 2]:
     print(f"\nTesting comm_range={comm_range}")
