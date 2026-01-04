@@ -8,33 +8,39 @@ This module implements the harvester agent that moves through the
 grid, collects fruit, and communicates with nearby agents to share information
 about fruit locations.
 
+REALISTIC KNOWLEDGE MODEL:
+Agents do NOT have global knowledge of fruit locations. They only know about:
+1. Fruit they personally discover by visiting a cell
+2. Fruit locations received via communication from other agents
+
+This makes communication genuinely valuable - it's the only way to learn about
+distant fruit without physically exploring the entire grid.
+
 BEHAVIORAL ALGORITHM:
 The agent uses a hierarchical decision process for movement:
-1. Check for nearby fruit (radius=2) - immediate local harvest opportunity
+1. Check for nearby fruit (radius=2) - local sensing, immediate opportunity
 2. Pursue communicated target if valid - coordination via communication
 3. Explore using Levy Flight + Density Heatmap
 
 Explanations:
 1. Levy Flight: Occasional long-range jumps (20% probability) help escape
-   local minima and discover new fruit clusters. Standard random walk tends
-   to over-explore the same local area.
+   local minima and discover new fruit clusters.
 
 2. Visited Cell Memory: Agents track cells they've visited and found empty.
    This prevents wasteful revisiting of harvested areas.
 
 3. Density Heatmap: When exploring, agents bias movement toward cells with
-   higher local fruit density in their neighborhood.
+   higher local fruit density (uses local sensing, not global knowledge).
 
 4. Target Validation: Before moving toward a communicated target, agents
    verify the fruit still exists (hasn't been harvested by another agent).
 
-5. Nearby Fruit Priority: Agents always check for nearby fruit before
-   pursuing distant targets, preventing inefficient long-distance travel
-   when fruit is available locally.
+5. Nearby Fruit Priority: Agents check for nearby fruit (local sensing)
+   before pursuing distant communicated targets.
 
 COMMUNICATION PROTOCOL:
-- Agents broadcast fruit locations to idle neighbors (no current target)
-- Messages are filtered to avoid redundancy (only send to top 3 closest idle)
+- Agents can only share fruit they have discovered (realistic)
+- Messages are sent to idle neighbors within communication range
 - Communication range is configurable (0 = disabled, 2/4/6/8 = experimental)
 
 ================================================================================
@@ -91,8 +97,9 @@ class HarvesterAgent(Agent):
         self.last_pos = None  # Previous position for distance tracking
         self.visited_cells = set()  # All visited positions (for coverage)
 
-        # Memory for exploration
+        # Memory for exploration (realistic - no global fruit knowledge)
         self.empty_cells = set()  # Cells confirmed to have no fruit
+        self.discovered_fruits = set()  # Fruit positions agent has found or heard about
         
     def step(self):
         """
@@ -124,13 +131,15 @@ class HarvesterAgent(Agent):
 
         Decision Hierarchy (in order of priority):
         1. Stop if no fruit remains (simulation complete)
-        2. Move to nearby fruit if within search_radius=2
+        2. Move to nearby fruit if within search_radius=2 (local sensing)
         3. Move to communicated target if valid
-        4. Explore using Levy Flight + Density Heatmap
+        4. Move to nearest remembered fruit from discovered_fruits
+        5. Explore using Levy Flight + Density Heatmap
 
         Design Rationale:
             - Local fruit priority prevents inefficient long-distance travel
             - Target validation avoids chasing already-harvested fruit
+            - Remembered fruit provides direction when no immediate targets
             - Levy Flight + Density exploration balances coverage and efficiency
         """
         # Early termination: don't move if simulation is done
@@ -138,7 +147,7 @@ class HarvesterAgent(Agent):
         if remaining_fruit == 0:
             return
 
-        # Priority 1: Check for immediately accessible fruit
+        # Priority 1: Check for immediately accessible fruit (also discovers them)
         nearby_fruit = self._find_closest_fruit_nearby(search_radius=2)
 
         if nearby_fruit:
@@ -150,19 +159,38 @@ class HarvesterAgent(Agent):
             if self._is_target_valid():
                 self._move_toward(self.current_target)
             else:
-                # Target was harvested by another agent, explore instead
+                # Target was harvested by another agent, clear it
                 self.current_target = None
-                self._move_with_levy_and_density()
+                # Try to find another remembered fruit instead of random exploration
+                self._pursue_remembered_or_explore()
+        elif self.discovered_fruits:
+            # Priority 3: No nearby fruit, no target, but we remember some locations
+            self._pursue_remembered_or_explore()
         else:
-            # Priority 3: Exploration
+            # Priority 4: Pure exploration - no known fruit anywhere
+            self._move_with_levy_and_density()
+
+    def _pursue_remembered_or_explore(self):
+        """
+        Try to navigate to a remembered fruit location, or explore if none valid.
+
+        This prevents agents from sitting idle when they have fruit in memory
+        but no immediate target or nearby fruit.
+        """
+        nearest_remembered = self._find_nearest_fruit()  # Uses discovered_fruits
+        if nearest_remembered:
+            self.current_target = nearest_remembered
+            self._move_toward(nearest_remembered)
+        else:
+            # All remembered fruit was harvested, explore to find more
             self._move_with_levy_and_density()
 
     def _find_closest_fruit_nearby(self, search_radius=2):
         """
-        Find the closest available fruit within a small radius.
+        Find the closest available fruit within a small radius (local sensing).
 
-        Agents should not travel far to communicated targets when fruit is
-        available locally.
+        This simulates the agent's "vision" - they can see fruit within search_radius.
+        Any fruit seen is added to discovered_fruits (memory) for future navigation.
 
         Args:
             search_radius: Maximum Chebyshev distance to search (default=2)
@@ -182,10 +210,14 @@ class HarvesterAgent(Agent):
 
             dist = self._chebyshev_distance(self.pos, fruit.pos)
 
-            # Only consider fruit within search radius
-            if dist <= search_radius and dist < min_dist:
-                min_dist = dist
-                closest = fruit.pos
+            # Only consider fruit within search radius (agent's vision)
+            if dist <= search_radius:
+                # Remember this fruit location (local sensing -> memory)
+                self.discovered_fruits.add(fruit.pos)
+
+                if dist < min_dist:
+                    min_dist = dist
+                    closest = fruit.pos
 
         return closest
 
@@ -376,6 +408,8 @@ class HarvesterAgent(Agent):
         on the position. This is used by _density_biased_move to prefer
         directions with more fruit.
 
+        Also adds any seen fruit to discovered_fruits (local sensing -> memory).
+
         Args:
             pos: (x,y) position to evaluate
 
@@ -396,6 +430,8 @@ class HarvesterAgent(Agent):
                 for obj in cell_contents:
                     if hasattr(obj, 'is_fruit') and obj.is_fruit and obj.available:
                         fruit_count += 1
+                        # Remember this fruit (local sensing -> memory)
+                        self.discovered_fruits.add(obj.pos)
 
         return fruit_count
     
@@ -421,16 +457,26 @@ class HarvesterAgent(Agent):
 
         fruit_found = False
         for obj in cell_contents:
-            if hasattr(obj, 'is_fruit') and obj.is_fruit and obj.available:
-                obj.harvest()
-                self.harvested += 1
-                self.current_target = None  # Goal achieved
-                fruit_found = True
-                break  # Only harvest one fruit per step
+            if hasattr(obj, 'is_fruit') and obj.is_fruit:
+                if obj.available:
+                    # Discover and harvest the fruit
+                    obj.harvest()
+                    self.harvested += 1
+                    self.current_target = None  # Goal achieved
+                    fruit_found = True
+                    # Remove from discovered since we just harvested it
+                    self.discovered_fruits.discard(self.pos)
+                    self.empty_cells.add(self.pos)  # Now empty
+                    break  # Only harvest one fruit per step
+                else:
+                    # Fruit exists but already harvested by another agent
+                    self.discovered_fruits.discard(self.pos)
+                    fruit_found = True  # There was fruit, just already taken
 
         # Update Visited Cell Memory
         if not fruit_found and self.pos not in self.empty_cells:
             self.empty_cells.add(self.pos)
+            self.discovered_fruits.discard(self.pos)  # Definitely no fruit here
 
     def communicate(self):
         """
@@ -497,55 +543,85 @@ class HarvesterAgent(Agent):
         """
         Find the highest-value fruit to share with other agents.
 
+        REALISTIC IMPLEMENTATION: Only considers fruit the agent has personally
+        discovered or learned about through communication. No global knowledge.
+
         Value is computed as a combination of:
         - Local fruit density (prefer fruit in clusters)
         - Distance from sender (prefer closer fruit)
 
-        This ensures communicated fruit is both valuable (in dense area)
-        and accessible (not too far away).
-
         Returns:
-            tuple: (x,y) position of best fruit, or None if no fruit available
+            tuple: (x,y) position of best fruit, or None if no known fruit available
         """
         best_fruit = None
         best_score = -float('inf')
 
-        for fruit in self.model.fruits:
-            if not fruit.available or fruit.pos in self.empty_cells:
+        # Only consider fruit we've discovered (realistic - no global knowledge)
+        for fruit_pos in list(self.discovered_fruits):  # Copy to allow modification
+            # Skip if we know this cell is empty
+            if fruit_pos in self.empty_cells:
+                self.discovered_fruits.discard(fruit_pos)
+                continue
+
+            # Validate fruit still exists and is available
+            fruit_available = False
+            for fruit in self.model.fruits:
+                if fruit.pos == fruit_pos and fruit.available:
+                    fruit_available = True
+                    break
+
+            if not fruit_available:
+                # Fruit was harvested, remove from our knowledge
+                self.discovered_fruits.discard(fruit_pos)
                 continue
 
             # Calculate value score
-            distance = self._chebyshev_distance(self.pos, fruit.pos)
-            density = self._calculate_local_density(fruit.pos)
+            distance = self._chebyshev_distance(self.pos, fruit_pos)
+            density = self._calculate_local_density(fruit_pos)
 
             # Score: higher density is better, shorter distance is better
             score = density - (distance * 0.1)
 
             if score > best_score:
                 best_score = score
-                best_fruit = fruit.pos
+                best_fruit = fruit_pos
 
         return best_fruit
 
     def _find_nearest_fruit(self):
         """
-        Find the nearest available fruit position.
+        Find the nearest available fruit position from discovered fruits.
 
-        This is a fallback method for simple nearest-neighbor targeting.
-        Not used in main algorithm but available for testing/comparison.
+        REALISTIC IMPLEMENTATION: Only considers fruit the agent has personally
+        discovered or learned about through communication. No global knowledge.
 
         Returns:
-            tuple: (x,y) of nearest fruit, or None if no fruit available
+            tuple: (x,y) of nearest known fruit, or None if no fruit known
         """
         min_dist = float('inf')
         nearest = None
 
-        for fruit in self.model.fruits:
-            if fruit.available:
-                dist = self._chebyshev_distance(self.pos, fruit.pos)
-                if dist < min_dist:
-                    min_dist = dist
-                    nearest = fruit.pos
+        # Only consider fruit we've discovered (realistic - no global knowledge)
+        for fruit_pos in list(self.discovered_fruits):
+            if fruit_pos in self.empty_cells:
+                self.discovered_fruits.discard(fruit_pos)
+                continue
+
+            # Validate fruit still available
+            fruit_available = False
+            for fruit in self.model.fruits:
+                if fruit.pos == fruit_pos and fruit.available:
+                    fruit_available = True
+                    break
+
+            if not fruit_available:
+                self.discovered_fruits.discard(fruit_pos)
+                continue
+
+            dist = self._chebyshev_distance(self.pos, fruit_pos)
+            if dist < min_dist:
+                min_dist = dist
+                nearest = fruit_pos
 
         return nearest
 
@@ -570,13 +646,16 @@ class HarvesterAgent(Agent):
         """
         Receive a message about fruit location from another agent.
 
-        The agent only accepts the message if it doesn't already have
-        a target - this prevents overwriting existing navigation goals.
+        The agent learns about the fruit location (adds to discovered_fruits)
+        and sets it as target if idle. This implements realistic information
+        sharing - agents only know about fruit they discover or hear about.
 
         Args:
             fruit_pos: (x,y) position of reported fruit
         """
         self.messages_received += 1
+        # Learn about this fruit location (realistic discovery)
+        self.discovered_fruits.add(fruit_pos)
         if not self.current_target:
             self.current_target = fruit_pos
 
