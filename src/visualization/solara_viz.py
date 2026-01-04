@@ -55,8 +55,9 @@ def agent_portrayal(agent):
         # Agents: Red circles, size increases with harvest success
         return {
             "color": "#f41414",  # Red
-            "size": 20 + agent.harvested * 2,  # Grows with success
+            "size": 30 + agent.harvested * 2,  # Grows with success
             "marker": "o",  # Circle
+            "zorder": 1,  # Ensure agents are above fruit
         }
     elif isinstance(agent, Fruit):
         if agent.available:
@@ -65,6 +66,7 @@ def agent_portrayal(agent):
                 "color": "#2ca02c",  # Green
                 "size": 15,
                 "marker": "s",  # Square
+                "zorder": 0,  # Ensure fruit is below agents
             }
         else:
             # Harvested fruit: Small gray squares
@@ -72,6 +74,7 @@ def agent_portrayal(agent):
                 "color": "#d3d3d3",  # Light gray
                 "size": 8,
                 "marker": "s",
+                "zorder": 0,  # Ensure fruit is below agents
             }
     return {}
 
