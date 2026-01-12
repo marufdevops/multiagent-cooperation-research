@@ -15,7 +15,7 @@ from models.harvest_model import HarvestModel
 
 
 def run_experiments(
-    grid_size=50,
+    grid_size=100,
     episode_length=500,
     num_replications=20,
     comm_ranges=None,
@@ -89,14 +89,17 @@ def run_experiments(
                         run_id += 1
                         seed = replication  # Use replication number as seed
                         
-                        # Run simulation
+                        # Run simulation with clustered resources
                         model = HarvestModel(
                             width=grid_size,
                             height=grid_size,
                             num_agents=team_size,
                             fruit_density=density,
                             comm_range=comm_range,
-                            seed=seed
+                            seed=seed,
+                            use_clustered_resources=True,
+                            num_clusters=8,
+                            cluster_spread=5
                         )
                         
                         model.run_model(steps=episode_length)

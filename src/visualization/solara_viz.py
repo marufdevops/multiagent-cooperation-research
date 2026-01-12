@@ -1,9 +1,6 @@
 """
 Solara Visualization for Fruit Harvesting Simulation.
 
-================================================================================
-PURPOSE
-================================================================================
 This module provides an interactive web-based visualization of the multi-agent
 fruit harvesting simulation using Mesa's Solara visualization framework.
 
@@ -21,7 +18,6 @@ COLOR SCHEME:
 - Red circles: Harvester agents (size grows with harvest count)
 - Green squares: Available fruit
 - Gray squares: Harvested fruit
-================================================================================
 """
 import sys
 import os
@@ -112,9 +108,6 @@ def make_model(params):
     )
 
 
-# =============================================================================
-# SOLARA UI PARAMETER CONFIGURATION
-# =============================================================================
 # These parameters define the interactive controls shown in the web interface.
 # Users can adjust these while the simulation is running to explore behavior.
 
@@ -161,10 +154,6 @@ model_params = {
     },
 }
 
-
-# =============================================================================
-# VISUALIZATION SETUP
-# =============================================================================
 # Create the Mesa Solara visualization with default parameters.
 # The visualization will be updated when parameters change in the UI.
 

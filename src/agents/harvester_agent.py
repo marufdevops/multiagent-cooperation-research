@@ -1,49 +1,7 @@
 """
-Harvester Agent for fruit collection simulation.
-
-================================================================================
-PURPOSE & DESIGN RATIONALE
-================================================================================
-This module implements the harvester agent that moves through the
-grid, collects fruit, and communicates with nearby agents to share information
-about fruit locations.
-
-REALISTIC KNOWLEDGE MODEL:
-Agents do NOT have global knowledge of fruit locations. They only know about:
-1. Fruit they personally discover by visiting a cell
-2. Fruit locations received via communication from other agents
-
-This makes communication genuinely valuable - it's the only way to learn about
-distant fruit without physically exploring the entire grid.
-
-BEHAVIORAL ALGORITHM:
-The agent uses a hierarchical decision process for movement:
-1. Check for nearby fruit (radius=2) - local sensing, immediate opportunity
-2. Pursue communicated target if valid - coordination via communication
-3. Explore using Levy Flight + Density Heatmap
-
-Explanations:
-1. Levy Flight: Occasional long-range jumps (20% probability) help escape
-   local minima and discover new fruit clusters.
-
-2. Visited Cell Memory: Agents track cells they've visited and found empty.
-   This prevents wasteful revisiting of harvested areas.
-
-3. Density Heatmap: When exploring, agents bias movement toward cells with
-   higher local fruit density (uses local sensing, not global knowledge).
-
-4. Target Validation: Before moving toward a communicated target, agents
-   verify the fruit still exists (hasn't been harvested by another agent).
-
-5. Nearby Fruit Priority: Agents check for nearby fruit (local sensing)
-   before pursuing distant communicated targets.
-
-COMMUNICATION PROTOCOL:
-- Agents can only share fruit they have discovered (realistic)
-- Messages are sent to idle neighbors within communication range
-- Communication range is configurable (0 = disabled, 2/4/6/8 = experimental)
-
-================================================================================
+This module implements the HarvesterAgent class, representing autonomous
+foraging agents that move through a grid environment, collect fruit resources,
+and share information with nearby teammates via communication range.
 """
 import random
 import numpy as np
@@ -52,66 +10,62 @@ from mesa import Agent
 
 class HarvesterAgent(Agent):
     """
-    Harvesting agent that collects fruit and communicates with neighbors.
-
-    This agent implements a sophisticated movement and communication strategy
-    designed to efficiently harvest fruit in a multi-agent environment. The
-    agent balances local exploitation (harvesting nearby fruit) with global
-    exploration (finding new fruit clusters).
+    Autonomous harvesting agent with local sensing and communication capabilities.
 
     Attributes:
-        harvested (int): Total fruit collected by this agent
-        messages_sent (int): Messages sent this step (reset each step)
-        messages_received (int): Total messages received (lifetime)
-        current_target (tuple): Target (x,y) position from communication, or None
-        travel_distance (int): Total steps moved (for efficiency analysis)
+        harvested (int): Total fruit collected by this agent (primary performance metric)
+        messages_sent (int): Messages sent in current step (reset each step by model)
+        messages_received (int): Cumulative messages received (lifetime counter)
+        current_target (tuple): Target (x,y) position from communication, or None if idle
+        travel_distance (int): Total movement steps (for efficiency analysis)
         visited_cells (set): All (x,y) positions visited (for coverage metric)
-        empty_cells (set): Positions known to have no fruit (optimization)
+        empty_cells (set): Positions known to have no available fruit (memory optimization)
+        last_pos (tuple): Previous position for distance tracking
+
+    Behavioral Constants:
+        SENSING_RADIUS = 2: Local sensing range in Chebyshev distance
+        LEVY_FLIGHT_PROB = 0.2: Probability of long-range exploration jump
+        LEVY_FLIGHT_RANGE = 10: Maximum distance for Levy flight jumps
 
     Design Notes:
-        - Movement uses Moore neighborhood (8 directions + stay)
+        - Movement uses Moore neighborhood (8 directions + stay in place)
         - Communication uses Chebyshev distance for range calculation
-        - Agents cannot overlap (collision avoidance via cell checking)
+        - Collision avoidance prevents agent overlap (one agent per cell)
+        - Target validation prevents pursuing already-harvested fruit
+        - Density heatmap biases exploration toward fruit-cluster areas
     """
 
     def __init__(self, model):
         """
-        Initialize harvester agent with default state.
-
+        Initialize harvester agent with clean state and empty memory.
         Args:
-            model: The HarvestModel instance this agent belongs to
-
-        The agent starts with no harvested fruit, no target, and empty
-        memory of visited/empty cells.
+            model (HarvestModel): The parent model instance this agent belongs to.
+                                 Required by Mesa's Agent base class.
         """
         super().__init__(model)
 
         # Performance tracking
         self.harvested = 0  # Fruit collected (primary metric)
-        self.messages_sent = 0  # Messages this step (reset each step)
+        self.messages_sent = 0  # Messages this step (reset each step by model)
         self.messages_received = 0  # Lifetime message count
 
         # Navigation state
-        self.current_target = None  # (x,y) target from communication
-        self.travel_distance = 0  # Total movement steps
+        self.current_target = None  # (x,y) target from communication, or None if idle
+        self.travel_distance = 0  # Total movement steps (for efficiency analysis)
         self.last_pos = None  # Previous position for distance tracking
-        self.visited_cells = set()  # All visited positions (for coverage)
+        self.visited_cells = set()  # All visited positions (for coverage metric)
 
-        # Memory for exploration (realistic - no global fruit knowledge)
-        self.empty_cells = set()  # Cells confirmed to have no fruit
-        self.discovered_fruits = set()  # Fruit positions agent has found or heard about
+        # Memory for exploration (implements bounded rationality)
+        self.empty_cells = set()  # Cells confirmed to have no available fruit
+        self.discovered_fruits = set()  # Fruit positions agent has found or been told about
+
+        # Idleness tracking for improved communication targeting
+        self.idle_steps = 0  # Steps without finding fruit (indicates need for help)
+        self._found_fruit_this_step = False  # Flag set during harvest() for idleness tracking
         
     def step(self):
         """
-        Execute one complete agent step: move, harvest, then communicate.
-
-        The step order is important:
-        1. Move - Agent relocates based on decision hierarchy
-        2. Harvest - Collect fruit if present at new position
-        3. Communicate - Share fruit information with nearby agents
-
-        This order ensures agents harvest before communicating, so they
-        don't send messages about fruit they're about to collect.
+        Execute one complete behavioral cycle: move, harvest, communicate.
         """
         self.last_pos = self.pos
         self.move()
@@ -123,39 +77,53 @@ class HarvesterAgent(Agent):
             self.visited_cells.add(self.pos)
 
         self.harvest()
+
+        # Update idleness tracking for communication targeting
+        if not self._found_fruit_this_step:
+            self.idle_steps += 1
+        else:
+            self.idle_steps = 0
+
         self.communicate()
 
     def move(self):
         """
-        Execute movement decision using hierarchical strategy.
-
-        Decision Hierarchy (in order of priority):
-        1. Stop if no fruit remains (simulation complete)
-        2. Move to nearby fruit if within search_radius=2 (local sensing)
-        3. Move to communicated target if valid
-        4. Move to nearest remembered fruit from discovered_fruits
-        5. Explore using Levy Flight + Density Heatmap
-
-        Design Rationale:
-            - Local fruit priority prevents inefficient long-distance travel
-            - Target validation avoids chasing already-harvested fruit
-            - Remembered fruit provides direction when no immediate targets
-            - Levy Flight + Density exploration balances coverage and efficiency
+        Execute movement decision using hierarchical priority-based strategy.
+        
+        Determines next position based on a priority hierarchy of behavioral
+        rules, from immediate opportunities (local fruit) to exploration (random walk).
         """
         # Early termination: don't move if simulation is done
         remaining_fruit = sum(1 for f in self.model.fruits if f.available)
         if remaining_fruit == 0:
             return
 
+        # Priority 0: Check if fruit is at current position
+        # If so, don't move - let harvest() handle it
+        if self.pos:
+            cell_contents = self.model.grid.get_cell_list_contents([self.pos])
+            for obj in cell_contents:
+                if hasattr(obj, 'is_fruit') and obj.is_fruit and obj.available:
+                    # Fruit at current position - don't move
+                    self.current_target = None
+                    return
+
         # Priority 1: Check for immediately accessible fruit (also discovers them)
         nearby_fruit = self._find_closest_fruit_nearby(search_radius=2)
 
         if nearby_fruit:
-            # Override any distant target with nearby opportunity
-            self.current_target = nearby_fruit
-            self._move_toward(nearby_fruit)
-        elif self.current_target:
-            # Priority 2: Pursue communicated target if still valid
+            # If fruit is at current position, don't move - let harvest() handle it
+            if nearby_fruit == self.pos:
+                self.current_target = None  # Clear any previous target
+                # Don't move, just let harvest() collect it
+            else:
+                # Override any distant target with nearby opportunity
+                self.current_target = nearby_fruit
+                self._move_toward(nearby_fruit)
+                return  # Don't check other targets, focus on nearby fruit
+
+        # Priority 2: Pursue communicated target if still valid
+        if self.current_target:
             if self._is_target_valid():
                 self._move_toward(self.current_target)
             else:
@@ -189,9 +157,6 @@ class HarvesterAgent(Agent):
         """
         Find the closest available fruit within a small radius (local sensing).
 
-        This simulates the agent's "vision" - they can see fruit within search_radius.
-        Any fruit seen is added to discovered_fruits (memory) for future navigation.
-
         Args:
             search_radius: Maximum Chebyshev distance to search (default=2)
 
@@ -224,17 +189,12 @@ class HarvesterAgent(Agent):
     def _move_toward(self, target_pos):
         """
         Move one step toward a target position using greedy pathfinding.
-
-        Uses simple greedy movement: move in the direction that reduces
-        distance to target. Diagonal movement is allowed (Moore neighborhood).
-
         Args:
             target_pos: (x,y) tuple of destination position
 
         Notes:
             - Movement blocked if target cell contains another HarvesterAgent
             - Target is cleared upon reaching destination
-            - Out-of-bounds targets are abandoned
         """
         if not self.pos:
             return
@@ -276,9 +236,6 @@ class HarvesterAgent(Agent):
 
         Returns:
             bool: True if target fruit exists and is available, False otherwise
-
-        Side Effects:
-            - Adds target to empty_cells if fruit not found (optimization)
         """
         if not self.current_target:
             return False
@@ -377,28 +334,30 @@ class HarvesterAgent(Agent):
 
     def _density_biased_move(self, candidates):
         """
-        Select movement direction biased toward fruit-dense areas.
-
-        This implements the Density Heatmap improvement - when exploring,
-        prefer to move toward cells that have more fruit in their neighborhood.
-        This helps agents find fruit clusters more efficiently.
+        Select movement direction biased toward remembered fruit locations.
 
         Args:
             candidates: List of valid (x,y) positions to consider
 
         Returns:
-            tuple: (x,y) position with highest local fruit density
+            tuple: (x,y) position with highest nearby remembered fruit count
         """
-        best_move = candidates[0]
-        best_density = self._calculate_local_density(candidates[0])
+        best_move = None
+        best_count = -1
 
-        for candidate in candidates[1:]:
-            density = self._calculate_local_density(candidate)
-            if density > best_density:
-                best_density = density
+        for candidate in candidates:
+            # Count remembered fruit near this candidate
+            nearby_remembered = sum(
+                1 for fruit_pos in self.discovered_fruits
+                if self._chebyshev_distance(candidate, fruit_pos) <= 2
+            )
+
+            if nearby_remembered > best_count:
+                best_count = nearby_remembered
                 best_move = candidate
 
-        return best_move
+        # If no remembered fruit nearby, random choice (true exploration)
+        return best_move if best_move else random.choice(candidates)
 
     def _calculate_local_density(self, pos):
         """
@@ -439,18 +398,9 @@ class HarvesterAgent(Agent):
     def harvest(self):
         """
         Attempt to harvest fruit at current position.
-
-        If fruit is present and available, harvest it and increment
-        the agent's harvest count. Also updates Visited Cell Memory
-        to mark positions without fruit.
-
-        Side Effects:
-            - Increments self.harvested if fruit found
-            - Marks fruit as unavailable (fruit.harvest())
-            - Clears current_target after successful harvest
-            - Adds position to empty_cells if no fruit found
         """
         if not self.pos:
+            self._found_fruit_this_step = False
             return
 
         cell_contents = self.model.grid.get_cell_list_contents([self.pos])
@@ -464,6 +414,7 @@ class HarvesterAgent(Agent):
                     self.harvested += 1
                     self.current_target = None  # Goal achieved
                     fruit_found = True
+                    self._found_fruit_this_step = True  # Track for idleness
                     # Remove from discovered since we just harvested it
                     self.discovered_fruits.discard(self.pos)
                     self.empty_cells.add(self.pos)  # Now empty
@@ -471,6 +422,7 @@ class HarvesterAgent(Agent):
                 else:
                     # Fruit exists but already harvested by another agent
                     self.discovered_fruits.discard(self.pos)
+                    self.empty_cells.add(self.pos)  # Mark as empty since fruit is gone
                     fruit_found = True  # There was fruit, just already taken
 
         # Update Visited Cell Memory
@@ -478,30 +430,47 @@ class HarvesterAgent(Agent):
             self.empty_cells.add(self.pos)
             self.discovered_fruits.discard(self.pos)  # Definitely no fruit here
 
+        self._found_fruit_this_step = fruit_found
+
     def communicate(self):
         """
         Share fruit location information with nearby idle agents.
 
-        This implements the communication protocol for RQ1. Agents broadcast
-        information about known fruit to neighbors within communication range.
+        IMPROVED COMMUNICATION PROTOCOL with directional information sharing:
 
-        Message Filtering:
-        - Only send to agents without a current target (idle agents)
-        - Prioritize closer agents (they can reach fruit faster)
-        - Limit to top 3 recipients (reduce message flooding)
+        1. DIRECTIONAL COMMUNICATION:
+           Only agents with cluster targets (from communication or discovery)
+           share information with idle agents. This creates a feedback loop
+           where successful agents guide explorers to clusters.
+
+        2. BROADENED IDLENESS DEFINITION:
+           An agent is "idle" if:
+           - No current target, AND
+           - No nearby fruit (within search_radius=2), AND
+           - Idle for 2+ steps (indicates stuck in empty area)
+
+           This makes idle agents more receptive to communication.
+
+        3. DISTRIBUTED TARGET ASSIGNMENT:
+           Different fruits to different agents to reduce herding.
+
+        4. INTERFERENCE MODEL:
+           High communication ranges have message loss due to congestion.
 
         Communication Protocol:
-        1. Find nearby agents within comm_range (Chebyshev distance)
-        2. Find best fruit to share (density + distance score)
-        3. Filter to idle recipients only
-        4. Send to closest 3 idle agents
-
-        Notes:
-            - comm_range=0 disables communication entirely (control condition)
-            - Messages are counted for efficiency metric calculation
+        1. Check if this agent has valuable information (cluster target)
+        2. Find agents within comm_range
+        3. Identify truly idle agents (no target, no nearby fruit, idle_steps >= 2)
+        4. Get multiple ranked fruits to distribute
+        5. Assign different fruits to different agents
         """
         if not self.pos or self.model.comm_range == 0:
             return  # No communication in control condition
+
+        # Only share if we have valuable information (cluster target)
+        available_fruits = self._get_ranked_fruits()
+        if not available_fruits:
+            return  # Nothing to share
 
         # Find agents within communication range
         neighbors = self.model.grid.get_neighbors(
@@ -517,46 +486,60 @@ class HarvesterAgent(Agent):
         if not agent_neighbors:
             return
 
-        # Determine best fruit to share
-        best_fruit = self._find_best_fruit()
+        idle_neighbors = []
+        for n in agent_neighbors:
+            if n.current_target:
+                continue  # Has a target, not idle
 
-        if not best_fruit:
-            return
+            # Check for nearby fruit
+            nearby = n._find_closest_fruit_nearby(search_radius=2)
+            if nearby:
+                continue  # Has nearby fruit, not idle
 
-        # Message filtering: only contact idle agents
-        idle_neighbors = [n for n in agent_neighbors if not n.current_target]
+            # Check idle duration
+            if n.idle_steps >= 2:
+                idle_neighbors.append(n)  # Truly idle
 
         if not idle_neighbors:
-            return  # All neighbors busy
+            return  # No truly idle agents
 
-        # Prioritize by distance to fruit (closer agents first)
+        num_agents_in_range = len(agent_neighbors)
+
+        if self.model.comm_range > 4:
+            range_interference = 0.05 * (self.model.comm_range - 4)
+            crowd_interference = 0.02 * max(0, num_agents_in_range - 5)
+            total_interference = min(range_interference + crowd_interference, 0.5)
+
+            if random.random() < total_interference:
+                return  # Message lost to interference
+
         idle_neighbors.sort(
-            key=lambda n: self._chebyshev_distance(n.pos, best_fruit)
+            key=lambda n: self._chebyshev_distance(n.pos, available_fruits[0])
         )
 
-        # Send to top 3 closest idle agents
-        for neighbor in idle_neighbors[:3]:
-            neighbor.receive_message(best_fruit)
+        # Assign different fruits to different agents
+        max_recipients = min(len(idle_neighbors), 5)  # Send to up to 5 agents
+
+        for i, neighbor in enumerate(idle_neighbors[:max_recipients]):
+            # Cycle through available fruits to distribute different targets
+            fruit_index = i % len(available_fruits)
+            target_fruit = available_fruits[fruit_index]
+
+            neighbor.receive_message(target_fruit)
             self.messages_sent += 1
 
-    def _find_best_fruit(self):
+    def _get_ranked_fruits(self):
         """
-        Find the highest-value fruit to share with other agents.
+        Get multiple ranked fruits for distributed target assignment.
 
-        REALISTIC IMPLEMENTATION: Only considers fruit the agent has personally
-        discovered or learned about through communication. No global knowledge.
-
-        Value is computed as a combination of:
-        - Local fruit density (prefer fruit in clusters)
-        - Distance from sender (prefer closer fruit)
+        Returns a list of known fruit positions sorted by value score
 
         Returns:
-            tuple: (x,y) position of best fruit, or None if no known fruit available
+            list: List of (x,y) fruit positions sorted by value (best first)
         """
-        best_fruit = None
-        best_score = -float('inf')
+        scored_fruits = []
 
-        # Only consider fruit we've discovered (realistic - no global knowledge)
+        # Only consider fruit we've discovered
         for fruit_pos in list(self.discovered_fruits):  # Copy to allow modification
             # Skip if we know this cell is empty
             if fruit_pos in self.empty_cells:
@@ -581,27 +564,23 @@ class HarvesterAgent(Agent):
 
             # Score: higher density is better, shorter distance is better
             score = density - (distance * 0.1)
+            scored_fruits.append((fruit_pos, score))
 
-            if score > best_score:
-                best_score = score
-                best_fruit = fruit_pos
+        # Sort by score descending (best fruits first)
+        scored_fruits.sort(key=lambda x: x[1], reverse=True)
 
-        return best_fruit
+        # Return just the positions (top 10 to limit communication overhead)
+        return [pos for pos, _ in scored_fruits[:10]]
 
     def _find_nearest_fruit(self):
         """
         Find the nearest available fruit position from discovered fruits.
-
-        REALISTIC IMPLEMENTATION: Only considers fruit the agent has personally
-        discovered or learned about through communication. No global knowledge.
-
         Returns:
             tuple: (x,y) of nearest known fruit, or None if no fruit known
         """
         min_dist = float('inf')
         nearest = None
 
-        # Only consider fruit we've discovered (realistic - no global knowledge)
         for fruit_pos in list(self.discovered_fruits):
             if fruit_pos in self.empty_cells:
                 self.discovered_fruits.discard(fruit_pos)
@@ -630,8 +609,6 @@ class HarvesterAgent(Agent):
         Calculate Chebyshev distance between two positions.
 
         Chebyshev distance = max(|x1-x2|, |y1-y2|)
-        This corresponds to the number of king moves on a chessboard
-        and is the standard distance metric for 8-connected grids.
 
         Args:
             pos1: (x,y) tuple
@@ -645,16 +622,10 @@ class HarvesterAgent(Agent):
     def receive_message(self, fruit_pos):
         """
         Receive a message about fruit location from another agent.
-
-        The agent learns about the fruit location (adds to discovered_fruits)
-        and sets it as target if idle. This implements realistic information
-        sharing - agents only know about fruit they discover or hear about.
-
         Args:
             fruit_pos: (x,y) position of reported fruit
         """
         self.messages_received += 1
-        # Learn about this fruit location (realistic discovery)
         self.discovered_fruits.add(fruit_pos)
         if not self.current_target:
             self.current_target = fruit_pos

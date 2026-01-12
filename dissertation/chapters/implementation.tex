@@ -12,18 +12,6 @@ The system consists of three main components:
     \item \textbf{Data Collection}: Metrics tracking and visualization
 \end{itemize}
 
-\subsection{Overall Structure}
-
-The implementation follows Mesa's standard architecture:
-
-\begin{itemize}
-    \item \textbf{Model class} (\texttt{HarvestModel}): Manages the simulation
-    \item \textbf{Agent classes}: \texttt{HarvesterAgent} and \texttt{Fruit}
-    \item \textbf{Grid}: \texttt{MultiGrid} for spatial representation
-    \item \textbf{DataCollector}: Tracks metrics at each step
-    \item \textbf{Visualization}: SolaraViz for interactive display
-\end{itemize}
-
 \subsection{Model Class}
 
 The \texttt{HarvestModel} class (in \texttt{src/models/harvest\_model.py}) manages the simulation. It inherits from Mesa's \texttt{Model} class and handles initialization, agent placement, fruit placement, and data collection.
@@ -40,7 +28,7 @@ The \texttt{HarvestModel} class (in \texttt{src/models/harvest\_model.py}) manag
 \textbf{Key methods}:
 \begin{itemize}
     \item \texttt{step()}: Executes one simulation step using Mesa 3.0's \texttt{shuffle\_do('step')} for randomized agent activation
-    \item \texttt{run\_model(steps)}: Runs the model for a specified number of steps
+    \item \texttt{run\_model(steps)}: Runs the model for a specified number of steps with early termination when all fruit is collected
     \item \texttt{\_place\_fruits()}: Randomly places fruit on the grid according to density (Static dynamics only)
     \item \texttt{\_place\_agents()}: Randomly places harvester agents on the grid
     \item \texttt{\_get\_total\_yield()}: Calculates total fruit harvested across all agents
@@ -50,6 +38,42 @@ The \texttt{HarvestModel} class (in \texttt{src/models/harvest\_model.py}) manag
 \end{itemize}
 
 The model uses Mesa's \texttt{DataCollector} to automatically track metrics at each step, including total yield, messages sent, remaining fruit, and coverage.
+
+\section{Agent Implementation}
+
+\subsection{HarvesterAgent}
+
+The \texttt{HarvesterAgent} class (in \texttt{src/agents/harvester\_agent.py}) implements the core agent behavior. Each agent maintains:
+
+\textbf{State variables}:
+\begin{itemize}
+    \item \texttt{position}: Current location on grid
+    \item \texttt{discovered\_fruits}: Set of known fruit locations from sensing and communication
+    \item \texttt{empty\_cells}: Set of visited cells with no fruit (Visited Cell Memory)
+    \item \texttt{current\_target}: Target fruit location from communication
+    \item \texttt{harvested}: Total fruits harvested by this agent
+    \item \texttt{messages\_sent}: Messages sent in current step
+\end{itemize}
+
+\textbf{Behavioral algorithm} (hierarchical decision process):
+\begin{enumerate}
+    \item Check for nearby fruit (radius=2) - local sensing
+    \item Pursue communicated target if valid (Target Validation)
+    \item Move to nearest remembered fruit from discovered\_fruits
+    \item Explore using Levy Flight + Density Heatmap
+\end{enumerate}
+
+\textbf{Key algorithm improvements}:
+\begin{itemize}
+    \item \textbf{Levy Flight:} 20\% probability of long-range jump to escape local minima
+    \item \textbf{Visited Cell Memory:} Track empty cells to avoid redundant revisiting
+    \item \textbf{Density Heatmap:} Bias movement toward high-density fruit areas
+    \item \textbf{Target Validation:} Verify target fruit still exists before moving toward it
+\end{itemize}
+
+\subsection{Fruit Agent}
+
+The \texttt{Fruit} class represents static resources. Each fruit has a position and availability status. Once harvested, fruit is removed from the grid (Static dynamics).
 
 \subsection{Grid and Spatial Representation}
 

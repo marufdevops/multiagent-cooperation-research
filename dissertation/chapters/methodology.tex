@@ -8,7 +8,7 @@ This research addresses the fundamental question: what communication range optim
 
 Given a team of $N$ autonomous harvesting agents operating in a spatial environment with distributed fruit resources, the goal is to maximize collective harvest yield. Agents can communicate within a configurable range $r$ (measured in grid cells using Chebyshev distance). The problem is to identify the communication range that optimizes the trade-off between information sharing benefits and communication costs.
 
-\textbf{State Space}: Each agent maintains local state including position $(x, y)$, known fruit locations, and messages received from neighbors.
+\textbf{State Space}: Each agent maintains local state including position $(x, y)$, known fruit locations, visited empty cells, and messages received from neighbors.
 
 \textbf{Action Space}: At each time step, agents can move (8 directions), harvest fruit if present, and broadcast messages to neighbors within range $r$.
 
@@ -20,15 +20,28 @@ Given a team of $N$ autonomous harvesting agents operating in a spatial environm
     \item Communication range $r$ is fixed for each experimental run
     \item Fruit cannot be harvested by multiple agents simultaneously (only one agent can harvest each fruit)
     \item Multiple agents may occupy the same cell (using Mesa's MultiGrid)
+    \item Static resource dynamics: fruit does not regenerate once harvested
 \end{itemize}
 
 \subsection{Research Approach}
 
-Rather than attempting to find a globally optimal communication strategy (which would require solving a complex multi-agent optimization problem), I take an empirical approach: systematically test discrete communication ranges and analyze performance using statistical methods.
+Rather than attempting to find a globally optimal communication strategy (which would require solving a complex multi-agent optimization problem), I take an empirical approach: systematically test discrete communication ranges and analyze performance using statistical methods. This approach is appropriate for an MSc dissertation focused on understanding mechanisms rather than discovering novel optimization algorithms.
 
 \section{Methodological Approach}
 
-Multiple approaches exist for investigating communication range effects in multi-agent systems. Machine learning methods (reinforcement learning, evolutionary algorithms) could discover optimal communication policies, but they require extensive training, hyperparameter tuning, and produce results that are difficult to interpret. Given the constraints of an MSc dissertation (limited time, focus on understanding mechanisms rather than optimization), I chose a systematic parameter sweep approach: test discrete communication ranges $r \in \{0, 2, 4, 6, 8\}$ through controlled experimentation and analyze results using descriptive statistics.
+Multiple approaches exist for investigating communication range effects in multi-agent systems:
+
+\begin{itemize}
+    \item \textbf{Machine Learning (RL/EA):} Reinforcement learning or evolutionary algorithms could discover optimal communication policies, but require extensive training, hyperparameter tuning, and produce results difficult to interpret.
+
+    \item \textbf{Game Theory:} Formal game-theoretic analysis could model communication as a strategic game, but requires simplifying assumptions that may not reflect realistic agent behaviors.
+
+    \item \textbf{Analytical Methods:} Mathematical analysis could derive optimal ranges under specific assumptions, but requires strong simplifications of the problem.
+
+    \item \textbf{Systematic Parameter Sweep:} Test discrete communication ranges through controlled experimentation and analyze results using statistical methods.
+\end{itemize}
+
+Given the constraints of an MSc dissertation (limited time, focus on understanding mechanisms rather than optimization), I chose systematic parameter sweep: test discrete communication ranges $r \in \{0, 2, 4, 6, 8\}$ through controlled experimentation and analyze results using descriptive statistics.
 
 This approach directly answers the research question ("Does communication range affect harvesting efficiency?") with clear, interpretable results. It allows systematic exploration of how communication range interacts with team size and resource density. While it doesn't search continuous parameter space or discover novel strategies, it provides rigorous evidence of communication range effects without the computational overhead or interpretability challenges of machine learning methods. This balance between rigor and feasibility makes it well-suited for an MSc research project focused on RQ1 (communication range effects) in static environments.
 
