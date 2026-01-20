@@ -1,219 +1,315 @@
 % Methodology
 
-\section{Problem Formulation}
+\section{Research Design and Rationale}
 
-This research addresses the fundamental question: what communication range optimizes harvesting efficiency in multi-agent systems? This section formalizes the problem by defining the state space, action space, objective function, and constraints.
+The purpose of this dissertation is to find out how communication range affects how well multiple agents work together in a harvesting task. The study doesn't use reinforcement learning or evolution to find the best communication policy. Instead, it uses a controlled, empirical design: a fixed and understandable communication protocol is tested across a discrete set of communication ranges, while other aspects of agent behavior stay the same.
 
-\subsection{Problem Definition}
+This approach is appropriate for several reasons:
 
-Given a team of $N$ autonomous harvesting agents operating in a spatial environment with distributed fruit resources, the goal is to maximize collective harvest yield. Agents can communicate within a configurable range $r$ (measured in grid cells using Chebyshev distance). The problem is to identify the communication range that optimizes the trade-off between information sharing benefits and communication costs.
-
-\textbf{State Space}: Each agent maintains local state including position $(x, y)$, known fruit locations, visited empty cells, and messages received from neighbors.
-
-\textbf{Action Space}: At each time step, agents can move (8 directions), harvest fruit if present, and broadcast messages to neighbors within range $r$.
-
-\textbf{Objective Function}: Maximize total yield $Y = \sum_{t=1}^{T} \sum_{i=1}^{N} h_i(t)$ where $h_i(t)$ is fruit harvested by agent $i$ at time $t$.
-
-\textbf{Constraints}:
-\begin{itemize}
-    \item Agents have limited sensing range (can only see fruit in adjacent cells)
-    \item Communication range $r$ is fixed for each experimental run
-    \item Fruit cannot be harvested by multiple agents simultaneously (only one agent can harvest each fruit)
-    \item Multiple agents may occupy the same cell (using Mesa's MultiGrid)
-    \item Static resource dynamics: fruit does not regenerate once harvested
-\end{itemize}
-
-\subsection{Research Approach}
-
-Rather than attempting to find a globally optimal communication strategy (which would require solving a complex multi-agent optimization problem), I take an empirical approach: systematically test discrete communication ranges and analyze performance using statistical methods. This approach is appropriate for an MSc dissertation focused on understanding mechanisms rather than discovering novel optimization algorithms.
-
-\section{Methodological Approach}
-
-Multiple approaches exist for investigating communication range effects in multi-agent systems:
-
-\begin{itemize}
-    \item \textbf{Machine Learning (RL/EA):} Reinforcement learning or evolutionary algorithms could discover optimal communication policies, but require extensive training, hyperparameter tuning, and produce results difficult to interpret.
-
-    \item \textbf{Game Theory:} Formal game-theoretic analysis could model communication as a strategic game, but requires simplifying assumptions that may not reflect realistic agent behaviors.
-
-    \item \textbf{Analytical Methods:} Mathematical analysis could derive optimal ranges under specific assumptions, but requires strong simplifications of the problem.
-
-    \item \textbf{Systematic Parameter Sweep:} Test discrete communication ranges through controlled experimentation and analyze results using statistical methods.
-\end{itemize}
-
-Given the constraints of an MSc dissertation (limited time, focus on understanding mechanisms rather than optimization), I chose systematic parameter sweep: test discrete communication ranges $r \in \{0, 2, 4, 6, 8\}$ through controlled experimentation and analyze results using descriptive statistics.
-
-This approach directly answers the research question ("Does communication range affect harvesting efficiency?") with clear, interpretable results. It allows systematic exploration of how communication range interacts with team size and resource density. While it doesn't search continuous parameter space or discover novel strategies, it provides rigorous evidence of communication range effects without the computational overhead or interpretability challenges of machine learning methods. This balance between rigor and feasibility makes it well-suited for an MSc research project focused on RQ1 (communication range effects) in static environments.
-
-\section{Simulation Environment Design}
-
-\subsection{Framework Selection: Mesa 3.0}
-
-This research employs Mesa 3.0, a Python framework for agent-based modeling. Mesa provides essential simulation infrastructure including grid management, agent scheduling, and data collection, enabling focus on domain-specific agent behaviors and coordination mechanisms.
-
-\textbf{Key features}:
-\begin{itemize}
-    \item \texttt{MultiGrid}: Spatial environment with multiple agents per cell
-    \item \texttt{model.agents.shuffle\_do('step')}: Randomized agent activation each step
-    \item \texttt{DataCollector}: Automated metric collection over time
-    \item \texttt{SolaraViz}: Interactive web-based visualization
-\end{itemize}
-
-\subsection{Environment Specification}
-
-\textbf{Grid}: 50×50 cells, non-toroidal (agents cannot wrap around edges). This size was chosen to provide sufficient spatial complexity for communication range effects to manifest while remaining computationally tractable for 400 experimental runs.
-
-\textbf{Fruit placement}: Random initial placement with density $\rho \in \{0.15, 0.25\}$ (proportion of cells with fruit)
-
-\textbf{Resource dynamics}: Static mode only. Fruit doesn't regenerate once harvested. This simplification allows us to isolate the effects of communication range on harvesting efficiency without confounding factors from resource regeneration.
-
-\subsection{Agent Architecture}
-
-Agents follow a simplified BDI (Belief-Desire-Intention) architecture inspired by the Multi-Agent Systems module:
-
-\textbf{Beliefs}: Known fruit locations (from sensing and received messages)
-
-\textbf{Desires}: Harvest fruit to maximize collective yield
-
-\textbf{Intentions}: Move toward nearest known fruit, or explore if none known
-
-\textbf{Agent behavior algorithm}:
 \begin{enumerate}
-    \item \textbf{Sense}: Detect fruit in adjacent cells (Moore neighborhood)
-    \item \textbf{Receive messages}: Update beliefs with fruit locations from neighbors within range $r$
-    \item \textbf{Decide}: Choose action based on beliefs
-    \begin{itemize}
-        \item If fruit in current cell: harvest
-        \item Else if known fruit locations: move toward nearest
-        \item Else: random walk (exploration)
-    \end{itemize}
-    \item \textbf{Act}: Execute chosen action
-    \item \textbf{Communicate}: Broadcast known fruit locations to neighbors within range $r$
+    \item \textbf{Causal interpretation:} By varying only communication range while controlling other factors, observed performance differences can be directly attributed to range effects rather than confounding variables.
+
+    \item \textbf{Systematic exploration:} The design enables comprehensive investigation of interactions between communication range, team size, and resource density through factorial experimentation.
+
+    \item \textbf{Reproducibility:} Fixed agent behaviors and explicit communication protocols ensure that results are reproducible and verifiable, unlike learned policies that may vary across training runs.
+
+    \item \textbf{Interpretability:} An engineered communication policy makes results explainable in terms of agent behaviors and information flow, supporting practical design insights.
+
+    \item \textbf{Computational efficiency:} Avoiding the computational overhead of learning algorithms enables extensive parameter sweeps with multiple replications for statistical robustness.
 \end{enumerate}
 
-\subsection{Communication Protocol}
+The methodology follows a simulation-based experimental approach using agent-based modeling (ABM). This paradigm is well-suited for studying emergent coordination phenomena where system-level outcomes arise from local agent interactions.
 
-\textbf{Range}: Chebyshev distance $d_{Chebyshev}(a, b) = \max(|x_a - x_b|, |y_a - y_b|)$
+\section{Problem Formulation}
 
-\textbf{Message content}: List of known fruit locations (coordinates)
+\subsection{Environment Model}
 
-\textbf{Broadcasting}: Each agent sends messages to all agents within range $r$ each step
+Consider a discrete grid environment $\mathcal{G} = \{(x,y) : 0 \le x < W, 0 \le y < H\}$ where $W$ and $H$ are the grid width and height. The environment contains:
 
-\textbf{Message processing}: Receiving agents merge new locations into their belief set
+\begin{itemize}
+    \item A set of $N$ autonomous harvesting agents $\mathcal{A} = \{a_1, a_2, \ldots, a_N\}$
+    \item A set of fruit resources $\mathcal{F} \subseteq \mathcal{G}$ distributed across grid cells
+    \item No obstacles or terrain constraints (all cells are traversable)
+\end{itemize}
 
-\textbf{Cost model}: Count total messages sent (bandwidth proxy)
+Each agent $a_i$ has a position $p_i = (x_i, y_i) \in \mathcal{G}$ and can move to any of the 8 adjacent cells (Moore neighborhood) in a single time step. Agents can occupy the same cell simultaneously.
+
+\subsection{Objective Function}
+
+The collective objective is to maximize the total harvest yield over a finite time horizon $T$:
+
+\begin{equation}
+Y = \sum_{t=1}^{T} \sum_{i=1}^{N} h_i(t)
+\end{equation}
+
+where $h_i(t)$ is the number of fruit items harvested by agent $i$ at time step $t$. An agent harvests all fruit present in its current cell, removing it from the environment.
+
+\subsection{Communication Model}
+
+Communication is range-limited based on Chebyshev distance (also known as the $L_\infty$ metric or chessboard distance). Two agents $a_i$ and $a_j$ can communicate if and only if:
+
+\begin{equation}
+d_{\infty}(p_i, p_j) = \max(|x_i - x_j|, |y_i - y_j|) \le r
+\end{equation}
+
+where $r \in \mathbb{Z}_{\ge 0}$ is the communication range parameter. This distance metric naturally models grid-based communication: an agent at position $(x, y)$ can communicate with all agents in a square region of size $(2r+1) \times (2r+1)$ centered at $(x, y)$.
+
+The Chebyshev distance is chosen for three reasons:
+
+\begin{enumerate}
+    \item \textbf{Grid alignment:} It naturally corresponds to the maximum number of grid steps required to reach another agent, making it intuitive for grid-based environments.
+
+    \item \textbf{Computational efficiency:} Computing Chebyshev distance requires only two subtractions, one absolute value operation, and one maximum operation, making neighbor queries very efficient.
+
+    \item \textbf{Symmetric neighborhoods:} The resulting communication neighborhoods are square and symmetric, simplifying analysis and visualization.
+\end{enumerate}
+
+\subsection{Environmental Constraints}
+
+The environment is \emph{static}: once a fruit item is collected, it does not regenerate. This constraint isolates the effects of communication range on exploration and coordination without the additional complexity of resource dynamics. The total available fruit is fixed at initialization, making the problem a finite-horizon resource collection task.
+
+The grid is \emph{non-toroidal}: agents cannot wrap around edges. This creates boundary effects where agents near edges have fewer potential neighbors and less explorable space, modeling realistic spatial constraints.
+
+\section{Simulation Implementation}
+
+\subsection{Framework Selection}
+
+The simulations are implemented using Mesa 3.0, a Python agent-based modeling framework specifically designed for social science and complex systems research. Mesa provides:
+
+\begin{itemize}
+    \item \textbf{Spatial structures:} Built-in support for grid-based environments with efficient neighbor queries using Chebyshev distance.
+    \item \textbf{Agent scheduling:} Flexible activation regimes including random shuffling to avoid ordering artifacts.
+    \item \textbf{Data collection:} Integrated tools for collecting agent-level and model-level metrics across simulation runs.
+    \item \textbf{Batch execution:} Support for parameter sweeps with multiple replications and parallel execution.
+    \item \textbf{Reproducibility:} Explicit random seed management ensuring deterministic results.
+\end{itemize}
+
+Mesa's modular architecture separates model components (agents, environment, scheduler) from analysis tools (data collection, visualization), enabling systematic experimentation while maintaining code clarity and interpretability.
+
+\subsection{Environment Configuration}
+
+\textbf{Grid dimensions.} The environment is a $30 \times 30$ non-toroidal grid, providing 900 cells. This size is chosen to balance:
+\begin{itemize}
+    \item Sufficient spatial extent for meaningful exploration and communication range effects
+    \item Computational efficiency for running hundreds of replications
+\end{itemize}
+
+\textbf{Resource distribution.} Fruit is placed randomly at initialization with density $\rho \in \{0.15, 0.25\}$, representing the fraction of grid cells containing fruit. For a $30 \times 30$ grid:
+\begin{itemize}
+    \item $\rho = 0.15$: approximately 135 fruit items (sparse environment)
+    \item $\rho = 0.25$: approximately 225 fruit items (dense environment)
+\end{itemize}
+
+Each cell contains at most one fruit item. Fruit is removed immediately upon harvesting and does not regenerate, creating a finite resource pool that depletes over time.
+
+\textbf{Time horizon.} Each simulation run executes for $T = 500$ discrete time steps. This duration is sufficient for agents to explore a significant portion of the environment and harvest most available resources, while remaining computationally tractable for extensive parameter sweeps.
+
+\subsection{Agent Architecture: BDI Framework}
+
+Each agent employs a Belief-Desire-Intention (BDI) architecture, a well-established model for autonomous agent decision-making. The BDI framework provides a structured approach to modeling rational agents that:
+
+\begin{itemize}
+    \item Maintain \textbf{beliefs} about the world state
+    \item Form \textbf{desires} representing goals to achieve
+    \item Commit to \textbf{intentions} as concrete plans of action
+\end{itemize}
+
+In the context of fruit harvesting, the BDI components are instantiated as follows:
+
+\textbf{Beliefs:} Each agent maintains a belief set $B_i \subseteq \mathcal{G}$ representing known fruit locations. Beliefs are updated through:
+\begin{itemize}
+    \item \textbf{Local sensing:} Detecting fruit in the Moore neighborhood (8 adjacent cells)
+    \item \textbf{Communication:} Receiving fruit location messages from nearby agents
+    \item \textbf{Belief revision:} Removing locations when fruit is harvested or found to be empty
+\end{itemize}
+
+\textbf{Desires:} The agent's primary desire is to maximize personal harvest yield, which aligns with the collective objective when combined with information sharing.
+
+\textbf{Intentions:} At each time step, the agent selects a target location $\tau_i \in B_i \cup \{\text{null}\}$ representing its current intention:
+\begin{itemize}
+    \item If $B_i \neq \emptyset$: select the nearest known fruit location as target
+    \item If $B_i = \emptyset$: set $\tau_i = \text{null}$ and enter exploration mode
+\end{itemize}
+
+\subsection{Behavioral Cycle}
+
+Each agent executes a three-phase behavioral cycle at every time step:
+
+\begin{enumerate}
+    \item \textbf{Move:}
+    \begin{itemize}
+        \item If $\tau_i \neq \text{null}$: move one cell toward target using greedy path selection (minimize Chebyshev distance)
+        \item If $\tau_i = \text{null}$: move randomly to an adjacent cell (exploration)
+    \end{itemize}
+
+    \item \textbf{Harvest:}
+    \begin{itemize}
+        \item If current cell contains fruit: harvest it (increment personal yield, remove from environment)
+        \item Update beliefs to remove harvested location
+        \item Sense Moore neighborhood and add any discovered fruit to beliefs
+    \end{itemize}
+
+    \item \textbf{Communicate:}
+    \begin{itemize}
+        \item If $B_i \neq \emptyset$ and $r > 0$: broadcast belief set to all agents within range $r$
+        \item Receive messages from nearby agents and merge new locations into $B_i$
+        \item Increment message counter for efficiency analysis
+    \end{itemize}
+\end{enumerate}
+
+This cycle implements a simple but effective coordination strategy: agents exploit known resources when available (guided by beliefs) and explore randomly when no information is available. Communication enables agents to share discoveries, reducing redundant exploration.
+
+\subsection{Communication Protocol: Selective Broadcasting}
+
+Communication is implemented as \emph{selective broadcasting} within a Chebyshev radius $r$. This protocol balances information sharing with communication efficiency:
+
+\textbf{Range constraint:} An agent $a_i$ at position $p_i$ can send messages to all agents $a_j$ satisfying:
+\begin{equation}
+d_{\infty}(p_i, p_j) = \max(|x_i - x_j|, |y_i - y_j|) \le r
+\end{equation}
+
+\textbf{Selective transmission:} Agents only broadcast when they have information to share ($B_i \neq \emptyset$). This prevents unnecessary message overhead when agents have no knowledge to contribute.
+
+\textbf{Message content:} Each message contains the sender's complete belief set—the set of fruit locations the sender currently believes are available. This simple protocol ensures that all discovered information propagates through the network.
+
+\textbf{Message handling:} Upon receiving a message, an agent merges the received locations into its own belief set using set union: $B_i \leftarrow B_i \cup B_{\text{received}}$. Duplicate locations are automatically eliminated through set semantics.
+
+\textbf{Belief validation:} When an agent reaches a target location and finds no fruit (because another agent harvested it first), the location is removed from beliefs. This implements a simple form of belief revision that prevents agents from pursuing stale targets indefinitely.
+
+\textbf{Cost measurement:} Communication cost is measured as the total number of messages sent during a simulation run. Each broadcast to $k$ neighbors counts as $k$ messages, reflecting the bandwidth and processing overhead of information transmission. This metric serves as a proxy for:
+\begin{itemize}
+    \item Bandwidth consumption in wireless communication
+    \item Computational overhead for message processing
+    \item Energy expenditure in battery-powered robots
+\end{itemize}
+
+\subsection{Communication Range Configurations}
+
+The study evaluates five communication range values:
+
+\begin{itemize}
+    \item $r = 0$ (no communication): Agents operate independently with no information sharing. This baseline isolates the contribution of communication to collective performance.
+
+    \item $r = 2$ (local communication): Agents communicate within a $5 \times 5$ neighborhood. This represents short-range communication typical of Bluetooth or local radio.
+
+    \item $r = 4$ (medium communication): Agents communicate within a $9 \times 9$ neighborhood, covering a moderate spatial extent.
+
+    \item $r = 6$ (long-range communication): Agents communicate within a $13 \times 13$ neighborhood, approaching grid-wide connectivity in a $30 \times 30$ environment.
+
+    \item $r = 8$ (very long-range communication): Agents communicate within a $17 \times 17$ neighborhood, providing near-global connectivity for most agent positions.
+\end{itemize}
+
+These values are chosen to span a range from isolated operation to near-complete connectivity, enabling identification of optimal intermediate ranges.
 
 \section{Experimental Design}
 
-\subsection{Independent Variables}
+\subsection{Factorial Design}
 
-\textbf{Communication range} $r \in \{0, 2, 4, 6, 8\}$ cells (5 levels)
-\begin{itemize}
-    \item $r=0$: No communication (baseline)
-    \item $r=2$: Local communication (immediate neighbors)
-    \item $r=4$: Medium range
-    \item $r=6$: Long range
-    \item $r=8$: Very long range (covers significant portion of 50×50 grid)
-\end{itemize}
+The experiment employs a full factorial design with three independent variables:
 
-\textbf{Team size} $N \in \{10, 20\}$ agents (2 levels)
+\begin{enumerate}
+    \item \textbf{Communication range:} $r \in \{0, 2, 4, 6, 8\}$ (5 levels)
+    \item \textbf{Team size:} $N \in \{10, 20\}$ (2 levels)
+    \item \textbf{Resource density:} $\rho \in \{0.15, 0.25\}$ (2 levels)
+\end{enumerate}
 
-\textbf{Resource density} $\rho \in \{0.15, 0.25\}$ (2 levels)
+This yields $5 \times 2 \times 2 = 20$ unique parameter configurations. Each configuration is replicated 20 times with different random seeds, producing $20 \times 20 = 400$ total simulation runs.
 
-\textbf{Total configurations}: $5 \times 2 \times 2 = 20$ unique configurations
-
-\subsection{Dependent Variables (Performance Metrics)}
-
-\textbf{Primary metric}:
-\begin{itemize}
-    \item \textbf{Total yield}: Cumulative fruit harvested by all agents over episode
-\end{itemize}
-
-\textbf{Secondary metrics}:
-\begin{itemize}
-    \item \textbf{Messages sent}: Total communication cost
-    \item \textbf{Efficiency ratio}: $E = Y / M$ where $Y$ is yield and $M$ is messages (yield per message)
-    \item \textbf{Coverage}: Number of unique cells visited (exploration measure)
-    \item \textbf{Remaining fruit}: Fruit left unharvested at episode end
-\end{itemize}
-
-\subsection{Experimental Protocol}
-
-\textbf{Replications}: 20 runs per configuration for reproducibility
-
-\textbf{Random seeds}: Fixed sequence (0-19) for reproducibility
-
-\textbf{Episode length}: 500 time steps (sufficient for agents to explore and harvest)
-
-\textbf{Data collection}: Per-step metrics recorded via Mesa \texttt{DataCollector}
-
-\textbf{Total runs}: $20 \text{ configurations} \times 20 \text{ replications} = 400$ simulation runs
-
-\subsection{Baseline Comparison}
-
-Range $r=0$ (no communication) serves as baseline. All other ranges are compared against this to quantify communication benefits.
-
-\section{Results Analysis Approach}
-
-The experimental results are analyzed using descriptive statistics including means, standard deviations, and confidence intervals. This approach is appropriate because:
+\textbf{Rationale for factor selection:}
 
 \begin{itemize}
-    \item The effect sizes are large and consistent across all configurations
-    \item The practical significance is clear from the raw numbers
-    \item The sample size (400 runs) provides sufficient evidence for robust conclusions
-    \item Descriptive statistics effectively communicate the communication range effects
+    \item \textbf{Communication range} is the primary independent variable of interest, varied systematically to identify optimal values.
+
+    \item \textbf{Team size} affects agent density and potential for coordination. Larger teams may benefit more from communication but also face greater coordination overhead.
+
+    \item \textbf{Resource density} influences the exploration-exploitation trade-off. Sparse environments require more exploration, while dense environments may benefit more from coordination to avoid redundant harvesting.
 \end{itemize}
 
-\subsection{Metrics Analyzed}
+\subsection{Dependent Variables and Metrics}
 
+The study collects multiple metrics to comprehensively evaluate communication range effects:
+
+\textbf{Primary metric:}
 \begin{itemize}
-    \item \textbf{Total yield}: Fruits harvested per run (primary metric for RQ1)
-    \item \textbf{Total messages}: Number of messages sent (communication cost)
-    \item \textbf{Efficiency}: Yield per message (cost-benefit ratio)
-    \item \textbf{Coverage}: Number of unique cells visited (exploration metric)
-    \item \textbf{Remaining fruit}: Unharvested fruit at episode end
+    \item \textbf{Total yield} ($Y$): The total number of fruit items harvested by all agents over the 500-step episode. This directly measures collective task performance.
 \end{itemize}
 
-\subsection{Comparison Method}
-
-Results are compared across communication ranges using:
-
+\textbf{Communication metrics:}
 \begin{itemize}
-    \item \textbf{Mean and standard deviation}: Central tendency and variability
-    \item \textbf{Min/max values}: Range of outcomes
-    \item \textbf{Percentage improvement}: Relative gain over baseline (range 0)
-    \item \textbf{Efficiency analysis}: Yield per message to identify cost-benefit trade-offs
+    \item \textbf{Total messages sent} ($M$): The cumulative number of messages transmitted during the episode, measuring communication overhead.
+
+    \item \textbf{Average messages per step}: $M / T$, normalizing communication cost by episode length.
 \end{itemize}
 
-\subsection{Validation and Reproducibility}
-
-\textbf{Fixed random seeds}: Ensures reproducibility of results
-
-\textbf{Sanity checks}:
+\textbf{Efficiency metrics:}
 \begin{itemize}
-    \item Range 0 should produce 0 messages
-    \item Higher ranges should produce more messages
-    \item Total fruit harvested cannot exceed initial fruit count (Static mode)
+    \item \textbf{Communication efficiency}: $E = Y / M$ for configurations with $M > 0$, measuring yield per message exchanged. This captures the cost-effectiveness of communication.
+
+    \item \textbf{Normalized efficiency}: Efficiency relative to baseline yield, enabling comparison across different environmental conditions.
 \end{itemize}
 
-\section{Theoretical Discussion: Resource Dynamics (RQ2)}
+\textbf{Environmental metrics:}
+\begin{itemize}
+    \item \textbf{Remaining fruit}: Number of unharvested fruit items at episode end, indicating exploration completeness.
 
-While RQ1 focuses on communication range effects in Static environments, RQ2 asks whether resource dynamics (Static vs. Replenishing) change the optimal communication range. Due to time constraints, I don't run full experiments for RQ2, but discuss it theoretically here.
+    \item \textbf{Harvest rate}: Fraction of available fruit harvested, measuring task completion.
+\end{itemize}
 
-\subsection{Hypothesis}
+\subsection{Replication and Randomization}
 
-\textbf{Static environments}: Communication benefits diminish over time as fruit depletes. Optimal range may be lower since there's less information to share as the episode progresses.
+\textbf{Replication strategy:} Each of the 20 parameter configurations is replicated 20 times using a fixed set of random seeds (0-19). This provides:
+\begin{itemize}
+    \item Sufficient statistical power to detect meaningful differences
+    \item Reproducibility through deterministic seed sequences
+    \item Quantification of variability through standard deviation estimates
+\end{itemize}
 
-\textbf{Replenishing environments}: Sustained communication remains valuable because new fruit keeps appearing. Optimal range may be higher to maintain awareness of regenerating resources across the environment.
+\textbf{Randomization controls:}
+\begin{itemize}
+    \item \textbf{Fruit placement:} Random seed controls initial fruit distribution, ensuring different spatial patterns across replications while maintaining fixed density.
 
-\subsection{Theoretical Framework}
+    \item \textbf{Agent initialization:} Agents start at random positions, preventing artifacts from fixed starting configurations.
 
-The value of communication depends on information freshness and relevance. In Static mode, once an area is cleared, communicating about it provides no benefit. In Replenishing mode, previously cleared areas may have new fruit, making sustained communication more valuable.
+    \item \textbf{Agent activation:} Mesa's RandomActivation scheduler shuffles agent execution order each step, eliminating ordering biases.
 
-This suggests an interaction effect: optimal communication range may depend on resource dynamics. Future work should test this hypothesis systematically.
+    \item \textbf{Movement ties:} When multiple moves yield equal distance to target, selection is randomized to prevent systematic biases.
+\end{itemize}
+
+\section{Data Analysis}
+
+\subsection{Descriptive Statistics}
+
+For each parameter configuration, summary statistics are computed across replications: mean yield, standard deviation, mean messages, and communication efficiency ($E = Y / M$).
+
+\subsection{Comparative Analysis}
+
+Communication-enabled configurations ($r > 0$) are compared against the baseline ($r = 0$) to quantify information sharing benefits. Performance improvements are reported as percentage change:
+
+\begin{equation}
+\Delta Y_r = \frac{\bar{Y}_r - \bar{Y}_0}{\bar{Y}_0} \times 100\%
+\end{equation}
+
+The analysis emphasizes \emph{practical significance} through efficiency metrics, identifying ranges that maximize yield-to-cost ratio rather than raw yield alone.
+
+\section{Validation}
+
+Model verification includes unit testing of agent behaviors, boundary testing at grid edges, and conservation law verification (fruit count decreases monotonically). Model validation is established through behavioral plausibility (agents move toward known resources, explore when uninformed) and emergent patterns matching theoretical expectations (clustering around resources, diminishing returns from excessive communication).
+
+\section{Reproducibility}
+
+The experimental protocol ensures reproducibility through fixed parameter grids, deterministic seeding (seeds 0-19), version control, and open access. All code, data, and analysis scripts are publicly available at \href{https://github.com/marufdevops/multiagent-cooperation-research}{GitHub}.. This study uses computational simulation with no human or animal subjects. Ethical considerations include transparent reporting of assumptions, appropriate generalization within modeled scope, and honest uncertainty quantification.
 
 \section{Summary}
 
-This chapter presented the methodology for investigating RQ1: "Does communication range affect harvest yield?" I discussed four alternative approaches (RL, EA/PSO, game theory, parameter sweep) and justified choosing systematic parameter sweep with statistical analysis. The experimental design tests 5 communication ranges across 20 configurations with 20 replications each (400 total runs) in static environments. Statistical analysis uses descriptive statistics and hypothesis testing to determine the significance of communication range effects. RQ2 (resource dynamics) and machine learning extensions are discussed as future work.
+This chapter presented a comprehensive methodology for investigating communication range effects in multi-agent harvesting systems. The approach combines:
 
-The next chapter describes the implementation details of the simulation system.
+\begin{itemize}
+    \item A formal problem formulation with explicit objective functions and constraints
+    \item A BDI agent architecture providing interpretable autonomous behavior
+    \item A selective broadcasting protocol with range-limited communication
+    \item A full factorial experimental design with systematic parameter variation
+    \item Statistical analysis and efficiency metrics
+    \item Rigorous reproducibility and validation procedures
+\end{itemize}
+
+The methodology enables systematic investigation of the research question: \emph{What is the optimal communication range for maximizing collective yield in multi-agent fruit harvesting?} The following chapters present the implementation details and experimental results obtained through this methodology.

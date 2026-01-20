@@ -1,49 +1,60 @@
 % Introduction
 
-\section{Background and Motivation}
+\section{Research Context and Motivation}
 
-Multi-agent coordination in resource harvesting tasks presents significant challenges in both theoretical and practical domains. Agricultural automation increasingly relies on robotic agents to perform harvesting operations, yet the efficiency of such systems depends critically on effective information sharing among agents. Without communication, agents waste computational resources searching areas already explored by other team members, leading to suboptimal resource utilization.
+Multi-agent systems (MAS) have become a powerful way to solve difficult distributed problems where separate agents must work together to reach common goals. Resource harvesting and foraging tasks are standard ways to study cooperation in MAS. They are a real-world example of a problem where groups of autonomous agents must explore shared environments, find resources that are spread out in different places, and work together to get them as quickly as possible. In the real world, this kind of abstraction is used in things like precision farming, warehouse automation, search-and-rescue operations, and swarm robotics.
 
-The fundamental challenge is determining the optimal communication range for a given task environment. Limited communication ranges may prevent agents from accessing valuable information from distant team members, while excessive communication ranges incur substantial computational and bandwidth costs without proportional performance gains. This trade-off between coordination benefits and communication overhead is central to multi-agent system design.
+As labor shortages and the need for efficiency drive automation in agriculture, the problem of controlling multiple self-driving harvesting robots has gotten a lot of attention. Fruit harvesting has its own problems because resources are spread out in different places and are not all densely packed together. To solve these problems, systematic exploration strategies are needed. When many agents work in the same space, they need to work together to avoid doing the same things over and over again and get the most out of the situation as a whole.
 
-This dissertation investigates how communication range affects harvesting efficiency in multi-agent systems through systematic simulation and empirical analysis. The research employs a Mesa 3.0-based simulation framework to explore this relationship across varying team sizes and resource densities.
+Communication is the main way that decentralized agents cut down on unnecessary exploration and work together to find profitable targets. When one agent finds a place with lots of resources, telling other agents about it can help them avoid areas that aren't useful and increase the group's output. Communication does not come for free, though. It uses up bandwidth, adds to the cost of computing, and can make it harder to coordinate. Also, expanding the range of communication doesn't always mean that the benefits are proportional. Sharing too much information can cause diminishing returns or even interference effects.
 
-\section{Research Question}
+Because of these different effects, there is a basic design trade-off: {how far should agents be able to talk to each other?} If the range of communication is too short, agents may work alone and miss out on discoveries made in other areas. If it's too big, the small benefit of extra information may go away while costs rise, making the whole process less efficient. To make scalable, effective cooperative systems, you need to understand this range-dependent cost-benefit curve.
 
-This dissertation addresses the following primary research question:
+\section{Problem Statement}
 
-\begin{enumerate}
-    \item \textbf{RQ1:} How does communication range affect harvesting efficiency in multi-agent systems, and what is the optimal range for different task configurations?
-\end{enumerate}
+Even though a lot of research has been done on multi-agent coordination and communication protocols, there is still not a lot of real-world advice on how to choose the best communication range for a given team size and environment density. In multi-agent reinforcement learning (MARL), a lot of the methods focus on teaching agents what to say and when to say it. This often leads to policies that are hard to understand and only work for certain tasks. Recent research focuses on improving communication for efficiency rather than just volume, but the main question of what the best communication range is in structured environments has not been fully explored.
 
-This investigation focuses on static resource environments where harvested fruit does not regenerate. The effects of dynamic resource regeneration are deferred to future research.
+Range-limited broadcasting or local messaging is still the most common way to use systems in the real world, especially when resources are limited, like in agricultural robotics or swarm systems. Clearly defined range limits are needed because of physical limitations (like radio range and line-of-sight) and computational limitations (like processing power and battery life). However, it's not clear how the relationship between communication range and group performance changes when the environment does.
 
-\section{Research Objectives}
+The controlled simulation study of a grid-based fruit-harvesting environment in this dissertation fills in that gap. Agents use limited-range communication and local sensing to share where resources are. They use a Belief-Desire-Intention (BDI) architecture to model how agents really make decisions on their own. The study aims to find the best communication range by changing other factors but not the communication range itself. It also wants to find efficiency trade-offs and see how environmental factors such as resource density and team size affect communication range.
 
-The primary objectives of this research are:
+\section{Research Question and Objectives}
 
-\begin{enumerate}
-    \item Develop a functional multi-agent simulation framework using Mesa 3.0 that implements agents capable of movement, resource harvesting, and range-limited communication.
+The dissertation addresses the following primary research question:
 
-    \item Conduct systematic experimental evaluation across multiple communication ranges and task configurations to quantify the relationship between communication range and harvesting efficiency.
+\begin{quote}
+\textbf{RQ1:} What is the optimal communication range for maximizing collective yield in a multi-agent fruit harvesting environment?
+\end{quote}
 
-    \item Provide interactive visualization tools to facilitate qualitative analysis of agent behavior and communication patterns.
-\end{enumerate}
+This primary question is supported by several sub-questions:
+
+\begin{itemize}
+    \item How does communication range affect harvesting efficiency when measured as yield per message exchanged?
+    \item What are the relative impacts of communication range versus environmental factors (resource density, team size)?
+    \item At what point does increased communication range produce diminishing returns or interference effects?
+    \item How does the optimal range vary across different environmental configurations?
+\end{itemize}
+
+The research goals are to (1) Make an ABM that can be repeated using Mesa 3.0, BDI agents, a grid environment, and Chebyshev distance communication; (2) Do a parameter sweep over $r \in \{0, 2, 4, 6, 8\}$ with 100 replications per configuration; (3) Measure yield, messages, and efficiency metrics; (4) Use statistical analysis to find out what's important; and (5) Use clear communication policies to make things easy to understand.
+
+This project is mostly about \textbf{static resource environments}. For instance, fruit doesn't grow back after it's been picked, which can have different effects on communication range. In the part about future work, we talk about important additions like environments full of obstacles, agents with different skills, and dynamic resource replenishment.
 
 \section{Scope and Contributions}
 
-The key contributions of this work are:
+The main contributions of this dissertation are:
 
 \begin{itemize}
-    \item \textbf{Simulation Framework:} A Mesa 3.0-based implementation of a multi-agent harvesting system with configurable communication ranges, employing Chebyshev distance metrics for range-limited communication.
+    \item \textbf{A complete Mesa-based harvesting simulation}: a grid world agent-based model with team size, resource density, and communication range that can be changed. The Chebyshev distance ($L_\infty$) metric is used to model interactions between neighbors that are limited by range. Realistic constraints are used in the simulation, such as movement costs, local sensing, and selective broadcasting protocols.
 
-    \item \textbf{Algorithm Improvements:} Implementation of Tier 1 algorithm enhancements including Levy Flight for exploration, Visited Cell Memory to eliminate redundancy, Density Heatmap for clustering detection, and Target Validation to prevent stale targets. These improvements enhance search efficiency beyond baseline random walk.
+    \item \textbf{A BDI-inspired agent architecture}: agents use a Belief-Desire-Intention framework to keep beliefs about resources they find, make intentions (target selection), and go through a behavioral cycle (Move → Harvest → Communicate). This architecture makes decisions that can be understood and models realistic autonomous behavior.
 
-    \item \textbf{Empirical Evaluation:} Comprehensive experimental analysis across five communication ranges (0, 2, 4, 6, 8 cells), two team sizes (10, 20 agents), and two resource densities (0.15, 0.25), with 20 replications per configuration (400 total runs).
+    \item \textbf{A systematic parameter-sweep study}: Comprehensive evaluation over 500 simulation runs (5 communication ranges $\times$ 100 replications) with controlled environmental conditions, providing statistically robust evidence for communication range effects.
 
-    \item \textbf{Visualization Infrastructure:} Interactive Solara-based web interface enabling real-time observation of agent behavior and communication patterns.
+    \item \textbf{Empirical evidence for optimal local communication}: Results demonstrate that moderate communication range ($r=2$) achieves the highest efficiency (912.5 units per message), outperforming both isolated agents and longer-range communication. This finding challenges the assumption that more communication is always beneficial.
 
-    \item \textbf{Quantitative Results:} Empirical evidence demonstrating that communication range significantly affects harvesting efficiency, with identification of optimal range parameters for cost-benefit trade-offs.
+    \item \textbf{Quantification of the exploration-coordination trade-off}: Statistical analysis reveals that environmental factors (resource density, team size) have greater impact than communication range, suggesting that exploration dominates coordination in large, sparse environments.
 
-    \item \textbf{Future Research Agenda:} Theoretical framework for extending this work to dynamic resource environments and machine learning-based coordination strategies.
+    \item \textbf{An interference model for excessive communication}: Identification of diminishing returns and coordination overhead at ranges $r > 4$, where message volume increases exponentially while efficiency drops by 83\% (from 912.5 at $r=2$ to 102.3 at $r=8$).
+
+    \item \textbf{Open-source implementation and reproducible results}: Complete simulation code, experimental data, and analysis scripts publicly available at \href{https://github.com/marufdevops/multiagent-cooperation-research}{GitHub}., enabling validation and extension of findings.
 \end{itemize}

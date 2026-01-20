@@ -1,0 +1,135 @@
+% Appendices
+
+\chapter{Experimental Configuration and Parameters}
+
+\section{Simulation Parameters}
+
+Table \ref{tab:sim_params} summarizes the key simulation parameters used in all experiments:
+
+\begin{table}[h]
+\centering
+\small
+\caption{Simulation configuration parameters}
+\label{tab:sim_params}
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Parameter} & \textbf{Value} \\
+\hline
+Grid dimensions & $30 \times 30$ cells (900 total) \\
+Grid topology & Non-toroidal (no wrapping) \\
+Time horizon & 500 discrete time steps \\
+Agent movement & Moore neighborhood (8 directions) \\
+Distance metric & Chebyshev distance ($L_\infty$) \\
+\hline
+\end{tabular}
+\end{table}
+
+\section{Experimental Design Matrix}
+
+Table \ref{tab:design_matrix} presents the full factorial design:
+
+\begin{table}[h]
+\centering
+\small
+\caption{Full factorial experimental design (20 configurations × 20 replications = 400 runs)}
+\label{tab:design_matrix}
+\begin{tabular}{|c|c|c|c|}
+\hline
+\textbf{Communication Range} & \textbf{Team Size} & \textbf{Resource Density} & \textbf{Runs} \\
+\hline
+$r \in \{0, 2, 4, 6, 8\}$ & $N \in \{10, 20\}$ & $\rho \in \{0.15, 0.25\}$ & 20 per config \\
+\hline
+\end{tabular}
+\end{table}
+
+\section{BDI Agent Parameters}
+
+\begin{itemize}
+    \item \textbf{Local sensing radius:} 2 cells (Moore neighborhood)
+    \item \textbf{Movement strategy:} Greedy (minimize Chebyshev distance to target)
+    \item \textbf{Exploration strategy:} Random movement to adjacent cells
+    \item \textbf{Belief update:} Set union of received messages
+    \item \textbf{Target selection:} Nearest known fruit location
+    \item \textbf{Idle threshold:} 2 consecutive steps without finding fruit
+\end{itemize}
+
+\section{Communication Protocol Details}
+
+\subsection{Message Format}
+
+Each message contains:
+\begin{itemize}
+    \item Sender agent ID
+    \item Sender position $(x, y)$
+    \item Belief set: list of known fruit locations
+    \item Timestamp (simulation step)
+\end{itemize}
+
+\subsection{Chebyshev Distance Neighborhoods}
+
+For each communication range $r$, the neighborhood size is $(2r+1) \times (2r+1)$:
+
+\begin{table}[h]
+\centering
+\small
+\caption{Communication neighborhood sizes by range}
+\label{tab:neighborhoods}
+\begin{tabular}{|c|c|c|}
+\hline
+\textbf{Range} & \textbf{Neighborhood Size} & \textbf{Max Agents} \\
+\hline
+0 & N/A & 0 \\
+2 & $5 \times 5$ & 24 \\
+4 & $9 \times 9$ & 80 \\
+6 & $13 \times 13$ & 168 \\
+8 & $17 \times 17$ & 288 \\
+\hline
+\end{tabular}
+\end{table}
+
+\section{Data Collection Metrics}
+
+\subsection{Primary Metrics}
+
+\begin{itemize}
+    \item \textbf{Total Yield ($Y$):} Cumulative fruit harvested by all agents
+    \item \textbf{Total Messages ($M$):} Cumulative messages sent during episode
+    \item \textbf{Remaining Fruit:} Unharvested fruit at episode end
+\end{itemize}
+
+\subsection{Derived Metrics}
+
+\begin{itemize}
+    \item \textbf{Communication Efficiency:} $E = Y / M$ (yield per message)
+    \item \textbf{Harvest Rate:} Fraction of available fruit harvested
+    \item \textbf{Messages per Step:} $M / T$ (average communication overhead)
+\end{itemize}
+
+\section{Reproducibility Information}
+
+\subsection{Software Environment}
+
+\begin{itemize}
+    \item \textbf{Framework:} Mesa 3.0 (Python agent-based modeling)
+    \item \textbf{Python version:} 3.9+
+    \item \textbf{Key dependencies:} numpy, pandas, matplotlib
+    \item \textbf{Random seed range:} 0-19 (fixed for reproducibility)
+\end{itemize}
+
+\subsection{Repository Information}
+
+Complete source code, experimental data, and analysis scripts are available at:
+
+\begin{center}
+\url{https://github.com/marufdevops/multiagent-cooperation-research}
+\end{center}
+
+This repository includes:
+\begin{itemize}
+    \item Complete simulation implementation
+    \item Batch experiment runner
+    \item Raw experimental results (CSV format)
+    \item Analysis and visualization scripts
+    \item This dissertation source (LaTeX)
+\end{itemize}
+
