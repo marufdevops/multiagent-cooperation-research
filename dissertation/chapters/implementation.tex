@@ -1,6 +1,6 @@
 % Implementation
 
-This chapter describes the technical implementation of the multi-agent fruit harvesting simulation. The system is built using Mesa 3.0, a Python framework for agent-based modeling, and implements the BDI agent architecture with an improved communication protocol featuring directional information sharing, idle agent detection, and interference modeling.
+This chapter describes the technical implementation of the multi-agent fruit harvesting simulation. The system is built using Mesa 3.0 \citep{kazil2020}, a Python framework for agent-based modeling, and implements the BDI agent architecture \citep{rao1995bdi, georgeff1999belief} with an improved communication protocol featuring directional information sharing, idle agent detection, and interference modeling.
 
 \section{System Architecture Overview}
 
@@ -53,7 +53,7 @@ Fruit resources are placed randomly at initialization with each cell containing 
 
 \subsection{Agent State Representation}
 
-The \texttt{HarvesterAgent} class implements the BDI architecture through explicit state variables:
+The \texttt{HarvesterAgent} class implements the BDI architecture \citep{bratman1987intention, rao1995bdi} through explicit state variables:
 
 \textbf{Beliefs} (represented as sets):
 \begin{itemize}
@@ -156,7 +156,7 @@ def receive_message(self, fruit_pos):
 
 \subsection{Chebyshev Distance Implementation}
 
-Communication range is enforced using Chebyshev distance (also known as $L_\infty$ metric or chessboard distance):
+Communication range is enforced using Chebyshev distance (also known as $L_\infty$ metric or chessboard distance) \citep{deza2009encyclopedia}:
 
 \begin{equation}
 d_{\infty}(p_1, p_2) = \max(|x_1 - x_2|, |y_1 - y_2|)
@@ -171,18 +171,18 @@ This metric is implemented efficiently in Mesa's \texttt{get\_neighbors()} metho
 
 \subsection{Interference Model for High Communication Ranges}
 
-Experimental results reveal that communication ranges $r > 4$ exhibit diminishing returns and reduced efficiency. This phenomenon is modeled as \emph{coordination interference}, where excessive information sharing creates overhead without proportional benefits.
+Experimental results reveal that communication ranges $r > 4$ exhibit diminishing returns and reduced efficiency. This phenomenon is modeled as \emph{coordination interference} \citep{lynch1996distributed}, where excessive information sharing creates overhead without proportional benefits \citep{farinelli2004multirobot}.
 
-\textbf{Interference mechanisms}:
+\textbf{Interference mechanisms} \citep{yan2013survey}:
 
 \begin{enumerate}
-    \item \textbf{Information redundancy}: At high ranges, agents receive many duplicate messages about the same fruit locations, providing no new information while consuming processing resources.
+    \item \textbf{Information redundancy}: At high ranges, agents receive many duplicate messages about the same fruit locations, providing no new information while consuming processing resources \citep{zhang2024}.
 
     \item \textbf{Stale information propagation}: Fruit locations are broadcast widely, but by the time distant agents receive the information and travel to the location, the fruit may already be harvested.
 
-    \item \textbf{Target contention}: Multiple agents may select the same distant fruit as a target based on broadcast information, leading to redundant travel and wasted effort when only one agent can harvest it.
+    \item \textbf{Target contention}: Multiple agents may select the same distant fruit as a target based on broadcast information, leading to redundant travel and wasted effort when only one agent can harvest it \citep{shell2006coordination}.
 
-    \item \textbf{Exploration suppression}: When agents have many known targets from communication, they spend less time exploring new areas, potentially missing nearby undiscovered resources.
+    \item \textbf{Exploration suppression}: When agents have many known targets from communication, they spend less time exploring new areas, potentially missing nearby undiscovered resources \citep{march1991exploration}.
 \end{enumerate}
 
 \textbf{Quantitative interference model}:
@@ -212,7 +212,7 @@ This dramatic efficiency drop demonstrates that communication range optimization
 
 \subsection{Mesa DataCollector Integration}
 
-The simulation uses Mesa's \texttt{DataCollector} class to track metrics at each time step:
+The simulation uses Mesa's \texttt{DataCollector} class \citep{kazil2020} to track metrics at each time step:
 
 \begin{lstlisting}[language=Python, caption=DataCollector configuration]
 self.datacollector = DataCollector(

@@ -11,14 +11,14 @@ This approach is appropriate for several reasons:
 
     \item \textbf{Systematic exploration:} The design enables comprehensive investigation of interactions between communication range, team size, and resource density through factorial experimentation.
 
-    \item \textbf{Reproducibility:} Fixed agent behaviors and explicit communication protocols ensure that results are reproducible and verifiable, unlike learned policies that may vary across training runs.
+    \item \textbf{Reproducibility:} Fixed agent behaviors and explicit communication protocols ensure that results are reproducible and verifiable, unlike learned policies that may vary across training runs \citep{bonabeau2002agent}.
 
     \item \textbf{Interpretability:} An engineered communication policy makes results explainable in terms of agent behaviors and information flow, supporting practical design insights.
 
     \item \textbf{Computational efficiency:} Avoiding the computational overhead of learning algorithms enables extensive parameter sweeps with multiple replications for statistical robustness.
 \end{enumerate}
 
-The methodology follows a simulation-based experimental approach using agent-based modeling (ABM). This paradigm is well-suited for studying emergent coordination phenomena where system-level outcomes arise from local agent interactions.
+The methodology follows a simulation-based experimental approach using agent-based modeling (ABM) \citep{gilbert2005simulation, north2007managing}. This paradigm is well-suited for studying emergent coordination phenomena where system-level outcomes arise from local agent interactions \citep{bonabeau2002agent}.
 
 \section{Problem Formulation}
 
@@ -46,7 +46,7 @@ where $h_i(t)$ is the number of fruit items harvested by agent $i$ at time step 
 
 \subsection{Communication Model}
 
-Communication is range-limited based on Chebyshev distance (also known as the $L_\infty$ metric or chessboard distance). Two agents $a_i$ and $a_j$ can communicate if and only if:
+Communication is range-limited based on Chebyshev distance (also known as the $L_\infty$ metric or chessboard distance) \citep{deza2009encyclopedia}. Two agents $a_i$ and $a_j$ can communicate if and only if:
 
 \begin{equation}
 d_{\infty}(p_i, p_j) = \max(|x_i - x_j|, |y_i - y_j|) \le r
@@ -54,7 +54,7 @@ d_{\infty}(p_i, p_j) = \max(|x_i - x_j|, |y_i - y_j|) \le r
 
 where $r \in \mathbb{Z}_{\ge 0}$ is the communication range parameter. This distance metric naturally models grid-based communication: an agent at position $(x, y)$ can communicate with all agents in a square region of size $(2r+1) \times (2r+1)$ centered at $(x, y)$.
 
-The Chebyshev distance is chosen for three reasons:
+The Chebyshev distance is chosen for three reasons \citep{deza2009encyclopedia}:
 
 \begin{enumerate}
     \item \textbf{Grid alignment:} It naturally corresponds to the maximum number of grid steps required to reach another agent, making it intuitive for grid-based environments.
@@ -74,7 +74,7 @@ The grid is \emph{non-toroidal}: agents cannot wrap around edges. This creates b
 
 \subsection{Framework Selection}
 
-The simulations are implemented using Mesa 3.0, a Python agent-based modeling framework specifically designed for social science and complex systems research. Mesa provides:
+The simulations are implemented using Mesa 3.0 \citep{kazil2020}, a Python agent-based modeling framework specifically designed for social science and complex systems research. Mesa provides:
 
 \begin{itemize}
     \item \textbf{Spatial structures:} Built-in support for grid-based environments with efficient neighbor queries using Chebyshev distance.
@@ -106,7 +106,7 @@ Each cell contains at most one fruit item. Fruit is removed immediately upon har
 
 \subsection{Agent Architecture: BDI Framework}
 
-Each agent employs a Belief-Desire-Intention (BDI) architecture, a well-established model for autonomous agent decision-making. The BDI framework provides a structured approach to modeling rational agents that:
+Each agent employs a Belief-Desire-Intention (BDI) architecture \citep{bratman1987intention, rao1995bdi}, a well-established model for autonomous agent decision-making \citep{georgeff1999belief, wooldridge2009introduction}. The BDI framework provides a structured approach to modeling rational agents that:
 
 \begin{itemize}
     \item Maintain \textbf{beliefs} about the world state
@@ -157,11 +157,11 @@ Each agent executes a three-phase behavioral cycle at every time step:
     \end{itemize}
 \end{enumerate}
 
-This cycle implements a simple but effective coordination strategy: agents exploit known resources when available (guided by beliefs) and explore randomly when no information is available. Communication enables agents to share discoveries, reducing redundant exploration.
+This cycle implements a simple but effective coordination strategy: agents exploit known resources when available (guided by beliefs) and explore randomly when no information is available \citep{march1991exploration}. Communication enables agents to share discoveries, reducing redundant exploration \citep{panait2005cooperative}.
 
 \subsection{Communication Protocol: Selective Broadcasting}
 
-Communication is implemented as \emph{selective broadcasting} within a Chebyshev radius $r$. This protocol balances information sharing with communication efficiency:
+Communication is implemented as \emph{selective broadcasting} within a Chebyshev radius $r$ \citep{farinelli2004multirobot}. This protocol balances information sharing with communication efficiency:
 
 \textbf{Range constraint:} An agent $a_i$ at position $p_i$ can send messages to all agents $a_j$ satisfying:
 \begin{equation}

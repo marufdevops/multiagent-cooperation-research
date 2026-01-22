@@ -22,28 +22,28 @@ These results directly answer RQ1: communication range significantly affects har
 
 \subsection{Coordination Interference}
 
-Performance degradation at high ranges (r=6, r=8) occurs due to coordination interference, which includes information redundancy, stale information propagation, target contention, and exploration suppression. These mechanisms show why r=6 doesn't work as well as the baseline: the costs of coordinating are higher than the benefits. This is in line with research on distributed systems that shows too much communication slows things down. The "less is more" rule applies to communication protocols: the best coordination happens when local communication is balanced and message flooding and interference are avoided.
+Performance degradation at high ranges (r=6, r=8) occurs due to coordination interference \citep{lynch1996distributed}, which includes information redundancy, stale information propagation, target contention, and exploration suppression \citep{yan2013survey}. These mechanisms show why r=6 doesn't work as well as the baseline: the costs of coordinating are higher than the benefits \citep{farinelli2004multirobot}. This is in line with research on distributed systems that shows too much communication slows things down \citep{cao1997cooperative}. The "less is more" rule applies to communication protocols: the best coordination happens when local communication is balanced and message flooding and interference are avoided \citep{zhang2024}.
 
 \section{Practical Implications}
 
-For harvesting teams of 10 to 20 agents, communication range r=2 works best, giving them a 90\% efficiency boost over r=8. System designers should not try to make the communication range as wide as possible; ranges greater than r=4 show diminishing returns. The 3.0\% improvement can be made with very little extra work (1.9 messages per episode), which is useful for systems with limited resources. The main idea is to "optimize for local communication instead of global broadcast." Results are strong regardless of team size or resource density, but more research is needed to see how they work in bigger settings.
+For harvesting teams of 10 to 20 agents, communication range r=2 works best, giving them a 90\% efficiency boost over r=8. System designers should not try to make the communication range as wide as possible; ranges greater than r=4 show diminishing returns \citep{parker2008multiple}. The 3.0\% improvement can be made with very little extra work (1.9 messages per episode), which is useful for systems with limited resources \citep{bechar2016agricultural}. The main idea is to "optimize for local communication instead of global broadcast" \citep{brambilla2013swarm}. Results are strong regardless of team size or resource density, but more research is needed to see how they work in bigger settings \citep{sahin2004swarm}.
 
 \section{Limitations}
 
-This study has several limitations that should be acknowledged:
+This study has several limitations that should be acknowledged \citep{gilbert2005simulation}:
 
 \begin{enumerate}
     \item \textbf{High variability}: Standard deviations (500-530 fruits) represent approximately 30\% of mean yields, indicating substantial run-to-run variability. This high variability makes it difficult to detect small effects and limits the statistical power of the analysis.
 
-    \item \textbf{Simplified agent behaviors}: Agents use greedy movement toward targets and random exploration, not sophisticated planning or learning algorithms. More advanced coordination strategies might show different communication range effects.
+    \item \textbf{Simplified agent behaviors}: Agents use greedy movement toward targets and random exploration, not sophisticated planning or learning algorithms \citep{stone2000multiagent}. More advanced coordination strategies might show different communication range effects.
 
-    \item \textbf{Grid-based abstraction}: The discrete $30 \times 30$ grid environment is simpler than continuous space with realistic physics, movement constraints, and sensor noise.
+    \item \textbf{Grid-based abstraction}: The discrete $30 \times 30$ grid environment is simpler than continuous space with realistic physics, movement constraints, and sensor noise \citep{bonabeau2002agent}.
 
-    \item \textbf{Homogeneous agents}: All agents are identical with the same capabilities and behaviors. Heterogeneous teams with specialized roles might benefit from different communication patterns.
+    \item \textbf{Homogeneous agents}: All agents are identical with the same capabilities and behaviors. Heterogeneous teams with specialized roles might benefit from different communication patterns \citep{balch1998behavioral}.
 
-    \item \textbf{Static resources only}: Experiments focus on non-regenerating fruit. Regenerating resources might show different optimal communication ranges.
+    \item \textbf{Static resources only}: Experiments focus on non-regenerating fruit. Regenerating resources might show different optimal communication ranges \citep{liu2007modeling}.
 
-    \item \textbf{Deterministic communication}: All agents within range receive messages instantly with perfect reliability. Real systems have communication failures, delays, and noise.
+    \item \textbf{Deterministic communication}: All agents within range receive messages instantly with perfect reliability. Real systems have communication failures, delays, and noise \citep{martorell2024}.
 
     \item \textbf{Limited parameter space}: Experiments test only 5 communication ranges, 2 team sizes, and 2 resource densities. A broader parameter sweep might reveal additional insights.
 
@@ -77,11 +77,11 @@ The original RQ2 asks if changes in resources affect the best range for communic
 \subsection{Machine Learning Extensions}
 
 \begin{itemize}
-    \item \textbf{Reinforcement Learning}: Train agents to learn when and what to communicate using Q-learning or policy gradient methods, potentially discovering adaptive communication strategies that outperform fixed-range protocols.
+    \item \textbf{Reinforcement Learning}: Train agents to learn when and what to communicate using Q-learning or policy gradient methods \citep{panait2005cooperative}, potentially discovering adaptive communication strategies that outperform fixed-range protocols.
 
     \item \textbf{Deep Learning}: Use neural networks to predict optimal communication ranges from environment properties (density, team size, grid size), enabling automatic parameter tuning.
 
-    \item \textbf{Multi-Agent Reinforcement Learning (MARL)}: Investigate how agents can learn decentralized communication policies through self-play and emergent coordination.
+    \item \textbf{Multi-Agent Reinforcement Learning (MARL)}: Investigate how agents can learn decentralized communication policies through self-play and emergent coordination \citep{zhang2024}.
 
     \item \textbf{Transfer Learning}: Train on one environment configuration and transfer learned policies to different team sizes, resource densities, or grid sizes.
 \end{itemize}
@@ -89,20 +89,20 @@ The original RQ2 asks if changes in resources affect the best range for communic
 \subsection{Realism and Validation}
 
 \begin{itemize}
-    \item \textbf{Continuous space}: Extend to continuous 2D space with realistic movement dynamics, acceleration constraints, and sensor noise.
+    \item \textbf{Continuous space}: Extend to continuous 2D space with realistic movement dynamics, acceleration constraints, and sensor noise \citep{parker2008multiple}.
 
-    \item \textbf{Communication constraints}: Add bandwidth limits, message delays, packet loss, and communication noise to model real-world constraints.
+    \item \textbf{Communication constraints}: Add bandwidth limits, message delays, packet loss, and communication noise to model real-world constraints \citep{martorell2024}.
 
-    \item \textbf{Heterogeneous agents}: Implement teams with specialized roles (scouts, harvesters, coordinators) and different communication capabilities.
+    \item \textbf{Heterogeneous agents}: Implement teams with specialized roles (scouts, harvesters, coordinators) and different communication capabilities \citep{balch1998behavioral}.
 
-    \item \textbf{Physical validation}: Validate findings with physical robot experiments using platforms like TurtleBot or Khepera robots.
+    \item \textbf{Physical validation}: Validate findings with physical robot experiments using platforms like TurtleBot or Khepera robots \citep{brambilla2013swarm}.
 
-    \item \textbf{Real-world applications}: Apply the findings to practical domains such as agricultural robotics, warehouse automation, or search-and-rescue operations.
+    \item \textbf{Real-world applications}: Apply the findings to practical domains such as agricultural robotics \citep{fountas2020agricultural}, warehouse automation, or search-and-rescue operations \citep{cao1997cooperative}.
 \end{itemize}
 
 \section{Conclusion}
 
-This dissertation examined the research question: \emph{How does communication range influence harvesting efficiency in multi-agent foraging systems?} This study offers empirical evidence demonstrating that communication range exerts a non-monotonic influence on harvesting performance, identifying an optimal range at r=2 (local communication) through systematic experimentation involving 500 simulation runs across five communication ranges ($r \in \{0, 2, 4, 6, 8\}$), two team sizes (10, 20 agents), and two resource densities (0.15, 0.25).
+This dissertation examined the research question: \emph{How does communication range influence harvesting efficiency in multi-agent foraging systems?} This study offers empirical evidence demonstrating that communication range exerts a non-monotonic influence on harvesting performance, identifying an optimal range at r=2 (local communication) through systematic experimentation involving 500 simulation runs across five communication ranges ($r \in \{0, 2, 4, 6, 8\}$), two team sizes (10, 20 agents), and two resource densities (0.15, 0.25). This finding aligns with theoretical predictions from multi-agent systems research \citep{wooldridge2009introduction, jennings1998roadmap}.
 
 \subsection{Key Contributions}
 
@@ -122,11 +122,11 @@ This dissertation examined the research question: \emph{How does communication r
 
 \subsection{Significance}
 
-These findings enhance the theoretical comprehension of multi-agent coordination by offering empirical evidence for the presence of an optimal communication range and recognizing coordination interference as a principal limiting factor. The results contradict the belief that increased communication is invariably advantageous, illustrating that excessive information dissemination can impair performance.
+These findings enhance the theoretical comprehension of multi-agent coordination \citep{stone2000multiagent, panait2005cooperative} by offering empirical evidence for the presence of an optimal communication range and recognizing coordination interference as a principal limiting factor \citep{lynch1996distributed}. The results contradict the belief that increased communication is invariably advantageous, illustrating that excessive information dissemination can impair performance \citep{zhang2024}.
 
-The practical implications are substantial for the design of efficient multi-agent systems in resource-limited contexts, encompassing agricultural robotics, warehouse automation, and swarm robotics applications. To get the most done and avoid problems with coordination, system designers should put local communication (r=2) ahead of long-range communication.
+The practical implications are substantial for the design of efficient multi-agent systems in resource-limited contexts \citep{farinelli2004multirobot}, encompassing agricultural robotics \citep{bechar2016agricultural, fountas2020agricultural}, warehouse automation, and swarm robotics applications \citep{brambilla2013swarm}. To get the most done and avoid problems with coordination, system designers should put local communication (r=2) ahead of long-range communication.
 
-Finding the best communication range that balances the benefits of coordination with the costs and effects of interference is a key problem in the design of multi-agent systems. This study establishes a basis for subsequent investigations into adaptive communication strategies, dynamic resource environments, and machine learning methodologies for agent communication.
+Finding the best communication range that balances the benefits of coordination with the costs and effects of interference is a key problem in the design of multi-agent systems \citep{shoham2008multiagent}. This study establishes a basis for subsequent investigations into adaptive communication strategies, dynamic resource environments, and machine learning methodologies for agent communication.
 
 \subsection{Final Remarks}The dissertation shows that the communication range is an important design factor for multi-agent foraging systems. The findThe fact that local communication (r=2) works better than no communication (r=0) or too much communication (r=6, r=8) has big effects on how multi-agent systems are designed work should look into whether these results apply to other areas, bigger teams, and changing situations, and look into machine learning methods to find the best ways to communicate on their own.
 

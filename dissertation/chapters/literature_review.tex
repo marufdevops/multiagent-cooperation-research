@@ -2,7 +2,7 @@
 
 \section{Introduction}
 
-Multi-agent systems (MAS) have become a powerful way to solve difficult distributed problems where separate agents must work together to reach common goals. Resource gathering and foraging are standard ways to study coordination in MAS because they show how difficult it is to explore, exploit, and share information in real life. The real-world uses of these problems are very important, like in precision farming, warehouse automation, and swarm robotics.
+Multi-agent systems (MAS) have become a powerful way to solve difficult distributed problems where separate agents must work together to reach common goals \citep{wooldridge2009introduction, shoham2008multiagent}. Resource gathering and foraging are standard ways to study coordination in MAS because they show how difficult it is to explore, exploit, and share information in real life \citep{zedadra2017, liu2007modeling}. The real-world uses of these problems are very important, like in precision farming, warehouse automation, and swarm robotics \citep{brambilla2013swarm, bechar2016agricultural}.
 
 This literature review looks at the basic research that the dissertation uses to study communication range effects in multi-agent harvesting. These four main ideas form the basis of the review: (i) swarm intelligence and bio-inspired coordination mechanisms; (ii) agricultural robotics and multi-agent cooperation; (iii) agent-based modeling frameworks and methodologies; and (iv) how to make communication more effective in multi-agent systems. Each part brings together relevant research that explains the theoretical and practical background for improving communication range in tasks that involve multiple harvesters.
 
@@ -10,9 +10,9 @@ This literature review looks at the basic research that the dissertation uses to
 
 \subsection{Ant Colony Optimization}
 
-Swarm intelligence is when a group of people act together based on simple rules for how to interact with each other, without any central control. Dorigo and Stützle's groundbreaking work on Ant Colony Optimization (ACO) lays the groundwork for understanding how decentralized agents can solve difficult optimization problems by interacting with each other locally and talking to each other indirectly \cite{dorigo2004ant}.
+Swarm intelligence is when a group of people act together based on simple rules for how to interact with each other, without any central control \citep{sahin2004swarm, brambilla2013swarm}. Groundbreaking work on Ant Colony Optimization (ACO) lays the groundwork for understanding how decentralized agents can solve difficult optimization problems by interacting with each other locally and talking to each other indirectly \citep{dorigo2004ant}.
 
-Foraging behavior in real ant colonies is a big influence on ACO algorithms. As individuals ants look for food, they leave behind pheromone trails. There is a type of communication called stigmangergy that is made possible by these chemical signals. Instead of sending direct messages, agents work together by changing and responding to their shared environment. If an ant finds food, it goes back to its nest and leaves pheromones behind. It is likely that other ants will follow stronger pheromone trails, which creates a positive feedback loop that makes shorter paths stronger.
+Foraging behavior in real ant colonies is a big influence on ACO algorithms \citep{duan2023}. As individuals ants look for food, they leave behind pheromone trails. There is a type of communication called stigmergy that is made possible by these chemical signals. Instead of sending direct messages, agents work together by changing and responding to their shared environment \citep{werger1999cooperation}. If an ant finds food, it goes back to its nest and leaves pheromones behind. It is likely that other ants will follow stronger pheromone trails, which creates a positive feedback loop that makes shorter paths stronger.
 
 
 
@@ -24,24 +24,24 @@ The ACO metaheuristic turns this behavior into a computer framework that can be 
     \item \textbf{Local decision-making:} Each agent operates based on local information without global coordination.
 \end{itemize}
 
-For multi-agent harvesting systems, ACO demonstrates two fundamental principles:
+For multi-agent harvesting systems, ACO demonstrates two fundamental principles \citep{dorigo2004ant}:
 
 \begin{enumerate}
-    \item \textbf{Locality of information:} Effective coordination can emerge from agents operating primarily on local information, without requiring global knowledge or centralized control.
-    \item \textbf{Emergent optimization:} Simple, repeated local decisions can yield efficient global behavior through positive feedback mechanisms.
+    \item \textbf{Locality of information:} Effective coordination can emerge from agents operating primarily on local information, without requiring global knowledge or centralized control \citep{cao1997cooperative}.
+    \item \textbf{Emergent optimization:} Simple, repeated local decisions can yield efficient global behavior through positive feedback mechanisms \citep{bonabeau2002agent}.
 \end{enumerate}
 
-These principles directly motivate the dissertation's focus on range-limited communication. Just as ant pheromones have limited spatial extent and decay over time, communication in practical multi-agent systems is constrained by range, bandwidth, and computational resources. Understanding how communication range affects emergent coordination is essential for designing efficient distributed systems.
+These principles directly motivate the dissertation's focus on range-limited communication. Just as ant pheromones have limited spatial extent and decay over time, communication in practical multi-agent systems is constrained by range, bandwidth, and computational resources \citep{parker2008multiple}. Understanding how communication range affects emergent coordination is essential for designing efficient distributed systems.
 
-The ACO framework also highlights the trade-off between exploration and exploitation. Early in the search process, weak pheromone trails encourage exploration of diverse paths. As stronger trails emerge, agents increasingly exploit known good solutions while maintaining some exploration through probabilistic decision-making. This balance is analogous to the coordination challenge in multi-agent harvesting: agents must explore to discover resources while exploiting shared information to avoid redundant search.
+The ACO framework also highlights the trade-off between exploration and exploitation \citep{march1991exploration}. Early in the search process, weak pheromone trails encourage exploration of diverse paths. As stronger trails emerge, agents increasingly exploit known good solutions while maintaining some exploration through probabilistic decision-making. This balance is analogous to the coordination challenge in multi-agent harvesting: agents must explore to discover resources while exploiting shared information to avoid redundant search \citep{balch1998behavioral}.
 
 \section{Agricultural Robotics and Multi-Agent Cooperation}
 
 \subsection{Multi-Agent Systems in Precision Agriculture}
 
-The application of multi-agent systems to agricultural automation has gained significant attention as labor shortages and efficiency demands drive technological innovation. Seyyedhasani and Dvorak \citep{seyyedhasani2018} investigate the use of collaborative autonomous ground vehicles for field operations, demonstrating how multiple robots can coordinate to improve operational efficiency in crop production.
+The application of multi-agent systems to agricultural automation has gained significant attention as labor shortages and efficiency demands drive technological innovation. Research has investigated the use of collaborative autonomous ground vehicles for field operations, demonstrating how multiple robots can coordinate to improve operational efficiency in crop production \citep{seyyedhasani2018}.
 
-Their work addresses a fundamental challenge in agricultural robotics: how to coordinate multiple autonomous vehicles operating simultaneously in the same field. The authors develop a simulation framework to evaluate different coordination strategies for tasks such as planting, spraying, and harvesting. Key findings include:
+This work addresses a fundamental challenge in agricultural robotics: how to coordinate multiple autonomous vehicles operating simultaneously in the same field. A simulation framework was developed to evaluate different coordination strategies for tasks such as planting, spraying, and harvesting \citep{seyyedhasani2018}. Key findings include:
 
 \begin{itemize}
     \item \textbf{Task allocation efficiency:} Proper coordination can reduce field coverage time by 15-30\% compared to independent operation.
@@ -51,13 +51,13 @@ Their work addresses a fundamental challenge in agricultural robotics: how to co
 
 The study emphasizes that communication infrastructure is critical for multi-robot agricultural systems. In outdoor agricultural environments, communication is often range-limited due to terrain, vegetation, and radio propagation constraints. This practical limitation motivates the dissertation's focus on understanding how communication range affects collective performance.
 
-Seyyedhasani and Dvorak also highlight the importance of \emph{spatial coordination} ensuring that robots do not interfere with each other while maximizing field coverage. This parallels the resource harvesting problem studied in this dissertation, where agents must balance exploration (covering new areas) with exploitation (harvesting discovered resources) while avoiding redundant search.
+This research also highlights the importance of \emph{spatial coordination} ensuring that robots do not interfere with each other while maximizing field coverage \citep{seyyedhasani2018}. This parallels the resource harvesting problem studied in this dissertation, where agents must balance exploration (covering new areas) with exploitation (harvesting discovered resources) while avoiding redundant search.
 
 \subsection{Swarm Robotics for Agricultural Applications}
 
-Albani et al. \citep{albani2017} provide a comprehensive review of swarm robotics applications in agriculture, examining how bio-inspired collective behaviors can be applied to farming tasks. Their survey covers various agricultural operations including monitoring, spraying, harvesting, and logistics, identifying common challenges and opportunities for swarm-based approaches.
+A comprehensive review of swarm robotics applications in agriculture examines how bio-inspired collective behaviors can be applied to farming tasks \citep{albani2017}. This survey covers various agricultural operations including monitoring, spraying, harvesting, and logistics, identifying common challenges and opportunities for swarm-based approaches.
 
-Key insights from their review relevant to this dissertation include:
+Key insights from this review relevant to this dissertation include:
 
 \begin{itemize}
     \item \textbf{Decentralized control:} Agricultural swarms typically operate without centralized coordination, relying instead on local sensing and communication. This makes communication range a critical design parameter.
@@ -69,7 +69,7 @@ Key insights from their review relevant to this dissertation include:
     \item \textbf{Task-specific coordination:} Different agricultural tasks require different coordination mechanisms. Harvesting tasks, in particular, benefit from information sharing about resource locations but may suffer from excessive coordination overhead.
 \end{itemize}
 
-Albani et al. note that most agricultural swarm systems use simple, local communication protocols rather than complex negotiation mechanisms. This observation supports the dissertation's approach of studying range-limited broadcast communication with explicit, interpretable policies rather than learned communication strategies.
+Research notes that most agricultural swarm systems use simple, local communication protocols rather than complex negotiation mechanisms \citep{albani2017}. This observation supports the dissertation's approach of studying range-limited broadcast communication with explicit, interpretable policies rather than learned communication strategies.
 
 
 
@@ -77,7 +77,7 @@ Albani et al. note that most agricultural swarm systems use simple, local commun
 
 \subsection{The Mesa Framework for Agent-Based Modeling}
 
-Agent-based modeling (ABM) provides a powerful methodology for studying emergent phenomena in complex systems where individual agents interact according to specified rules. Kazil et al. \citep{kazil2020} introduce Mesa, a Python-based ABM framework designed to make agent-based modeling more accessible, reproducible, and extensible.
+Agent-based modeling (ABM) provides a powerful methodology for studying emergent phenomena in complex systems where individual agents interact according to specified rules. Mesa is a Python-based ABM framework designed to make agent-based modeling more accessible, reproducible, and extensible \citep{kazil2020}.
 
 Mesa addresses several limitations of earlier ABM platforms by providing:
 
@@ -99,17 +99,17 @@ For this dissertation, Mesa's grid-based spatial model is particularly relevant.
 
 Mesa's batch runner enables the systematic parameter sweep required to answer the research question. By varying communication range while controlling for team size and resource density, the framework supports rigorous experimental designs with multiple replications per configuration. The data collection module automatically aggregates metrics across runs, enabling statistical analysis of communication range effects.
 
-Kazil et al. emphasize that Mesa is designed for \emph{explanatory} modeling rather than predictive simulation. This aligns with the dissertation's goal of understanding fundamental trade-offs in communication range rather than predicting specific real-world outcomes. The framework's transparency and simplicity make it ideal for isolating the effects of individual parameters and interpreting results in terms of agent behaviors and interactions.
+The Mesa framework is designed for \emph{explanatory} modeling rather than predictive simulation \citep{kazil2020}. This aligns with the dissertation's goal of understanding fundamental trade-offs in communication range rather than predicting specific real-world outcomes. The framework's transparency and simplicity make it ideal for isolating the effects of individual parameters and interpreting results in terms of agent behaviors and interactions.
 
 \section{Communication Efficiency in Multi-Agent Systems}
 
 \subsection{Learning Efficient Communication Protocols}
 
-While this dissertation employs an engineered communication policy, recent advances in multi-agent reinforcement learning (MARL) provide important insights into communication efficiency. Zhang et al. \citep{zhang2024} propose a framework for learning efficient communication protocols in multi-agent systems, explicitly targeting communication efficiency as an optimization objective rather than treating it as a secondary concern.
+While this dissertation employs an engineered communication policy, recent advances in multi-agent reinforcement learning (MARL) provide important insights into communication efficiency. Recent research proposes a framework for learning efficient communication protocols in multi-agent systems, explicitly targeting communication efficiency as an optimization objective rather than treating it as a secondary concern \citep{zhang2024}.
 
-Traditional MARL approaches to communication focus on \emph{what} to communicate and \emph{when}, often resulting in high message volumes without considering cost-effectiveness. Zhang et al. argue that communication should be evaluated not just by its impact on task performance, but by its efficiency—the ratio of performance improvement to communication cost.
+Traditional MARL approaches to communication focus on \emph{what} to communicate and \emph{when}, often resulting in high message volumes without considering cost-effectiveness. This research argues that communication should be evaluated not just by its impact on task performance, but by its efficiency—the ratio of performance improvement to communication cost \citep{zhang2024}.
 
-Their framework introduces three complementary efficiency metrics:
+This framework introduces three complementary efficiency metrics:
 
 \begin{itemize}
     \item \textbf{Information Entropy Improvement (IEI):} Measures how much communication reduces uncertainty in agent beliefs, encouraging informative messages over redundant ones.
@@ -121,7 +121,7 @@ Their framework introduces three complementary efficiency metrics:
 
 The framework separates communication design into two components: \emph{topology} (who communicates with whom and when) and \emph{message content} (what information is transmitted). This separation is particularly relevant to the dissertation's focus on communication range, which directly controls topology in range-limited broadcast models.
 
-Key findings from Zhang et al. include:
+Key findings from this research include \citep{zhang2024}:
 
 \begin{itemize}
     \item Communication efficiency does not monotonically increase with message volume. Excessive communication can reduce efficiency through redundancy and coordination overhead.
@@ -131,22 +131,22 @@ Key findings from Zhang et al. include:
     \item The optimal communication topology depends on task structure and environmental characteristics. No single topology is universally optimal.
 \end{itemize}
 
-For this dissertation, Zhang et al.'s work provides two important insights. First, it reinforces that communication range is a first-class design parameter that directly controls communication topology. In range-limited broadcast models, increasing range expands the set of potential receivers, affecting both information flow and overhead. Second, it motivates evaluating communication not only by volume (messages sent) but by cost-effectiveness (yield per message), which is central to the dissertation's efficiency analysis.
+For this dissertation, this work provides two important insights \citep{zhang2024}. First, it reinforces that communication range is a first-class design parameter that directly controls communication topology. In range-limited broadcast models, increasing range expands the set of potential receivers, affecting both information flow and overhead. Second, it motivates evaluating communication not only by volume (messages sent) but by cost-effectiveness (yield per message), which is central to the dissertation's efficiency analysis.
 
-It's also important to know the difference between learned and engineered communication policies. Zhang et al. use reinforcement learning to find good protocols, but this dissertation uses a clear policy that can be understood (selective broadcasting of resource locations). This choice in design puts an emphasis on clarity and figuring out what caused what: the effects that were seen can be directly linked to communication range instead of complicated learned behaviors. However, Zhang et al.'s ideas about efficiency, especially the fact that there isn't a simple relationship between communication volume and effectiveness, support the dissertation's hypothesis that moderate communication ranges may work better than both minimal and maximal ranges.
+It's also important to know the difference between learned and engineered communication policies. Recent MARL approaches use reinforcement learning to find good protocols \citep{zhang2024}, but this dissertation uses a clear policy that can be understood (selective broadcasting of resource locations). This choice in design puts an emphasis on clarity and figuring out what caused what: the effects that were seen can be directly linked to communication range instead of complicated learned behaviors. However, the insights about efficiency from this research, especially the fact that there isn't a simple relationship between communication volume and effectiveness, support the dissertation's hypothesis that moderate communication ranges may work better than both minimal and maximal ranges.
 
 \section{Summary and Research Gap}
 
 The reviewed literature establishes a strong foundation for investigating communication range effects in multi-agent harvesting systems:
 
 \begin{itemize}
-    \item \textbf{Swarm intelligence research} (Dorigo \& Stützle) demonstrates that effective coordination can emerge from local interactions, motivating the study of range-limited communication as a locality constraint.
+    \item \textbf{Swarm intelligence research} \citep{dorigo2004ant} demonstrates that effective coordination can emerge from local interactions, motivating the study of range-limited communication as a locality constraint.
 
-    \item \textbf{Agricultural robotics studies} (Seyyedhasani \& Dvorak, Albani et al.) show that multi-agent coordination is critical for agricultural automation, but communication constraints are common in outdoor environments.
+    \item \textbf{Agricultural robotics studies} \citep{seyyedhasani2018, albani2017} show that multi-agent coordination is critical for agricultural automation, but communication constraints are common in outdoor environments.
 
-    \item \textbf{Agent-based modeling frameworks} (Kazil et al.) provide the methodological tools for systematic experimentation with spatial communication range using Chebyshev distance metrics.
+    \item \textbf{Agent-based modeling frameworks} \citep{kazil2020} provide the methodological tools for systematic experimentation with spatial communication range using Chebyshev distance metrics.
 
-    \item \textbf{Communication efficiency research} (Zhang et al.) reveals that communication effectiveness does not increase monotonically with range or volume, suggesting that moderate communication may be optimal.
+    \item \textbf{Communication efficiency research} \citep{zhang2024} reveals that communication effectiveness does not increase monotonically with range or volume, suggesting that moderate communication may be optimal.
 \end{itemize}
 
 Despite these contributions, a significant research gap remains: \textbf{there is limited empirical guidance on selecting an appropriate communication range for multi-agent harvesting tasks under varying environmental conditions}. Existing work either focuses on learned communication policies (which lack interpretability) or assumes fixed communication topologies without systematic range variation.
